@@ -1,0 +1,469 @@
+<!DOCTYPE html>
+<html lang="tr">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Atmosfer Kafe - Crystal Cold Menu</title>
+    <link href="https://fonts.googleapis.com/css2?family=Oswald:wght@300;400;500;700&display=swap" rel="stylesheet">
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css" rel="stylesheet">
+    
+    <style>
+        :root {
+            /* KRİSTAL TEMA RENKLERİ */
+            --bg-deep: #050a14; /* Çok koyu lacivert */
+            --bg-gradient: radial-gradient(circle at top right, #002b4d, #000000);
+            
+            --glass-bg: rgba(255, 255, 255, 0.03); /* Transparan Cam */
+            --glass-border: rgba(255, 255, 255, 0.1);
+            
+            --text-primary: #ffffff;
+            --text-secondary: #88ccff; /* Buz mavisi yazı */
+            --accent: #00d2ff; /* Parlak Mavi Vurgu */
+            
+            --danger: #ff4d4d;
+        }
+
+        * { margin: 0; padding: 0; box-sizing: border-box; }
+
+        body {
+            background-color: var(--bg-deep);
+            background-image: var(--bg-gradient);
+            color: var(--text-primary);
+            font-family: 'Oswald', sans-serif;
+            height: 100vh;
+            width: 100vw;
+            overflow: hidden;
+            padding: 2vh 2vw;
+            display: flex;
+            flex-direction: column;
+        }
+
+        /* --- HEADER --- */
+        .header {
+            height: 10vh;
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            border-bottom: 1px solid var(--glass-border);
+            margin-bottom: 1.5vh;
+            padding: 0 1vw;
+            background: rgba(0, 0, 0, 0.3);
+            border-radius: 16px;
+            backdrop-filter: blur(10px);
+        }
+
+        .brand-block { display: flex; flex-direction: column; justify-content: center; }
+
+        .brand-title {
+            font-size: 6vh;
+            font-weight: 700;
+            letter-spacing: 3px;
+            color: #fff;
+            text-transform: uppercase;
+            line-height: 0.9;
+            text-shadow: 0 0 40px rgba(0, 210, 255, 0.5);
+        }
+
+        .brand-subtitle {
+            font-size: 2vh;
+            color: var(--accent);
+            letter-spacing: 8px;
+            text-transform: uppercase;
+            font-weight: 500;
+            margin-left: 5px;
+            text-shadow: 0 2px 8px rgba(0, 0, 0, 0.5);
+        }
+
+        .header-right { display: flex; align-items: center; gap: 2vw; position: relative; }
+
+        .header-logo-mini {
+            height: 7vh;
+            filter: drop-shadow(0 0 10px rgba(255,255,255,0.2));
+            opacity: 0.9;
+        }
+
+        .mode-badge {
+            border: 1px solid var(--accent);
+            color: var(--accent);
+            padding: 0.5vh 1.5vh;
+            border-radius: 6px;
+            font-size: 2vh;
+            font-weight: 600;
+            text-transform: uppercase;
+            display: none;
+            background: rgba(0, 210, 255, 0.1);
+        }
+
+        /* --- 3 KOLONLU IZGARA --- */
+        .main-content {
+            display: grid;
+            grid-template-columns: repeat(3, 1fr);
+            gap: 2vw;
+            height: 86.5vh;
+            width: 100%;
+        }
+
+        .column {
+            display: flex;
+            flex-direction: column;
+            gap: 1.5vh;
+        }
+
+        /* --- KART TASARIMI (CAM EFEKTİ) --- */
+        .menu-section {
+            background: rgba(255, 255, 255, 0.04);
+            border: 1.5px solid var(--glass-border);
+            border-radius: 14px;
+            padding: 1.5vh 2vh;
+            position: relative;
+            /* Cam Efekti */
+            backdrop-filter: blur(8px);
+            box-shadow: 0 8px 40px rgba(0, 0, 0, 0.4);
+        }
+
+        /* Başlıklar */
+        .section-header {
+            display: flex;
+            align-items: center;
+            gap: 1vh;
+            margin-bottom: 1vh;
+            padding-bottom: 0.8vh;
+            border-bottom: 2px solid rgba(0, 210, 255, 0.2);
+        }
+
+        .section-icon { 
+            font-size: 3vh; 
+            color: var(--accent);
+            filter: drop-shadow(0 0 10px rgba(0, 210, 255, 0.3));
+        }
+        
+        .section-title {
+            font-size: 3.2vh;
+            color: var(--accent);
+            text-transform: uppercase;
+            letter-spacing: 1.2px;
+            font-weight: 700;
+            text-shadow: 0 2px 10px rgba(0, 210, 255, 0.3);
+        }
+
+        /* --- ÜRÜNLER (BÜYÜK VE NET) --- */
+        .menu-list { display: flex; flex-direction: column; gap: 0.5vh; }
+
+        .menu-item {
+            display: flex;
+            justify-content: space-between;
+            align-items: baseline;
+            font-size: 2.6vh; /* OKUNABİLİR VE KOMPAKT */
+            color: #ffffff;
+            font-weight: 500;
+            letter-spacing: 0.4px;
+            line-height: 1.2;
+        }
+
+        .item-name {
+            padding-right: 12px;
+            z-index: 2;
+            text-shadow: 0 3px 8px rgba(0,0,0,0.7), 0 0 20px rgba(0, 210, 255, 0.1);
+            font-weight: 500;
+        }
+
+        /* İnce Çizgi */
+        .dots {
+            flex-grow: 1;
+            border-bottom: 1px dashed rgba(255, 255, 255, 0.25);
+            position: relative;
+            top: -8px;
+            opacity: 0.6;
+        }
+
+        .item-status { padding-left: 10px; }
+
+        .menu-item.unavailable { color: var(--text-secondary); opacity: 0.5; text-decoration: line-through; }
+        
+        .stock-tag {
+            font-size: 2.2vh;
+            color: #fff;
+            border: 2px solid var(--danger);
+            padding: 0.3vh 1vh;
+            border-radius: 6px;
+            font-weight: 700;
+            background: rgba(255, 77, 77, 0.25);
+            text-shadow: 0 2px 4px rgba(0,0,0,0.5);
+        }
+
+        /* --- YENİLENMİŞ HİZMET ARASI EKRANI --- */
+        #cafeStatusBanner {
+            display: none;
+            position: fixed; top: 0; left: 0; width: 100vw; height: 100vh;
+            background: rgba(3, 5, 8, 0.98); /* Neredeyse tam siyah */
+            z-index: 9999;
+            flex-direction: column; justify-content: center; align-items: center;
+            backdrop-filter: blur(20px);
+        }
+
+        /* Logo Animasyonu */
+        .status-logo-img {
+            height: 35vh; /* LOGO ÇOK BÜYÜK */
+            width: auto;
+            margin-bottom: 4vh;
+            filter: drop-shadow(0 0 40px rgba(0, 210, 255, 0.2));
+            animation: floatLogo 4s ease-in-out infinite;
+        }
+
+        @keyframes floatLogo {
+            0%, 100% { transform: translateY(0); filter: drop-shadow(0 0 40px rgba(0, 210, 255, 0.2)); }
+            50% { transform: translateY(-20px); filter: drop-shadow(0 0 60px rgba(0, 210, 255, 0.4)); }
+        }
+
+        .status-title {
+            font-size: 12vh;
+            color: #fff;
+            font-weight: 900;
+            text-transform: uppercase;
+            letter-spacing: 8px;
+            text-shadow: 0 10px 40px rgba(0,0,0,0.9), 0 0 60px rgba(0, 210, 255, 0.4);
+            border-top: 3px solid var(--accent);
+            padding-top: 3vh;
+        }
+        
+        .status-subtitle {
+            font-size: 4vh;
+            color: var(--text-secondary);
+            font-weight: 500;
+            letter-spacing: 4px;
+            margin-top: 2vh;
+            text-shadow: 0 4px 15px rgba(0,0,0,0.7);
+        }
+
+        /* Animasyon */
+        .fade-in { animation: fadeIn 0.8s ease-out forwards; opacity: 0; }
+        @keyframes fadeIn { from { opacity: 0; transform: translateY(20px); } to { opacity: 1; transform: translateY(0); } }
+
+    </style>
+</head>
+<body>
+
+    <div class="header">
+        <div class="brand-block">
+            <div class="brand-title">ATMOSFER KAFE</div>
+            <div class="brand-subtitle"><i class="fas fa-snowflake"></i> SOĞUK İÇECEK MENÜSÜ</div>
+        </div>
+        <div class="header-right">
+            <div id="saturdayBadge" class="mode-badge">CUMARTESİ</div>
+            <img src="cinarlogo3.png" alt="Logo" class="header-logo-mini" onerror="this.style.display='none'">
+        </div>
+    </div>
+
+    <div class="main-content" id="mainContainer">
+        </div>
+
+    <div id="cafeStatusBanner">
+        <img src="cinarlogo3.png" alt="Çınaraltı Logo" class="status-logo-img">
+        <div class="status-title">NAMAZ VAKTİ</div>
+        <div class="status-subtitle">Kısa süre içinde hizmetinizdeyiz</div>
+    </div>
+
+    <script src="/socket.io/socket.io.js"></script>
+    <script>
+        const socket = typeof io !== 'undefined' ? io() : { emit:()=>{}, on:(e,c)=>{if(e==='stockStatus')c({})} };
+        
+        let stockStatus = {};
+        let saturdayMenuItems = []; 
+        let isSaturdayEvening = false;
+        let cafeIsClosed = false;
+
+        // VERİLER (Soğuk İçecekler - EKSİKSİZ MENÜ)
+        const menuSections = [
+            // KOLON 1: ICE ESPRESSO
+            { 
+                title: 'Ice Espresso', 
+                icon: 'fa-cube', 
+                items: [
+                    'Shot Espresso', 
+                    'Shot Double Espresso', 
+                    'Ice Cortado', 
+                    'Ice Espresso Flat White', 
+                    'Ice Double Espresso Flat White', 
+                    'Ice Macchiato', 
+                    'Ice Double Shot Macchiato'
+                ] 
+            },
+            
+            // KOLON 1: ICE AMERICANO
+            { 
+                title: 'Ice Americano', 
+                icon: 'fa-glass-water', 
+                items: [
+                    'Ice Americano Hafif', 
+                    'Ice Americano Yoğun', 
+                    'Ice Sütlü Americano', 
+                    'Sparkling Americano', 
+                    'Ice Red', 
+                    'Ice Black', 
+                    'Soğuk Filtre', 
+                    'Soğuk Sütlü Filtre'
+                ] 
+            },
+            
+            // KOLON 2: ICE LATTE
+            { 
+                title: 'Ice Latte', 
+                icon: 'fa-whiskey-glass', 
+                items: [
+                    'Ice Latte', 
+                    'Ice Sahlep Latte', 
+                    'Ice Çikolat Latte', 
+                    'Ice Vanilya Latte', 
+                    'Ice Hazelnut Latte', 
+                    'Ice Caramel Latte', 
+                    'Ice Coconut Latte'
+                ] 
+            },
+            
+            // KOLON 2: ICE MOCHA
+            { 
+                title: 'Ice Mocha', 
+                icon: 'fa-mug-hot', 
+                items: [
+                    'Ice White Mocha', 
+                    'Ice Mix Mocha', 
+                    'Cococream Latte'
+                ] 
+            },
+            
+            // KOLON 2: MILKSHAKE
+            { 
+                title: 'Milkshake', 
+                icon: 'fa-blender', 
+                items: [
+                    'Vanilya Milkshake', 
+                    'Çikolata Milkshake', 
+                    'Çilek Milkshake', 
+                    'Muz Milkshake', 
+                    'Mango Milkshake', 
+                    'Sahlep Milkshake', 
+                    'Coconut Milkshake'
+                ] 
+            },
+            
+            // KOLON 3: FROZEN
+            { 
+                title: 'Frozen', 
+                icon: 'fa-snowflake', 
+                items: [
+                    'Mix Frozen', 
+                    'Mikser Frozen', 
+                    'Çilek Frozen', 
+                    'Lime Frozen', 
+                    'Lime Fizz Frozen', 
+                    'Mango Frozen', 
+                    'The Jungle', 
+                    'Sour Jungle', 
+                    'Jungle Fizz', 
+                    'Jungle Sour Fizz'
+                ] 
+            },
+            
+            // KOLON 3: COOL & FRESH
+            { 
+                title: 'Cool & Fresh', 
+                icon: 'fa-bottle-water', 
+                items: [
+                    'Cool Lime', 
+                    'Sodalı Cool Lime', 
+                    'Mango Lime', 
+                    'Sodalı Mango Lime', 
+                    'Mango', 
+                    'Kokteyl', 
+                    'Cococream', 
+                    'Sade Soda', 
+                    'Limon Soda', 
+                    'Süt'
+                ] 
+            }
+        ];
+
+        function renderMenu() {
+            const container = document.getElementById('mainContainer');
+            container.innerHTML = ''; 
+
+            const columns = [];
+            const colHeights = [0, 0, 0]; 
+
+            for(let i=0; i<3; i++) {
+                const div = document.createElement('div');
+                div.className = 'column';
+                container.appendChild(div);
+                columns.push(div);
+            }
+
+            let sectionsToRender = JSON.parse(JSON.stringify(menuSections));
+            if (isSaturdayEvening) {
+                document.getElementById('saturdayBadge').style.display = 'block';
+                if (saturdayMenuItems.length > 0) {
+                    sectionsToRender = sectionsToRender.map(s => {
+                        s.items = s.items.filter(i => saturdayMenuItems.includes(i));
+                        return s;
+                    }).filter(s => s.items.length > 0);
+                }
+            } else {
+                document.getElementById('saturdayBadge').style.display = 'none';
+            }
+
+            sectionsToRender.forEach((section, idx) => {
+                const secDiv = document.createElement('div');
+                secDiv.className = 'menu-section fade-in';
+                secDiv.style.animationDelay = `${idx * 0.1}s`;
+
+                let html = `
+                    <div class="section-header">
+                        <i class="fas ${section.icon} section-icon"></i>
+                        <span class="section-title">${section.title}</span>
+                    </div>
+                    <div class="menu-list">
+                `;
+
+                section.items.forEach(item => {
+                    let isUnavailable = stockStatus[item] === false;
+                    let extraClass = isUnavailable ? 'unavailable' : '';
+                    let statusHtml = isUnavailable ? '<span class="stock-tag">YOK</span>' : '';
+                    
+                    html += `
+                        <div class="menu-item ${extraClass}">
+                            <span class="item-name">${item}</span>
+                            <span class="dots"></span>
+                            <span class="item-status">${statusHtml}</span>
+                        </div>
+                    `;
+                });
+                html += '</div>';
+                secDiv.innerHTML = html;
+
+                const minCol = colHeights.indexOf(Math.min(...colHeights));
+                columns[minCol].appendChild(secDiv);
+                colHeights[minCol] += (section.items.length + 3);
+            });
+        }
+
+        function updateCafeStatus() {
+            document.getElementById('cafeStatusBanner').style.display = cafeIsClosed ? 'flex' : 'none';
+        }
+
+        socket.emit('getStock');
+        socket.emit('getSaturdayMenuStatus');
+        socket.emit('getCafeStatus');
+        socket.on('stockStatus', s => { stockStatus = s; renderMenu(); });
+        socket.on('stockUpdated', d => { stockStatus[d.itemName] = d.isAvailable; renderMenu(); });
+        socket.on('saturdayMenuStatus', d => { saturdayMenuItems = d.items || []; isSaturdayEvening = d.isSaturdayEvening; renderMenu(); });
+        socket.on('saturdayMenuUpdated', i => { saturdayMenuItems = i; isSaturdayEvening = i.length > 0; renderMenu(); });
+        socket.on('cafeStatus', s => { cafeIsClosed = s.isClosed; updateCafeStatus(); });
+
+        document.addEventListener('keydown', e => {
+            if(e.key === 's') { isSaturdayEvening = !isSaturdayEvening; if(!saturdayMenuItems.length) saturdayMenuItems=['Ice Latte']; renderMenu(); }
+            if(e.key === 'c') { cafeIsClosed = !cafeIsClosed; updateCafeStatus(); }
+        });
+
+        renderMenu();
+    </script>
+</body>
+</html>

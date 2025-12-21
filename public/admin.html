@@ -1,0 +1,1189 @@
+<!DOCTYPE html>
+<html lang="tr">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Barista Flow - Hayır Kafe</title>
+    <link href="https://fonts.googleapis.com/css2?family=Outfit:wght@300;500;700;900&display=swap" rel="stylesheet">
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.1/font/bootstrap-icons.css" rel="stylesheet">
+    
+    <style>
+        :root {
+            --bg-dark: #1e1e1e;
+            --card-dark: #2d2d2d;
+            --starbucks-green: #00704A; /* Starbucks Yeşili */
+            --latte-accent: #d4e9e2;
+            --text-white: #ffffff;
+            --text-gray: #a0a0a0;
+            --danger: #ff5f57;
+        }
+
+        body {
+            font-family: 'Outfit', sans-serif;
+            background-color: var(--bg-dark);
+            color: var(--text-white);
+            margin: 0;
+            padding: 20px;
+            min-height: 100vh;
+        }
+
+        /* Header Tasarımı */
+        .header-bar {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 30px;
+            padding: 0 10px;
+        }
+
+        .header-logo {
+            height: 40px;
+            width: auto;
+            object-fit: contain;
+        }
+
+        .brand-title {
+            font-size: 2rem;
+            font-weight: 900;
+            letter-spacing: -1px;
+            background: linear-gradient(90deg, #fff, #a0a0a0);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+        }
+
+        .status-badge {
+            background: rgba(0, 112, 74, 0.2);
+            color: var(--starbucks-green);
+            padding: 8px 16px;
+            border-radius: 30px;
+            font-weight: 600;
+            font-size: 0.9rem;
+            border: 1px solid var(--starbucks-green);
+            display: flex;
+            align-items: center;
+            gap: 8px;
+        }
+
+        .cafe-status-btn {
+            background: rgba(0, 112, 74, 0.2);
+            color: var(--starbucks-green);
+            border: 1px solid var(--starbucks-green);
+            padding: 8px 16px;
+            border-radius: 30px;
+            font-weight: 600;
+            font-size: 0.9rem;
+            cursor: pointer;
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            transition: all 0.3s;
+        }
+
+        .cafe-status-btn:hover {
+            background: var(--starbucks-green);
+            color: white;
+        }
+
+        .cafe-status-btn.cafe-closed {
+            background: rgba(255, 95, 87, 0.2);
+            color: var(--danger);
+            border-color: var(--danger);
+        }
+
+        .cafe-status-btn.cafe-closed:hover {
+            background: var(--danger);
+            color: white;
+        }
+
+        .status-dot {
+            width: 8px;
+            height: 8px;
+            background-color: var(--starbucks-green);
+            border-radius: 50%;
+            box-shadow: 0 0 10px var(--starbucks-green);
+            animation: pulse 2s infinite;
+        }
+
+        @keyframes pulse {
+            0% { opacity: 1; }
+            50% { opacity: 0.5; }
+            100% { opacity: 1; }
+        }
+
+        /* İstatistikler (Stories Tarzı) */
+        .stats-container {
+            display: flex;
+            gap: 15px;
+            margin-bottom: 30px;
+            overflow-x: auto;
+            padding-bottom: 10px;
+        }
+
+        .stat-pill {
+            background: var(--card-dark);
+            min-width: 120px;
+            padding: 15px;
+            border-radius: 20px;
+            display: flex;
+            flex-direction: column;
+            border: 1px solid rgba(255,255,255,0.05);
+        }
+
+        .stat-label {
+            font-size: 0.8rem;
+            color: var(--text-gray);
+            margin-bottom: 5px;
+        }
+
+        .stat-value {
+            font-size: 1.8rem;
+            font-weight: 700;
+        }
+
+        /* Grid Yapısı */
+        .orders-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fill, minmax(280px, 1fr));
+            gap: 20px;
+        }
+
+        /* Modern Kart Tasarımı */
+        .order-card {
+            background: var(--card-dark);
+            border-radius: 24px;
+            padding: 20px;
+            position: relative;
+            overflow: hidden;
+            transition: all 0.3s cubic-bezier(0.175, 0.885, 0.32, 1.275);
+            border: 1px solid rgba(255,255,255,0.05);
+            animation: slideIn 0.5s ease-out forwards;
+            opacity: 0;
+            transform: translateY(20px);
+        }
+
+        @keyframes slideIn {
+            to { opacity: 1; transform: translateY(0); }
+        }
+
+        .order-card:hover {
+            transform: translateY(-5px);
+            box-shadow: 0 10px 30px rgba(0,0,0,0.3);
+            border-color: rgba(255,255,255,0.1);
+        }
+
+        .order-card::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 4px;
+            height: 100%;
+            background: var(--starbucks-green);
+        }
+
+        .card-header-row {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 15px;
+        }
+
+        .guest-name {
+            font-size: 1.2rem;
+            font-weight: 700;
+            color: var(--text-white);
+        }
+
+        .time-badge {
+            background: #1a1a1a;
+            color: var(--text-gray);
+            font-size: 0.8rem;
+            padding: 6px 12px;
+            border-radius: 12px;
+            font-family: monospace;
+        }
+
+        .phone-badge {
+            background: #2a2a2a;
+            color: var(--primary-color);
+            font-size: 0.8rem;
+            padding: 6px 12px;
+            border-radius: 12px;
+            margin-left: 8px;
+        }
+
+        .order-item {
+            font-size: 1.6rem;
+            font-weight: 900; /* Extra Bold */
+            color: var(--latte-accent);
+            line-height: 1.2;
+            margin-bottom: 25px;
+        }
+
+        /* Dev Buton */
+        .btn-complete {
+            background: var(--starbucks-green);
+            color: white;
+            border: none;
+            width: 100%;
+            padding: 16px;
+            border-radius: 16px;
+            font-size: 1rem;
+            font-weight: 700;
+            cursor: pointer;
+            transition: all 0.2s;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            gap: 10px;
+        }
+
+        /* Dev Buton */
+        .btn-complete {
+            background: var(--starbucks-green);
+            color: white;
+            border: none;
+            width: 100%;
+            padding: 16px;
+            border-radius: 16px;
+            font-size: 1rem;
+            font-weight: 700;
+            cursor: pointer;
+            transition: all 0.2s;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            gap: 10px;
+        }
+
+        .btn-complete:active {
+            transform: scale(0.95);
+            background: #005c3c;
+        }
+
+        .btn-stock {
+            background: rgba(255, 95, 87, 0.2);
+            color: var(--danger);
+            border: 1px solid var(--danger);
+            padding: 8px 12px;
+            border-radius: 8px;
+            font-size: 0.75rem;
+            font-weight: 700;
+            cursor: pointer;
+            transition: all 0.2s;
+            display: flex;
+            align-items: center;
+            gap: 6px;
+        }
+
+        .btn-stock:hover {
+            background: var(--danger);
+            color: white;
+        }
+
+        .btn-stock.in-stock {
+            background: rgba(0, 112, 74, 0.2);
+            color: var(--starbucks-green);
+            border-color: var(--starbucks-green);
+        }
+
+        .btn-stock.in-stock:hover {
+            background: var(--starbucks-green);
+            color: white;
+        }
+
+        .stock-controls {
+            display: flex;
+            gap: 10px;
+            margin-top: 15px;
+            padding-top: 15px;
+            border-top: 1px solid rgba(255,255,255,0.1);
+        }
+
+        .empty-state {
+            grid-column: 1 / -1;
+            text-align: center;
+            padding: 80px 20px;
+            color: var(--text-gray);
+            background: var(--card-dark);
+            border-radius: 24px;
+            border: 2px dashed rgba(255,255,255,0.05);
+        }
+
+        .empty-icon {
+            font-size: 4rem;
+            margin-bottom: 20px;
+            opacity: 0.2;
+        }
+
+        /* Stok Yönetimi Sekmeleri */
+        .tabs-nav {
+            display: flex;
+            gap: 10px;
+            margin-bottom: 30px;
+            border-bottom: 1px solid rgba(255,255,255,0.05);
+            padding-bottom: 15px;
+        }
+
+        .tab-btn {
+            background: transparent;
+            border: none;
+            color: var(--text-gray);
+            padding: 10px 20px;
+            font-weight: 700;
+            font-size: 0.95rem;
+            cursor: pointer;
+            transition: all 0.3s;
+            border-bottom: 2px solid transparent;
+            position: relative;
+            bottom: -15px;
+        }
+
+        .tab-btn:hover {
+            color: var(--text-white);
+        }
+
+        .tab-btn.active {
+            color: var(--starbucks-green);
+            border-bottom-color: var(--starbucks-green);
+        }
+
+        .tab-content {
+            display: none;
+        }
+
+        .tab-content.active {
+            display: block;
+        }
+
+        /* Raporlar Stilleri */
+        .reports-container {
+            display: flex;
+            flex-direction: column;
+            gap: 30px;
+        }
+
+        .report-section h3 {
+            color: var(--text-white);
+            margin-bottom: 20px;
+            font-size: 1.4rem;
+            font-weight: 700;
+        }
+
+        .report-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fill, minmax(300px, 1fr));
+            gap: 20px;
+        }
+
+        .report-card {
+            background: var(--card-dark);
+            border-radius: 16px;
+            padding: 20px;
+            border: 1px solid rgba(255,255,255,0.05);
+        }
+
+        .report-card h4 {
+            color: var(--starbucks-green);
+            margin-bottom: 15px;
+            font-size: 1.1rem;
+            font-weight: 600;
+        }
+
+        .report-item {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            padding: 8px 0;
+            border-bottom: 1px solid rgba(255,255,255,0.05);
+        }
+
+        .report-item:last-child {
+            border-bottom: none;
+        }
+
+        .report-name {
+            color: var(--text-white);
+            font-weight: 500;
+        }
+
+        .report-count {
+            color: var(--latte-accent);
+            font-weight: 700;
+            background: rgba(212, 233, 226, 0.1);
+            padding: 4px 8px;
+            border-radius: 8px;
+        }
+
+        /* Stok Grid */
+        .stock-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fill, minmax(200px, 1fr));
+            gap: 15px;
+        }
+
+        .stock-item {
+            background: var(--card-dark);
+            border-radius: 16px;
+            padding: 15px;
+            border: 1px solid rgba(255,255,255,0.05);
+            transition: all 0.3s;
+        }
+
+        .stock-item:hover {
+            border-color: rgba(255,255,255,0.1);
+        }
+
+        .stock-item-name {
+            font-weight: 700;
+            margin-bottom: 10px;
+            color: var(--text-white);
+        }
+
+        .stock-toggle-btn {
+            width: 100%;
+            padding: 10px;
+            border: none;
+            border-radius: 10px;
+            font-weight: 700;
+            cursor: pointer;
+            transition: all 0.2s;
+            font-size: 0.9rem;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 8px;
+        }
+
+        .stock-toggle-btn.available {
+            background: rgba(0, 112, 74, 0.3);
+            color: var(--starbucks-green);
+            border: 1px solid var(--starbucks-green);
+        }
+
+        .stock-toggle-btn.available:hover {
+            background: var(--starbucks-green);
+            color: white;
+        }
+
+        .stock-toggle-btn.unavailable {
+            background: rgba(255, 95, 87, 0.3);
+            color: var(--danger);
+            border: 1px solid var(--danger);
+        }
+
+        .stock-toggle-btn.unavailable:hover {
+            background: var(--danger);
+            color: white;
+        }
+
+    </style>
+</head>
+<body>
+
+    <div class="header-bar">
+        <div class="brand-title">Barista Flow</div>
+        <div style="display: flex; gap: 15px; align-items: center;">
+            <img src="cinarlogo3.png" alt="Çınar Logo" class="header-logo">
+            <button id="saturdayTestBtn" class="cafe-status-btn" style="background: rgba(255, 193, 7, 0.2); color: #ffc107; border-color: #ffc107;" onclick="toggleSaturdayTest()">
+                <i class="bi bi-calendar-check"></i> <span id="saturdayTestText">Cumartesi Test: Kapalı</span>
+            </button>
+            <button id="cafeStatusBtn" class="cafe-status-btn cafe-open" onclick="toggleCafeStatus()">
+                <i class="bi bi-door-open"></i> <span id="cafeStatusText">Açık</span>
+            </button>
+            <div class="status-badge">
+                <div class="status-dot"></div>
+                <span id="connectionText">Canlı</span>
+            </div>
+        </div>
+    </div>
+
+    <div class="stats-container">
+        <div class="stat-pill">
+            <span class="stat-label">Bekleyen</span>
+            <span class="stat-value" style="color: #ffbd2e;" id="pendingCount">0</span>
+        </div>
+        <div class="stat-pill">
+            <span class="stat-label">Tamamlanan</span>
+            <span class="stat-value" style="color: var(--starbucks-green);" id="completedCount">0</span>
+        </div>
+        <div class="stat-pill">
+            <span class="stat-label">Toplam</span>
+            <span class="stat-value" id="totalCount">0</span>
+        </div>
+    </div>
+
+    <!-- Sekmeler -->
+    <div class="tabs-nav">
+        <button class="tab-btn active" onclick="switchTab('orders', this)">
+            <i class="bi bi-cup-hot"></i> Siparişler
+        </button>
+        <button class="tab-btn" onclick="switchTab('stock', this)">
+            <i class="bi bi-boxes"></i> Stok Yönetimi
+        </button>
+        <button class="tab-btn" onclick="switchTab('saturday', this)">
+            <i class="bi bi-calendar-week"></i> Cumartesi Menüsü
+        </button>
+        <button class="tab-btn" onclick="switchTab('reports', this)">
+            <i class="bi bi-bar-chart"></i> Raporlar
+        </button>
+    </div>
+
+    <!-- Siparişler Sekmesi -->
+    <div id="ordersTab" class="tab-content active">
+        <div class="orders-grid" id="ordersContainer">
+            <div class="empty-state" id="emptyState">
+                <i class="bi bi-cup-hot empty-icon"></i>
+                <h3>Şu an sakin...</h3>
+                <p>Yeni siparişler buraya düşecek 🚀</p>
+            </div>
+        </div>
+    </div>
+
+    <!-- Stok Yönetimi Sekmesi -->
+    <div id="stockTab" class="tab-content">
+        <div class="stock-grid" id="stockContainer"></div>
+    </div>
+
+    <!-- Cumartesi Menüsü Sekmesi -->
+    <div id="saturdayTab" class="tab-content">
+        <div style="background: var(--card-dark); padding: 20px; border-radius: 16px; margin-bottom: 20px;">
+            <h3 style="color: var(--starbucks-green); margin-bottom: 10px;">
+                <i class="bi bi-calendar-week"></i> Cumartesi Akşam Menüsü (18:00 sonrası)
+            </h3>
+            <p style="color: var(--text-gray); margin-bottom: 0;">
+                Cumartesi günleri saat 18:00'dan sonra sadece burada seçtiğiniz ürünler menüde görünecektir.
+                Müşteriler yalnızca bu ürünlerden sipariş verebilir.
+            </p>
+        </div>
+        
+        <div style="margin-bottom: 20px;">
+            <button onclick="selectAllSaturdayItems()" style="background: var(--starbucks-green); color: white; border: none; padding: 10px 20px; border-radius: 10px; cursor: pointer; margin-right: 10px;">
+                <i class="bi bi-check-all"></i> Tümünü Seç
+            </button>
+            <button onclick="deselectAllSaturdayItems()" style="background: var(--danger); color: white; border: none; padding: 10px 20px; border-radius: 10px; cursor: pointer;">
+                <i class="bi bi-x-lg"></i> Tümünü Kaldır
+            </button>
+        </div>
+        
+        <div class="stock-grid" id="saturdayMenuContainer"></div>
+    </div>
+
+    <!-- Raporlar Sekmesi -->
+    <div id="reportsTab" class="tab-content">
+        <div class="reports-container">
+            <div class="report-section">
+                <h3>📅 Günlük Raporlar</h3>
+                <div id="dailyReports" class="report-grid"></div>
+            </div>
+            <div class="report-section">
+                <h3>📊 Aylık Raporlar</h3>
+                <div id="monthlyReports" class="report-grid"></div>
+            </div>
+        </div>
+    </div>
+
+    <audio id="notificationSound" preload="auto">
+        <source src="data:audio/wav;base64,UklGRnoGAABXQVZFZm10IBAAAAABAAEAQB8AAEAfAAABAAgAZGF0YQoGAACBhYqFbF1fdJivrJBhNjVgodDbq2EcBj+a2/LDciUFLIHO8tiJNwgZaLvt559NEAxQp+PwtmMcBjiR1/LMeSwFJHfH8N2QQAoUXrTp66hVFApGn+DyvmwhBSuBzvLZiTYIGGi77eeeSwwPUKXh8LdjHQU2kdXy0HotBSJ1xe/ajz8KE12y6OynUxQLRp7e8r9pIAUsgs/y24o4CBhpvO7om0kMEE+k4PG5ZBkFNo/T8tR6LgUjdMPs2Ys+CRNbsOjqqVcVCkSb3fHAah4FK4HOuN2KNwgaab3v6qJODRBPo9/ytWUaBTWO0vHVei4FI3PD7tiLPwkSW6/n6qlXFQpFnN3xw2sfBSt/zLbci0AIG2m98OqiTg0RTqHf8rVlGgU1jtLx1XouBSNzw+7Yiz8JElqv5+qoVhYKQ5vb8MRsHwUrfsy13oxBCRtov+/ro00NEFCA4fK2Zx0FNI7R8tZ8MAUiccTt15A/CRJYrunqqVgWCkOb2/DGbSEFK37LtN+MQQgbZ7/u6qRODRBPf+DxtWccBTOO0fLYfTAFInHE7deQPgkRV6/o6atZFglCmtnwyG0jBSp9yrf0L/JTh+AAAAAAAA==">
+    </audio>
+
+    <script src="/socket.io/socket.io.js"></script>
+    <script>
+        const socket = io();
+        const container = document.getElementById('ordersContainer');
+        const emptyState = document.getElementById('emptyState');
+        
+        let stats = { total: 0, pending: 0, completed: 0 };
+        let stockStatus = {}; // Stok durumunu tut
+        let cafeIsClosed = false; // Kafe kapalı mı
+        let saturdayMenuItems = []; // Cumartesi menüsü için seçilen ürünler
+        let saturdayTestMode = false; // Cumartesi test modu
+
+        // Service Worker register et (bildirim için gerekli)
+        if ('serviceWorker' in navigator) {
+            navigator.serviceWorker.register('/sw.js')
+                .then(registration => {
+                    console.log('Admin: Service Worker başarıyla kayıt edildi:', registration);
+                })
+                .catch(err => {
+                    console.log('Admin: Service Worker kayıt başarısız:', err);
+                });
+        } else {
+            console.log('Admin: Service Worker desteklenmiyor');
+        }
+
+        // Sayfa yüklendiğinde aktif siparişleri çek
+        loadActiveOrders();
+
+        // Notification izni iste
+        function requestNotificationPermission() {
+            console.log('Admin: requestNotificationPermission çağrıldı');
+            console.log('Current permission:', Notification.permission);
+            
+            if ('Notification' in window) {
+                if (Notification.permission === 'default') {
+                    console.log('İzin isteniyor...');
+                    // Chrome için daha açık bir prompt
+                    if (confirm('Yeni siparişler için bildirim almak ister misiniz?')) {
+                        Notification.requestPermission().then(permission => {
+                            console.log('İzin yanıtı:', permission);
+                            if (permission === 'granted') {
+                                sendNotification('Admin Bildirimleri Aktif!', {
+                                    body: 'Yeni siparişler geldiğinde bilgilendirileceksiniz.',
+                                    tag: 'welcome'
+                                });
+                            }
+                        });
+                    }
+                } else {
+                    console.log('İzin zaten verilmiş:', Notification.permission);
+                }
+            } else {
+                console.log('Notification API desteklenmiyor');
+            }
+        }
+
+        // Sayfa yüklendiğinde notification izni iste
+        window.addEventListener('load', () => {
+            console.log('Admin sayfa yüklendi, izin isteniyor...');
+            // 1 saniye bekle sonra iste (sayfa yüklendikten sonra)
+            setTimeout(() => {
+                requestNotificationPermission();
+            }, 1000);
+        });
+
+        // Bildirim gönder
+        function sendNotification(title, options = {}) {
+            console.log('Admin sendNotification çağrıldı:', title);
+            console.log('Notification permission:', Notification.permission);
+            
+            if ('Notification' in window && Notification.permission === 'granted') {
+                console.log('Bildirim gönderiliyor...');
+                const notification = new Notification(title, {
+                    icon: 'https://images.unsplash.com/photo-1495474472287-4d71bcdd2085?w=100&q=80',
+                    badge: 'https://images.unsplash.com/photo-1495474472287-4d71bcdd2085?w=100&q=80',
+                    requireInteraction: true,
+                    ...options
+                });
+                console.log('Bildirim oluşturuldu:', notification);
+            } else {
+                console.log('Bildirim gönderilemedi. Permission:', Notification.permission);
+            }
+        }
+
+        // Cumartesi test modunu aç/kapat
+        window.toggleSaturdayTest = function() {
+            saturdayTestMode = !saturdayTestMode;
+            socket.emit('toggleSaturdayTestMode');
+            
+            // UI'ı güncelle
+            const btn = document.getElementById('saturdayTestBtn');
+            const text = document.getElementById('saturdayTestText');
+            
+            if (saturdayTestMode) {
+                btn.style.background = 'rgba(255, 193, 7, 0.3)';
+                btn.style.color = '#ffc107';
+                btn.style.borderColor = '#ffc107';
+                text.textContent = 'Cumartesi Test: Açık';
+            } else {
+                btn.style.background = 'rgba(255, 193, 7, 0.2)';
+                btn.style.color = '#ffc107';
+                btn.style.borderColor = '#ffc107';
+                text.textContent = 'Cumartesi Test: Kapalı';
+            }
+        };
+
+        // Kafe durumunu değiştir
+        window.toggleCafeStatus = function() {
+            cafeIsClosed = !cafeIsClosed;
+            socket.emit('toggleCafeStatus', { isClosed: cafeIsClosed });
+            
+            // UI'ı güncelle
+            const btn = document.getElementById('cafeStatusBtn');
+            const text = document.getElementById('cafeStatusText');
+            
+            if (cafeIsClosed) {
+                btn.classList.remove('cafe-open');
+                btn.classList.add('cafe-closed');
+                btn.innerHTML = '<i class="bi bi-door-closed"></i> <span id="cafeStatusText">Kapalı</span>';
+            } else {
+                btn.classList.remove('cafe-closed');
+                btn.classList.add('cafe-open');
+                btn.innerHTML = '<i class="bi bi-door-open"></i> <span id="cafeStatusText">Açık</span>';
+            }
+        };
+
+        // Kafe durumunu al
+        socket.on('cafeStatus', (status) => {
+            cafeIsClosed = status.isClosed;
+            
+            const btn = document.getElementById('cafeStatusBtn');
+            if (cafeIsClosed) {
+                btn.classList.remove('cafe-open');
+                btn.classList.add('cafe-closed');
+                btn.innerHTML = '<i class="bi bi-door-closed"></i> <span id="cafeStatusText">Kapalı</span>';
+            } else {
+                btn.classList.remove('cafe-closed');
+                btn.classList.add('cafe-open');
+                btn.innerHTML = '<i class="bi bi-door-open"></i> <span id="cafeStatusText">Açık</span>';
+            }
+        });
+
+        // Tab Yönetimi
+        function switchTab(tabName, btn) {
+            // Tüm sekmeleri gizle
+            document.querySelectorAll('.tab-content').forEach(tab => {
+                tab.classList.remove('active');
+            });
+            document.querySelectorAll('.tab-btn').forEach(button => {
+                button.classList.remove('active');
+            });
+            
+            // Seçili sekmeyi göster
+            document.getElementById(tabName + 'Tab').classList.add('active');
+            btn.classList.add('active');
+
+            // Stok sekmesine girildiğinde grid'i doldur
+            if (tabName === 'stock') {
+                renderStockGrid();
+            }
+
+            // Cumartesi menüsü sekmesine girildiğinde grid'i doldur
+            if (tabName === 'saturday') {
+                renderSaturdayMenuGrid();
+            }
+
+            // Raporlar sekmesine girildiğinde raporları yükle
+            if (tabName === 'reports') {
+                loadReports();
+            }
+        }
+
+        // Menü ürünleri listesi
+        const allMenuItems = [
+            'Türk Kahvesi', 'Dibek Kahvesi', 'Menengiç', 'Damla Sakızlı',
+            'Espresso', 'Americano', 'Latte', 'Cappuccino', 'White Mocha', 'Filtre Kahve',
+            'Demleme Çay', 'Fincan Çay', 'Kış Çayı', 'Ada Çayı',
+            'Sıcak Çikolata', 'Salep', 'Ballı Süt',
+            'Ice Latte', 'Cold Brew', 'Limonata', 'Frozen Çilek', 'Milkshake Oreo',
+            'Boza', 'Özel Şıra',
+            // Pratik Soğuklar
+            'Cococream', 'Kokteyl', 'Mango', 'Sodali Mango Lime', 'Mango Lime', 'Sodali Cool Lime', 'Cool Lime', 'Churchill', 'Limonlu Soda', 'Sade Soda', 'Süt',
+            // Frozen
+            'Mixstyle Frozen', 'Cmix Frozen', 'Çilek Frozen', 'The Jungle Frozen', 'Sour Jungle', 'Jungle Fizz Frozen', 'Lime Frozen', 'Lime Fizz Frozen', 'Mango Frozen', 'Mango Lime Frozen', 'Mango Fizz Frozen',
+            // Milkshake
+            'Coconut Milkshake', 'Sahlep Milkshake', 'Mango Milkshake', 'Muz Milkshake', 'Çilek Milkshake', 'Çikolata Milkshake', 'Karamel Milkshake', 'Vanilya Milkshake',
+            // Geleneksel Kahveler
+            'Sütlü Filtre Kahve', 'Filtre Kahve', 'Sütlü Dibek Kahvesi', 'Sütlü Türk Kahvesi', 'Türk Kahvesi', 'Dibek Kahvesi',
+            // Sıcak Kahveler
+            'Macchiato', 'Americano', 'Black Eye', 'Red Eye', 'Espresso Flat White (1 oz)', 'Double Espresso Flat White (2 oz)', 'Cortado', 'Espresso', 'Double Espresso (Sert)', 'Vanilya Cappuccino', 'Sahlep Cappuccino', 'Çikolat Cappuccino', 'Cappuccino', 'Mix Çikolata Mocha', 'Mix Mocha', 'White Mocha', 'Mocha', 'Coconut Latte', 'Caramel Latte', 'Hazelnut Latte', 'Vanilya Latte', 'Çikolat Latte', 'Sahlep Latte', 'Latte', 'Sütlü Americano',
+            // Çay ve Sohbet
+            'Bitki Çayı', 'Bardak Çay', 'Atom Çayı', 'Bergamot Limonlu Kupa Çay', 'Bergamot Kupa Çay', 'Limonlu Çay', 'Yeşil Çay', 'Kupa Çay',
+            // Special Sıcaklar
+            'Chai Tea Latte', 'Sıcak Çikolata', 'Sahlep'
+        ];
+
+        function renderStockGrid() {
+            const stockContainer = document.getElementById('stockContainer');
+            stockContainer.innerHTML = '';
+            
+            allMenuItems.forEach(item => {
+                const isAvailable = stockStatus[item] !== false;
+                const statusClass = isAvailable ? 'available' : 'unavailable';
+                const statusText = isAvailable ? 'Stokta Var' : 'Stokta Yok';
+                const icon = isAvailable ? 'bi-check-circle' : 'bi-exclamation-circle';
+                
+                const itemDiv = document.createElement('div');
+                itemDiv.className = 'stock-item';
+                itemDiv.innerHTML = `
+                    <div class="stock-item-name">${item}</div>
+                    <button class="stock-toggle-btn ${statusClass}" onclick="toggleStockGlobal(this, '${item}')">
+                        <i class="bi ${icon}"></i> ${statusText}
+                    </button>
+                `;
+                stockContainer.appendChild(itemDiv);
+            });
+        }
+
+        function toggleStockGlobal(btn, itemName) {
+            const isCurrentlyAvailable = btn.classList.contains('available');
+            const newStatus = !isCurrentlyAvailable;
+            
+            // UI'ı güncelle
+            btn.classList.toggle('available', newStatus);
+            btn.classList.toggle('unavailable', !newStatus);
+            btn.innerHTML = newStatus ? 
+                '<i class="bi bi-check-circle"></i> Stokta Var' :
+                '<i class="bi bi-exclamation-circle"></i> Stokta Yok';
+            
+            // Sunucuya gönder
+            socket.emit('updateStock', { itemName: itemName, isAvailable: newStatus });
+        }
+
+        // Cumartesi menüsü grid'ini render et
+        function renderSaturdayMenuGrid() {
+            const container = document.getElementById('saturdayMenuContainer');
+            container.innerHTML = '';
+            
+            allMenuItems.forEach(item => {
+                const isSelected = saturdayMenuItems.includes(item);
+                const statusClass = isSelected ? 'available' : 'unavailable';
+                const statusText = isSelected ? 'Seçili' : 'Seçili Değil';
+                const icon = isSelected ? 'bi-check-circle-fill' : 'bi-circle';
+                
+                const itemDiv = document.createElement('div');
+                itemDiv.className = 'stock-item';
+                itemDiv.innerHTML = `
+                    <div class="stock-item-name">${item}</div>
+                    <button class="stock-toggle-btn ${statusClass}" onclick="toggleSaturdayMenuItem(this, '${item}')">
+                        <i class="bi ${icon}"></i> ${statusText}
+                    </button>
+                `;
+                container.appendChild(itemDiv);
+            });
+        }
+
+        // Cumartesi menüsünde ürün seç/kaldır
+        window.toggleSaturdayMenuItem = function(btn, itemName) {
+            const isCurrentlySelected = btn.classList.contains('available');
+            
+            if (isCurrentlySelected) {
+                // Kaldır
+                saturdayMenuItems = saturdayMenuItems.filter(item => item !== itemName);
+                btn.classList.remove('available');
+                btn.classList.add('unavailable');
+                btn.innerHTML = '<i class="bi bi-circle"></i> Seçili Değil';
+            } else {
+                // Ekle
+                saturdayMenuItems.push(itemName);
+                btn.classList.remove('unavailable');
+                btn.classList.add('available');
+                btn.innerHTML = '<i class="bi bi-check-circle-fill"></i> Seçili';
+            }
+            
+            // Sunucuya gönder
+            socket.emit('updateSaturdayMenu', saturdayMenuItems);
+        };
+
+        // Tüm ürünleri cumartesi menüsüne ekle
+        window.selectAllSaturdayItems = function() {
+            saturdayMenuItems = [...allMenuItems];
+            socket.emit('updateSaturdayMenu', saturdayMenuItems);
+            renderSaturdayMenuGrid();
+        };
+
+        // Tüm ürünleri cumartesi menüsünden kaldır
+        window.deselectAllSaturdayItems = function() {
+            saturdayMenuItems = [];
+            socket.emit('updateSaturdayMenu', saturdayMenuItems);
+            renderSaturdayMenuGrid();
+        };
+
+        function updateStats() {
+            document.getElementById('totalCount').textContent = stats.total;
+            document.getElementById('pendingCount').textContent = stats.pending;
+            document.getElementById('completedCount').textContent = stats.completed;
+        }
+
+        function loadReports() {
+            fetch('/api/reports')
+                .then(response => response.json())
+                .then(data => {
+                    renderDailyReports(data.daily);
+                    renderMonthlyReports(data.monthly);
+                })
+                .catch(error => {
+                    console.error('Rapor yükleme hatası:', error);
+                });
+        }
+
+        function loadActiveOrders() {
+            fetch('/api/active-orders')
+                .then(response => response.json())
+                .then(orders => {
+                    orders.forEach(order => {
+                        addOrderToUI(order);
+                    });
+                })
+                .catch(error => {
+                    console.error('Aktif sipariş yükleme hatası:', error);
+                });
+        }
+
+        function addOrderToUI(data) {
+            stats.total++;
+            stats.pending++;
+            updateStats();
+
+            // Boş durumu gizle
+            if(emptyState) emptyState.style.display = 'none';
+
+            // Kart Oluştur
+            const card = document.createElement('div');
+            card.className = 'order-card';
+            card.id = `order-${data.id}`;
+            card.setAttribute('data-item-name', data.item);
+            card.setAttribute('data-order-number', data.orderNumber || '');
+            card.setAttribute('data-guest-name', data.guestName || '');
+            card.setAttribute('data-item', data.item || '');
+            
+            // Sadece saati al (HH:MM)
+            const timeOnly = data.orderTime.split(' ')[1] || data.orderTime;
+            
+            // Stok durumunu kontrol et
+            const isInStock = stockStatus[data.item] !== false; // Varsayılan olarak stokta var
+            const stockButtonClass = isInStock ? 'btn-stock in-stock' : 'btn-stock';
+            const stockButtonText = isInStock ? 
+                '<i class="bi bi-check-circle"></i> Stokta Var' :
+                '<i class="bi bi-exclamation-circle"></i> Stokta Yok';
+
+            card.innerHTML = `
+                <div class="card-header-row">
+                    <span class="guest-name">#${data.orderNumber || '---'} - ${data.guestName}</span>
+                    <span class="phone-badge">${data.phone || ''}</span>
+                    <span class="time-badge">${timeOnly}</span>
+                </div>
+                <div class="order-item">
+                    ${data.item}
+                </div>
+                <div class="stock-controls">
+                    <button class="btn-stock ${stockButtonClass}" onclick="toggleStock(this, '${data.item}')">
+                        ${stockButtonText}
+                    </button>
+                    <button class="btn-complete" style="flex: 1;" onclick="finishOrder(this, '${data.id}')">
+                        <i class="bi bi-check-lg"></i> Hazırla
+                    </button>
+                </div>
+            `;
+
+            // En başa ekle (prepend)
+            container.insertBefore(card, container.firstChild);
+        }
+
+        function renderDailyReports(dailyData) {
+            const container = document.getElementById('dailyReports');
+            container.innerHTML = '';
+
+            const sortedDates = Object.keys(dailyData).sort().reverse();
+
+            if (sortedDates.length === 0) {
+                container.innerHTML = '<div class="report-card"><p>Günlük rapor bulunamadı.</p></div>';
+                return;
+            }
+
+            sortedDates.forEach(date => {
+                const dayData = dailyData[date];
+                const card = document.createElement('div');
+                card.className = 'report-card';
+
+                const dateObj = new Date(date);
+                const formattedDate = dateObj.toLocaleDateString('tr-TR', {
+                    weekday: 'long',
+                    year: 'numeric',
+                    month: 'long',
+                    day: 'numeric'
+                });
+
+                let html = `<h4>${formattedDate}</h4>`;
+
+                // Müşteriler
+                html += '<h5>👥 Müşteriler</h5>';
+                Object.entries(dayData.customers)
+                    .sort(([,a], [,b]) => b - a)
+                    .forEach(([name, count]) => {
+                        html += `<div class="report-item">
+                            <span class="report-name">${name}</span>
+                            <span class="report-count">${count}</span>
+                        </div>`;
+                    });
+
+                // Ürünler
+                html += '<h5>☕ Ürünler</h5>';
+                Object.entries(dayData.items)
+                    .sort(([,a], [,b]) => b - a)
+                    .forEach(([item, count]) => {
+                        html += `<div class="report-item">
+                            <span class="report-name">${item}</span>
+                            <span class="report-count">${count}</span>
+                        </div>`;
+                    });
+
+                card.innerHTML = html;
+                container.appendChild(card);
+            });
+        }
+
+        function renderMonthlyReports(monthlyData) {
+            const container = document.getElementById('monthlyReports');
+            container.innerHTML = '';
+
+            const sortedMonths = Object.keys(monthlyData).sort().reverse();
+
+            if (sortedMonths.length === 0) {
+                container.innerHTML = '<div class="report-card"><p>Aylık rapor bulunamadı.</p></div>';
+                return;
+            }
+
+            sortedMonths.forEach(month => {
+                const monthData = monthlyData[month];
+                const card = document.createElement('div');
+                card.className = 'report-card';
+
+                const [year, monthNum] = month.split('-');
+                const dateObj = new Date(year, monthNum - 1);
+                const formattedMonth = dateObj.toLocaleDateString('tr-TR', {
+                    year: 'numeric',
+                    month: 'long'
+                });
+
+                let html = `<h4>${formattedMonth}</h4>`;
+
+                // Müşteriler
+                html += '<h5>👥 Müşteriler</h5>';
+                Object.entries(monthData.customers)
+                    .sort(([,a], [,b]) => b - a)
+                    .forEach(([name, count]) => {
+                        html += `<div class="report-item">
+                            <span class="report-name">${name}</span>
+                            <span class="report-count">${count}</span>
+                        </div>`;
+                    });
+
+                // Ürünler
+                html += '<h5>☕ Ürünler</h5>';
+                Object.entries(monthData.items)
+                    .sort(([,a], [,b]) => b - a)
+                    .forEach(([item, count]) => {
+                        html += `<div class="report-item">
+                            <span class="report-name">${item}</span>
+                            <span class="report-count">${count}</span>
+                        </div>`;
+                    });
+
+                card.innerHTML = html;
+                container.appendChild(card);
+            });
+        }
+
+        function playSound() {
+            const audio = document.getElementById('notificationSound');
+            audio.currentTime = 0;
+            audio.play().catch(e => console.log("Ses izni gerekli"));
+        }
+
+        // Admin yüklendiğinde stok durumunu iste
+        socket.emit('getStock');
+
+        // Cumartesi menüsü durumunu iste
+        socket.emit('getSaturdayMenuStatus');
+
+        // Stok durumunu al
+        socket.on('stockStatus', (status) => {
+            stockStatus = status;
+        });
+
+        // Cumartesi menüsü durumunu al
+        socket.on('saturdayMenuStatus', (data) => {
+            saturdayMenuItems = data.items || [];
+            console.log('Cumartesi menüsü yüklendi:', saturdayMenuItems.length, 'ürün');
+        });
+
+        // Cumartesi menüsü güncellendiğinde
+        socket.on('saturdayMenuUpdated', (items) => {
+            saturdayMenuItems = items;
+            // Eğer cumartesi sekmesindeyse grid'i yeniden render et
+            const saturdayTab = document.getElementById('saturdayTab');
+            if (saturdayTab.classList.contains('active')) {
+                renderSaturdayMenuGrid();
+            }
+        });
+
+        // Stok güncellemelerini dinle
+        socket.on('stockUpdated', (data) => {
+            stockStatus[data.itemName] = data.isAvailable;
+            updateStockButton(data.itemName, data.isAvailable);
+            // Stok grid'inde de güncelle
+            const gridContainer = document.getElementById('stockContainer');
+            if (gridContainer.innerHTML !== '') {
+                renderStockGrid();
+            }
+        });
+
+        function updateStockButton(itemName, isAvailable) {
+            // Tüm kartlarda bu ürünün butonunu güncelle
+            document.querySelectorAll('[data-item-name]').forEach(card => {
+                if (card.getAttribute('data-item-name') === itemName) {
+                    const btn = card.querySelector('.btn-stock');
+                    if (btn) {
+                        btn.classList.toggle('in-stock', isAvailable);
+                        btn.innerHTML = isAvailable ? 
+                            '<i class="bi bi-check-circle"></i> Stokta Var' :
+                            '<i class="bi bi-exclamation-circle"></i> Stokta Yok';
+                    }
+                }
+            });
+        }
+
+        socket.on('newOrder', (data) => {
+            console.log('newOrder event alındı:', data);
+            playSound();
+            
+            // Barista'ya bildirim gönder
+            console.log('Barista bildirimi gönderiliyor...');
+            sendNotification(`Yeni Sipariş! - ${data.guestName}`, {
+                body: `${data.item} isteniyor`,
+                tag: 'new-order'
+            });
+            
+            addOrderToUI(data);
+        });
+
+        window.toggleStock = function(btn, itemName) {
+            const isCurrentlyInStock = btn.classList.contains('in-stock');
+            const newStatus = !isCurrentlyInStock;
+            
+            // UI'ı güncelle
+            btn.classList.toggle('in-stock', newStatus);
+            btn.innerHTML = newStatus ? 
+                '<i class="bi bi-check-circle"></i> Stokta Var' :
+                '<i class="bi bi-exclamation-circle"></i> Stokta Yok';
+            
+            // Sunucuya gönder
+            socket.emit('updateStock', { itemName: itemName, isAvailable: newStatus });
+        };
+
+        window.finishOrder = function(btn, id) {
+            const card = btn.parentElement.parentElement;
+            
+            // Get order data from data attributes
+            const orderNumber = card.getAttribute('data-order-number');
+            const guestName = card.getAttribute('data-guest-name');
+            const item = card.getAttribute('data-item');
+
+            // Emit orderReady event to notify customer
+            socket.emit('completeOrder', {
+                orderId: id,
+                orderNumber: orderNumber,
+                guestName: guestName,
+                item: item
+            });
+            
+            // Animasyonla Sil
+            card.style.transform = 'scale(0.9) translateY(20px)';
+            card.style.opacity = '0';
+            
+            setTimeout(() => {
+                card.remove();
+                stats.pending--;
+                stats.completed++;
+                updateStats();
+
+                // Eğer kart kalmadıysa boş durumu göster
+                if (container.children.length === 0 || (container.children.length === 1 && container.children[0].id === 'emptyState')) {
+                    if(emptyState) emptyState.style.display = 'block';
+                }
+            }, 300);
+        };
+    </script>
+</body>
+</html>

@@ -1,0 +1,366 @@
+{
+  "daily": {
+    "2025-12-11": {
+      "customers": {
+        "dfgdf": 1,
+        "dfhdhd": 1,
+        "sdfhd": 1,
+        "dsgsdgs": 1,
+        "dfhdfh": 1,
+        "dfhdf": 1,
+        "Dmdmsösö": 5
+      },
+      "items": {
+        "\n                    Bardak Çay\n                ": 10,
+        "\n                    Kupa Çay\n                ": 1
+      },
+      "orderRights": {
+        "Dmdmsösö": {
+          "used": 1,
+          "timeSlot": "20:00 sonrası",
+          "lastOrder": "2025-12-11T17:15:25.506Z"
+        }
+      },
+      "phoneRegistry": {},
+      "phoneOrders": {},
+      "deviceOrders": {}
+    },
+    "2025-12-12": {
+      "customers": {
+        "dfhdf": 1
+      },
+      "items": {
+        "\n                    Limonlu Çay (Bergamot)\n                ": 1
+      },
+      "orderRights": {
+        "dfhdf": {
+          "used": 1,
+          "timeSlot": "20:00 sonrası",
+          "lastOrder": "2025-12-12T17:19:50.375Z"
+        }
+      },
+      "phoneRegistry": {},
+      "phoneOrders": {},
+      "deviceOrders": {}
+    },
+    "2025-12-14": {
+      "customers": {
+        "Dndkdkdl": 1,
+        "Dndkdkdlsss": 1,
+        "Dndkdkdlssssmsm": 1,
+        "Dndkdkdlssssmsma": 1,
+        "Dndkdkdlssssmsmadkdkd": 1,
+        "Berkay dkdk": 1,
+        "Berkay dkdkaa": 4
+      },
+      "items": {
+        "\n                    Bardak Çay\n                ": 6,
+        "\n                    Limonlu Çay\n                ": 2,
+        "\n                    Kupa Çay\n                ": 2
+      },
+      "orderRights": {
+        "Dndkdkdl": {
+          "used": 1,
+          "phone": "5555555555",
+          "timeSlot": "20:00 sonrası",
+          "lastOrder": "2025-12-14T12:16:25.456Z"
+        },
+        "Dndkdkdlsss": {
+          "used": 1,
+          "phone": "5555555551",
+          "timeSlot": "20:00 sonrası",
+          "lastOrder": "2025-12-14T12:16:49.868Z"
+        },
+        "Dndkdkdlssssmsm": {
+          "used": 1,
+          "phone": "5555555522",
+          "timeSlot": "20:00 sonrası",
+          "lastOrder": "2025-12-14T12:18:21.511Z"
+        },
+        "Dndkdkdlssssmsma": {
+          "used": 1,
+          "phone": "5555555521",
+          "timeSlot": "20:00 sonrası",
+          "lastOrder": "2025-12-14T12:20:20.531Z"
+        },
+        "Dndkdkdlssssmsmadkdkd": {
+          "used": 1,
+          "phone": "5555555514",
+          "timeSlot": "20:00 sonrası",
+          "lastOrder": "2025-12-14T12:20:31.089Z"
+        },
+        "Berkay dkdk": {
+          "used": 1,
+          "phone": "5551112233",
+          "timeSlot": "20:00 sonrası",
+          "lastOrder": "2025-12-14T12:20:58.960Z"
+        },
+        "Berkay dkdkaa": {
+          "used": 1,
+          "phone": "5551112231",
+          "timeSlot": "20:00 sonrası",
+          "lastOrder": "2025-12-14T12:21:06.944Z"
+        },
+        "5551112231": {
+          "used": 2,
+          "phone": "Berkay dkdkaa",
+          "timeSlot": "20:00 sonrası",
+          "lastOrder": "2025-12-14T12:21:36.537Z"
+        }
+      },
+      "phoneRegistry": {
+        "5551112231": "Berkay dkdkaa"
+      },
+      "phoneOrders": {
+        "5551112231": {
+          "count": 1,
+          "lastOrder": "2025-12-14T12:22:37.757Z",
+          "name": "Berkay dkdkaa"
+        }
+      },
+      "deviceOrders": {
+        "device_1765714859061_ghfq0vz55": {
+          "name": "Berkay dkdkaa",
+          "phone": "5551112231",
+          "orderTime": "2025-12-14T12:22:37.757Z"
+        }
+      }
+    },
+    "2025-12-16": {
+      "customers": {},
+      "items": {},
+      "phoneRegistry": {
+        "5555555556": "dfhdf"
+      },
+      "deviceOrders": {
+        "device_1765900230885_8xt5s3sui": {
+          "name": "dfhdf",
+          "phone": "5555555556",
+          "orderTime": "2025-12-16T15:50:30.908Z"
+        }
+      },
+      "phoneOrders": {
+        "5555555556": {
+          "count": 1,
+          "lastOrder": "2025-12-16T15:50:30.908Z",
+          "name": "dfhdf"
+        }
+      }
+    },
+    "2025-12-20": {
+      "customers": {
+        "dfhdf": 1
+      },
+      "items": {
+        "\n                    Limon Soda\n                ": 1
+      },
+      "phoneRegistry": {},
+      "phoneOrders": {},
+      "deviceOrders": {}
+    },
+    "2025-12-21": {
+      "customers": {
+        "#--- - Berkay": 1,
+        "#359 - Dkdk": 1,
+        "#--- - Dkkddkdö": 1,
+        "#532 - Dkdmdm": 1,
+        "#250 - Dkkd": 1,
+        "#332 - Dkdkkd": 1,
+        "#164 - Djdkdkdj": 1,
+        "Dkddk": 1,
+        "Berkay dkdm": 1,
+        "Hjkj": 1,
+        "Dmdm": 2,
+        "dsfg": 1
+      },
+      "items": {
+        "\n                    Bardak Çay\n                ": 4,
+        "\n                    Süt\n                ": 1,
+        "\n                    Limonlu Çay\n                ": 1,
+        "\n                    Kupa Çay\n                ": 1,
+        "Bardak Çay": 3,
+        "Kupa Çay": 3
+      },
+      "phoneRegistry": {
+        "5309746238": "Berkay",
+        "5553332211": "Dkkddkdö",
+        "5552222222": "Dkdk",
+        "5551114411": "Dkdmdm",
+        "5309746231": "Dkkd",
+        "5309991122": "Dkdkkd",
+        "5303336644": "Djdkdkdj",
+        "5558899112": "Dkddk",
+        "5552221188": "Berkay dkdm",
+        "5552223366": "Hjkj",
+        "5551114477": "Dmdm",
+        "5554443322": "dsfg"
+      },
+      "deviceOrders": {
+        "device_1766299070118_15loi1fxv": {
+          "name": "Berkay",
+          "phone": "5309746238",
+          "orderTime": "2025-12-21T06:37:50.163Z"
+        },
+        "device_1766299339211_zlokg82za": {
+          "name": "Dkkddkdö",
+          "phone": "5553332211",
+          "orderTime": "2025-12-21T06:42:19.179Z"
+        },
+        "device_1766299398483_6xwj87fy2": {
+          "name": "Dkdk",
+          "phone": "5552222222",
+          "orderTime": "2025-12-21T06:43:18.490Z"
+        },
+        "device_1766299496482_6zjnwwoxt": {
+          "name": "Dkdmdm",
+          "phone": "5551114411",
+          "orderTime": "2025-12-21T06:44:56.487Z"
+        },
+        "device_1766299627914_ybz9rtet5": {
+          "name": "Dkkd",
+          "phone": "5309746231",
+          "orderTime": "2025-12-21T06:47:17.876Z"
+        },
+        "device_1766299702017_7meqh7a7g": {
+          "name": "Dkdkkd",
+          "phone": "5309991122",
+          "orderTime": "2025-12-21T06:48:22.024Z"
+        },
+        "device_1766299802472_8bwrxqkmw": {
+          "name": "Djdkdkdj",
+          "phone": "5303336644",
+          "orderTime": "2025-12-21T06:50:02.565Z"
+        },
+        "device_1766300298495_bcqtkyi0k": {
+          "name": "Dkddk",
+          "phone": "5558899112",
+          "orderTime": "2025-12-21T06:58:18.603Z"
+        },
+        "device_1766301625040_98i2ea7cf": {
+          "name": "Berkay dkdm",
+          "phone": "5552221188",
+          "orderTime": "2025-12-21T07:20:25.030Z"
+        },
+        "device_1766301901087_jip04x2qx": {
+          "name": "Hjkj",
+          "phone": "5552223366",
+          "orderTime": "2025-12-21T07:25:01.064Z"
+        },
+        "device_1766302058216_oxdgwglj2": {
+          "name": "Dmdm",
+          "phone": "5551114477",
+          "orderTime": "2025-12-21T07:27:38.204Z"
+        },
+        "device_1766302167753_dmr3li3j2": {
+          "name": "dsfg",
+          "phone": "5554443322",
+          "orderTime": "2025-12-21T07:29:27.775Z"
+        }
+      },
+      "phoneOrders": {
+        "5309746238": {
+          "count": 1,
+          "lastOrder": "2025-12-21T06:37:50.163Z",
+          "name": "Berkay"
+        },
+        "5553332211": {
+          "count": 1,
+          "lastOrder": "2025-12-21T06:42:19.178Z",
+          "name": "Dkkddkdö"
+        },
+        "5552222222": {
+          "count": 1,
+          "lastOrder": "2025-12-21T06:43:18.490Z",
+          "name": "Dkdk"
+        },
+        "5551114411": {
+          "count": 1,
+          "lastOrder": "2025-12-21T06:44:56.487Z",
+          "name": "Dkdmdm"
+        },
+        "5309746231": {
+          "count": 1,
+          "lastOrder": "2025-12-21T06:47:17.876Z",
+          "name": "Dkkd"
+        },
+        "5309991122": {
+          "count": 1,
+          "lastOrder": "2025-12-21T06:48:22.024Z",
+          "name": "Dkdkkd"
+        },
+        "5303336644": {
+          "count": 1,
+          "lastOrder": "2025-12-21T06:50:02.565Z",
+          "name": "Djdkdkdj"
+        },
+        "5558899112": {
+          "count": 1,
+          "lastOrder": "2025-12-21T06:58:18.603Z",
+          "name": "Dkddk"
+        },
+        "5552221188": {
+          "count": 1,
+          "lastOrder": "2025-12-21T07:20:25.030Z",
+          "name": "Berkay dkdm"
+        },
+        "5552223366": {
+          "count": 1,
+          "lastOrder": "2025-12-21T07:25:01.064Z",
+          "name": "Hjkj"
+        },
+        "5551114477": {
+          "count": 1,
+          "lastOrder": "2025-12-21T07:27:38.204Z",
+          "name": "Dmdm"
+        },
+        "5554443322": {
+          "count": 1,
+          "lastOrder": "2025-12-21T07:29:27.775Z",
+          "name": "dsfg"
+        }
+      }
+    }
+  },
+  "monthly": {
+    "2025-12": {
+      "customers": {
+        "dfgdf": 1,
+        "dfhdhd": 1,
+        "sdfhd": 1,
+        "dsgsdgs": 1,
+        "dfhdfh": 1,
+        "dfhdf": 3,
+        "Dmdmsösö": 5,
+        "Dndkdkdl": 1,
+        "Dndkdkdlsss": 1,
+        "Dndkdkdlssssmsm": 1,
+        "Dndkdkdlssssmsma": 1,
+        "Dndkdkdlssssmsmadkdkd": 1,
+        "Berkay dkdk": 1,
+        "Berkay dkdkaa": 4,
+        "#--- - Berkay": 1,
+        "#359 - Dkdk": 1,
+        "#--- - Dkkddkdö": 1,
+        "#532 - Dkdmdm": 1,
+        "#250 - Dkkd": 1,
+        "#332 - Dkdkkd": 1,
+        "#164 - Djdkdkdj": 1,
+        "Dkddk": 1,
+        "Berkay dkdm": 1,
+        "Hjkj": 1,
+        "Dmdm": 2,
+        "dsfg": 1
+      },
+      "items": {
+        "\n                    Bardak Çay\n                ": 20,
+        "\n                    Kupa Çay\n                ": 4,
+        "\n                    Limonlu Çay (Bergamot)\n                ": 1,
+        "\n                    Limonlu Çay\n                ": 3,
+        "\n                    Limon Soda\n                ": 1,
+        "\n                    Süt\n                ": 1,
+        "Bardak Çay": 3,
+        "Kupa Çay": 3
+      }
+    }
+  }
+}

@@ -7,14 +7,33 @@ const fs = require('fs');
 const admin = require('firebase-admin');
 
 // Initialize Firebase Admin SDK
+let db;
 try {
-  const serviceAccount = require('./atmosfercafe-firebase-adminsdk-fbsvc-ccfedce55e.json');
+  let serviceAccount;
+  
+  // 1. Önce DigitalOcean Environment Variable'a bak
+  if (process.env.FIREBASE_KEY) {
+    console.log('🔄 Firebase anahtarı Environment Variable üzerinden okunuyor...');
+    serviceAccount = JSON.parse(process.env.FIREBASE_KEY);
+  } 
+  // 2. Yoksa yerel dosyaya bak (Bilgisayarında çalışırken)
+  else {
+    console.log('📂 Firebase anahtarı yerel dosyadan okunuyor...');
+    // Buradaki dosya adının senin indirdiğin JSON ile aynı olduğundan emin ol
+    serviceAccount = require('./atmosfercafe-firebase-adminsdk-fbsvc-ccfedce55e.json');
+  }
+
   admin.initializeApp({
     credential: admin.credential.cert(serviceAccount)
   });
-  console.log('✅ Firebase Admin SDK initialized successfully');
+  
+  db = admin.firestore();
+  console.log('✅ Firebase Admin SDK başarıyla başlatıldı');
+  console.log('✅ Firestore veritabanı bağlandı');
+  
 } catch (error) {
-  console.error('❌ Failed to initialize Firebase Admin SDK:', error.message);
+  console.error('❌ Firebase Başlatma Hatası:', error.message);
+  console.error('⚠️  Sistem Firebase olmadan, sadece yerel hafıza ile çalışacak.');
 }
 
 // Initialize Express app
@@ -97,10 +116,33 @@ function isSaturdayEvening() {
   return day === 6 && hour >= 18; // Cumartesi ve saat 18 veya sonrası
 }
 
-// Cihaz ID kontrolü - Bir cihazdan sadece bir sipariş
-function checkDeviceLimit(deviceId) {
+// Cihaz ID kontrolü - Firestore üzerinden (VPN/gizli sekme engeller)
+async function checkDeviceLimit(deviceId) {
   const today = new Date().toISOString().split('T')[0];
   
+  try {
+    if (db) {
+      // Firestore'dan kontrol et
+      const deviceDoc = await db.collection('dailyOrders')
+        .doc(today)
+        .collection('devices')
+        .doc(deviceId)
+        .get();
+      
+      if (deviceDoc.exists) {
+        const deviceData = deviceDoc.data();
+        return {
+          valid: false,
+          message: `Bu cihazdan bugün zaten "${deviceData.name}" adına sipariş verilmiş. Günde tek sipariş hakkınız var.`
+        };
+      }
+      return { valid: true };
+    }
+  } catch (error) {
+    console.error(`[${getTimestamp()}] ❌ Firestore device check error:`, error);
+  }
+  
+  // Fallback: JSON kontrolü
   if (!salesReports.daily[today]) {
     salesReports.daily[today] = { customers: {}, items: {}, phoneRegistry: {}, deviceOrders: {} };
   }
@@ -109,7 +151,6 @@ function checkDeviceLimit(deviceId) {
     salesReports.daily[today].deviceOrders = {};
   }
   
-  // Bu cihaz bugün sipariş verdiyse
   if (salesReports.daily[today].deviceOrders[deviceId]) {
     const deviceData = salesReports.daily[today].deviceOrders[deviceId];
     return {
@@ -121,11 +162,35 @@ function checkDeviceLimit(deviceId) {
   return { valid: true };
 }
 
-// Telefon numarası ve isim kontrolü - Aynı telefon farklı isimle engelle
-function checkPhoneNameMismatch(phone, customerName) {
+// Telefon numarası ve isim kontrolü - Firestore üzerinden (VPN bypass engeller)
+async function checkPhoneNameMismatch(phone, customerName) {
   const today = new Date().toISOString().split('T')[0];
   
-  // Bugünün raporunda telefon var mı kontrol et
+  try {
+    if (db) {
+      // Firestore'dan kontrol et
+      const phoneDoc = await db.collection('dailyOrders')
+        .doc(today)
+        .collection('phones')
+        .doc(phone)
+        .get();
+      
+      if (phoneDoc.exists) {
+        const phoneData = phoneDoc.data();
+        if (phoneData.name !== customerName) {
+          return {
+            valid: false,
+            message: `Bu telefon numarası "${phoneData.name}" adına kayıtlı. Farklı isimle sipariş verilemez.`
+          };
+        }
+      }
+      return { valid: true };
+    }
+  } catch (error) {
+    console.error(`[${getTimestamp()}] ❌ Firestore phone check error:`, error);
+  }
+  
+  // Fallback: JSON kontrolü
   if (!salesReports.daily[today]) {
     salesReports.daily[today] = { customers: {}, items: {}, phoneRegistry: {} };
   }
@@ -134,7 +199,6 @@ function checkPhoneNameMismatch(phone, customerName) {
     salesReports.daily[today].phoneRegistry = {};
   }
   
-  // Bu telefon numarası daha önce kullanıldı mı?
   if (salesReports.daily[today].phoneRegistry[phone]) {
     const registeredName = salesReports.daily[today].phoneRegistry[phone];
     if (registeredName !== customerName) {
@@ -148,11 +212,36 @@ function checkPhoneNameMismatch(phone, customerName) {
   return { valid: true };
 }
 
-// Telefon bazında sipariş hakkı kontrolü
-function checkOrderRightsByPhone(phone, customerName) {
+// Telefon bazında sipariş hakkı kontrolü - Firestore üzerinden
+async function checkOrderRightsByPhone(phone, customerName) {
   const today = new Date().toISOString().split('T')[0];
   
-  // Bugünün raporunda veri var mı kontrol et
+  try {
+    if (db) {
+      // Firestore'dan kontrol et
+      const phoneDoc = await db.collection('dailyOrders')
+        .doc(today)
+        .collection('phones')
+        .doc(phone)
+        .get();
+      
+      if (phoneDoc.exists) {
+        const phoneData = phoneDoc.data();
+        if (phoneData.orderCount >= 1) {
+          return {
+            canOrder: false,
+            remaining: 0,
+            message: 'Günlük sipariş hakkınız dolmuştur (telefon başına 1 sipariş)'
+          };
+        }
+      }
+      return { canOrder: true, remaining: 1 };
+    }
+  } catch (error) {
+    console.error(`[${getTimestamp()}] ❌ Firestore order rights check error:`, error);
+  }
+  
+  // Fallback: JSON kontrolü
   if (!salesReports.daily[today]) {
     salesReports.daily[today] = { customers: {}, items: {}, phoneRegistry: {}, phoneOrders: {} };
   }
@@ -165,7 +254,6 @@ function checkOrderRightsByPhone(phone, customerName) {
     salesReports.daily[today].phoneOrders = {};
   }
   
-  // Bu telefon daha önce sipariş verdiyse kontrol et
   if (salesReports.daily[today].phoneOrders[phone]) {
     const orderCount = salesReports.daily[today].phoneOrders[phone].count || 0;
     if (orderCount >= 1) {
@@ -184,10 +272,53 @@ function checkOrderRightsByPhone(phone, customerName) {
   };
 }
 
-// Sipariş hakkı kullan - Telefon ve Cihaz bazında
-function useOrderRight(phone, customerName, deviceId) {
+// Sipariş hakkı kullan - Firestore'a kaydet (VPN/gizli sekme bypass engeller)
+async function useOrderRight(phone, customerName, deviceId, deviceInfo = {}) {
   const today = new Date().toISOString().split('T')[0];
+  const timestamp = new Date().toISOString();
   
+  try {
+    if (db) {
+      // Telefon bilgisini Firestore'a kaydet
+      await db.collection('dailyOrders')
+        .doc(today)
+        .collection('phones')
+        .doc(phone)
+        .set({
+          name: customerName,
+          phone: phone,
+          orderCount: 1,
+          deviceId: deviceId,
+          deviceModel: deviceInfo.deviceModel || 'unknown',
+          deviceBrand: deviceInfo.deviceBrand || 'unknown',
+          browser: deviceInfo.browser || 'unknown',
+          os: deviceInfo.os || 'unknown',
+          firstOrderTime: timestamp,
+          lastOrderTime: timestamp
+        });
+      
+      // Cihaz bilgisini Firestore'a kaydet
+      await db.collection('dailyOrders')
+        .doc(today)
+        .collection('devices')
+        .doc(deviceId)
+        .set({
+          name: customerName,
+          phone: phone,
+          deviceModel: deviceInfo.deviceModel || 'unknown',
+          deviceBrand: deviceInfo.deviceBrand || 'unknown',
+          browser: deviceInfo.browser || 'unknown',
+          os: deviceInfo.os || 'unknown',
+          orderTime: timestamp
+        });
+      
+      console.log(`[${getTimestamp()}] ✅ Sipariş kaydı Firestore'a yazıldı: ${phone} - ${customerName}`);
+    }
+  } catch (error) {
+    console.error(`[${getTimestamp()}] ❌ Firestore order save error:`, error);
+  }
+  
+  // JSON yedek kayıt
   if (!salesReports.daily[today]) {
     salesReports.daily[today] = { customers: {}, items: {}, phoneRegistry: {}, phoneOrders: {}, deviceOrders: {} };
   }
@@ -230,12 +361,42 @@ function useOrderRight(phone, customerName, deviceId) {
   saveReports();
 }
 
-// Aktif siparişleri dosyaya kaydet
-function saveActiveOrders() {
+// Aktif siparişleri dosyaya ve Firestore'a kaydet
+async function saveActiveOrders() {
   try {
+    // Dosyaya kaydet (yedek)
     fs.writeFileSync(ACTIVE_ORDERS_FILE, JSON.stringify(activeOrders, null, 2));
+    
+    // Firestore'a kaydet
+    if (db) {
+      await db.collection('activeOrders').doc('current').set({
+        orders: activeOrders,
+        lastUpdated: new Date().toISOString()
+      });
+    }
   } catch (error) {
     console.error(`[${getTimestamp()}] ❌ Aktif sipariş kaydetme hatası:`, error.message);
+  }
+}
+
+// Aktif siparişleri Firestore'dan yükle
+async function loadActiveOrdersFromFirestore() {
+  try {
+    if (db) {
+      const doc = await db.collection('activeOrders').doc('current').get();
+      if (doc.exists) {
+        const data = doc.data();
+        activeOrders = data.orders || [];
+        console.log(`[${getTimestamp()}] 📋 Firestore'dan aktif siparişler yüklendi: ${activeOrders.length} sipariş`);
+        return;
+      }
+    }
+    // Firestore'da veri yoksa dosyadan yükle
+    loadActiveOrders();
+  } catch (error) {
+    console.error(`[${getTimestamp()}] ❌ Firestore sipariş yükleme hatası:`, error.message);
+    // Hata durumunda dosyadan yükle
+    loadActiveOrders();
   }
 }
 
@@ -269,9 +430,22 @@ let salesReports = {
 // Rapor dosyası yolu
 const REPORTS_FILE = path.join(__dirname, 'sales_reports.json');
 
-// Raporları dosyadan yükle
-function loadReports() {
+// Raporları Firestore'dan yükle (JSON fallback)
+async function loadReports() {
   try {
+    // Önce Firestore'dan dene
+    if (db) {
+      const doc = await db.collection('reports').doc('salesData').get();
+      if (doc.exists) {
+        const data = doc.data();
+        salesReports.daily = data.daily || {};
+        salesReports.monthly = data.monthly || {};
+        console.log(`[${getTimestamp()}] 📊 Raporlar Firestore'dan yüklendi: ${Object.keys(salesReports.daily).length} günlük, ${Object.keys(salesReports.monthly).length} aylık`);
+        return;
+      }
+    }
+    
+    // Firestore yoksa JSON'dan yükle
     if (fs.existsSync(REPORTS_FILE)) {
       const data = fs.readFileSync(REPORTS_FILE, 'utf8');
       salesReports = JSON.parse(data);
@@ -289,17 +463,27 @@ function loadReports() {
         }
       });
       
-      console.log(`[${getTimestamp()}] 📊 Raporlar yüklendi: ${Object.keys(salesReports.daily).length} günlük, ${Object.keys(salesReports.monthly).length} aylık`);
+      console.log(`[${getTimestamp()}] 📊 Raporlar JSON'dan yüklendi: ${Object.keys(salesReports.daily).length} günlük, ${Object.keys(salesReports.monthly).length} aylık`);
     }
   } catch (error) {
     console.error(`[${getTimestamp()}] ❌ Rapor yükleme hatası:`, error.message);
   }
 }
 
-// Raporları dosyaya kaydet
-function saveReports() {
+// Raporları Firestore'a kaydet (JSON yedek)
+async function saveReports() {
   try {
+    // JSON yedek
     fs.writeFileSync(REPORTS_FILE, JSON.stringify(salesReports, null, 2));
+    
+    // Firestore'a kaydet
+    if (db) {
+      await db.collection('reports').doc('salesData').set({
+        daily: salesReports.daily,
+        monthly: salesReports.monthly,
+        lastUpdated: new Date().toISOString()
+      });
+    }
   } catch (error) {
     console.error(`[${getTimestamp()}] ❌ Rapor kaydetme hatası:`, error.message);
   }
@@ -388,8 +572,12 @@ const getTimestamp = () => {
 // Raporları yükle ve başlat
 loadReports();
 
-// Aktif siparişleri yükle
-loadActiveOrders();
+// Aktif siparişleri Firestore'dan yükle (yoksa dosyadan)
+if (db) {
+  loadActiveOrdersFromFirestore();
+} else {
+  loadActiveOrders();
+}
 
 // Cumartesi menüsünü yükle
 loadSaturdayMenu();
@@ -683,76 +871,89 @@ io.on('connection', (socket) => {
   socket.emit('cafeStatus', cafeStatus);
 
   // Listen for 'placeOrder' event from customer
-  socket.on('placeOrder', (orderData) => {
-    // Eğer kafe kapalıysa siparişi kabul etme
-    if (cafeStatus.isClosed) {
-      socket.emit('cafeIsClosed');
-      return;
+  socket.on('placeOrder', async (orderData) => {
+    try {
+      // Eğer kafe kapalıysa siparişi kabul etme
+      if (cafeStatus.isClosed) {
+        socket.emit('cafeIsClosed');
+        return;
+      }
+
+      // Cihaz ID kontrolü (en önemli kontrol - Firestore üzerinden)
+      const deviceCheck = await checkDeviceLimit(orderData.deviceId);
+      if (!deviceCheck.valid) {
+        socket.emit('deviceLimitExceeded', {
+          message: deviceCheck.message
+        });
+        console.log(`[${getTimestamp()}] ❌ Order rejected - Device ${orderData.deviceId}: ${deviceCheck.message}`);
+        return;
+      }
+
+      // Telefon-İsim uyuşmazlığı kontrolü (Firestore üzerinden)
+      const phoneCheck = await checkPhoneNameMismatch(orderData.phone, orderData.guestName);
+      if (!phoneCheck.valid) {
+        socket.emit('phoneNameMismatch', {
+          message: phoneCheck.message
+        });
+        console.log(`[${getTimestamp()}] ❌ Order rejected - Phone/Name mismatch: ${phoneCheck.message}`);
+        return;
+      }
+
+      // Sipariş hakkı kontrolü (Firestore üzerinden - telefon bazında)
+      const rightsCheck = await checkOrderRightsByPhone(orderData.phone, orderData.guestName);
+      if (!rightsCheck.canOrder) {
+        socket.emit('orderLimitExceeded', {
+          message: rightsCheck.message,
+          remaining: rightsCheck.remaining
+        });
+        console.log(`[${getTimestamp()}] ❌ Order rejected - Phone ${orderData.phone}: ${rightsCheck.message}`);
+        return;
+      }
+
+      console.log(`[${getTimestamp()}] 📋 New order received:`);
+      console.log(`   Name: ${orderData.guestName}`);
+      console.log(`   Phone: ${orderData.phone}`);
+      console.log(`   Device: ${orderData.deviceId}`);
+      console.log(`   Item: ${orderData.item}`);
+      console.log(`   Time: ${orderData.orderTime}`);
+
+      // Cihaz bilgilerini topla
+      const deviceInfo = {
+        deviceModel: orderData.deviceModel || 'unknown',
+        deviceBrand: orderData.deviceBrand || 'unknown',
+        browser: orderData.browser || 'unknown',
+        os: orderData.os || 'unknown'
+      };
+
+      // Sipariş hakkını kullan (Firestore'a kaydet)
+      await useOrderRight(orderData.phone, orderData.guestName, orderData.deviceId, deviceInfo);
+
+      // Aktif siparişlere ekle
+      const orderNumber = Math.floor(100 + Math.random() * 900); // 3 rakamlı random numara
+      const order = {
+        id: `order_${Date.now()}`,
+        orderNumber: orderNumber,
+        guestName: orderData.guestName,
+        phone: orderData.phone,
+        deviceId: orderData.deviceId,
+        item: orderData.item,
+        orderTime: orderData.orderTime,
+        fcmToken: orderData.fcmToken || null // Save FCM token for push notifications
+      };
+      activeOrders.push(order);
+      await saveActiveOrders();
+
+      // Sipariş başarılı - Müşteriye bildir (sipariş numarasını da gönder)
+      socket.emit('orderSuccess', { orderNumber: orderNumber });
+
+      // Emit 'newOrder' event to all admin dashboards
+      io.emit('newOrder', order);
+
+      console.log(`[${getTimestamp()}] ✅ Order broadcasted to admin dashboards`);
+    } catch (error) {
+      console.error(`[${getTimestamp()}] ❌ placeOrder error:`, error);
+      socket.emit('orderError', { message: 'Sipariş işlenirken bir hata oluştu.' });
     }
-
-    // Cihaz ID kontrolü (en önemli kontrol - değiştiremezler)
-    const deviceCheck = checkDeviceLimit(orderData.deviceId);
-    if (!deviceCheck.valid) {
-      socket.emit('deviceLimitExceeded', {
-        message: deviceCheck.message
-      });
-      console.log(`[${getTimestamp()}] ❌ Order rejected - Device ${orderData.deviceId}: ${deviceCheck.message}`);
-      return;
-    }
-
-    // Telefon-İsim uyuşmazlığı kontrolü
-    const phoneCheck = checkPhoneNameMismatch(orderData.phone, orderData.guestName);
-    if (!phoneCheck.valid) {
-      socket.emit('phoneNameMismatch', {
-        message: phoneCheck.message
-      });
-      console.log(`[${getTimestamp()}] ❌ Order rejected - Phone/Name mismatch: ${phoneCheck.message}`);
-      return;
-    }
-
-    // Sipariş hakkı kontrolü (telefon bazında)
-    const rightsCheck = checkOrderRightsByPhone(orderData.phone, orderData.guestName);
-    if (!rightsCheck.canOrder) {
-      socket.emit('orderLimitExceeded', {
-        message: rightsCheck.message,
-        remaining: rightsCheck.remaining
-      });
-      console.log(`[${getTimestamp()}] ❌ Order rejected - Phone ${orderData.phone}: ${rightsCheck.message}`);
-      return;
-    }
-
-    console.log(`[${getTimestamp()}] 📋 New order received:`);
-    console.log(`   Name: ${orderData.guestName}`);
-    console.log(`   Phone: ${orderData.phone}`);
-    console.log(`   Device: ${orderData.deviceId}`);
-    console.log(`   Item: ${orderData.item}`);
-    console.log(`   Time: ${orderData.orderTime}`);
-
-    // Sipariş hakkını kullan (telefon ve cihaz bazında)
-    useOrderRight(orderData.phone, orderData.guestName, orderData.deviceId);
-
-    // Aktif siparişlere ekle
-    const orderNumber = Math.floor(100 + Math.random() * 900); // 3 rakamlı random numara
-    const order = {
-      id: `order_${Date.now()}`,
-      orderNumber: orderNumber,
-      guestName: orderData.guestName,
-      phone: orderData.phone,
-      deviceId: orderData.deviceId,
-      item: orderData.item,
-      orderTime: orderData.orderTime,
-      fcmToken: orderData.fcmToken || null // Save FCM token for push notifications
-    };
-    activeOrders.push(order);
-    saveActiveOrders();
-
-    // Sipariş başarılı - Müşteriye bildir (sipariş numarasını da gönder)
-    socket.emit('orderSuccess', { orderNumber: orderNumber });
-
-    // Emit 'newOrder' event to all admin dashboards
-    io.emit('newOrder', order);
-
-    console.log(`[${getTimestamp()}] ✅ Order broadcasted to admin dashboards`);
   });
 
   // Handle cafe closed/open toggle from admin
@@ -784,8 +985,9 @@ io.on('connection', (socket) => {
     stockStatus[itemName] = isAvailable;
     
     console.log(`[${getTimestamp()}] 📦 Stock updated:`);
-    console.log(`   Item: ${itemName}`);
+    console.log(`   Item: "${itemName}"`);
     console.log(`   Available: ${isAvailable}`);
+    console.log(`   Current stockStatus:`, JSON.stringify(stockStatus, null, 2));
     
     // Broadcast stock status to all clients (menu and TV displays)
     io.emit('stockUpdated', { itemName, isAvailable });
@@ -913,13 +1115,71 @@ app.get('/admin', (req, res) => {
   res.sendFile(path.join(__dirname, 'public', 'admin.html'));
 });
 
+app.get('/tv-sicak', (req, res) => {
+  res.sendFile(path.join(__dirname, 'public', 'tv-hot.html'));
+});
+
+app.get('/tv-soguk', (req, res) => {
+  res.sendFile(path.join(__dirname, 'public', 'tv-cold.html'));
+});
+
 // Aktif siparişleri al endpoint
 app.get('/api/active-orders', (req, res) => {
   res.json(activeOrders);
 });
 
 // Raporları al endpoint
+// Raporları al endpoint (günlük/haftalık/aylık filtre)
 app.get('/api/reports', (req, res) => {
+  const { filter = 'all' } = req.query; // all, daily, weekly, monthly
+  
+  if (filter === 'all') {
+    return res.json(salesReports);
+  }
+  
+  const now = new Date();
+  const today = now.toISOString().split('T')[0];
+  
+  if (filter === 'daily') {
+    // Sadece bugünün raporu
+    return res.json({
+      daily: { [today]: salesReports.daily[today] || {} },
+      monthly: {}
+    });
+  }
+  
+  if (filter === 'weekly') {
+    // Son 7 günün raporu
+    const weekData = {};
+    for (let i = 0; i < 7; i++) {
+      const date = new Date(now);
+      date.setDate(date.getDate() - i);
+      const dateStr = date.toISOString().split('T')[0];
+      if (salesReports.daily[dateStr]) {
+        weekData[dateStr] = salesReports.daily[dateStr];
+      }
+    }
+    return res.json({
+      daily: weekData,
+      monthly: {}
+    });
+  }
+  
+  if (filter === 'monthly') {
+    // Bu ayın raporu
+    const thisMonth = now.toISOString().substring(0, 7); // YYYY-MM
+    const monthData = {};
+    Object.keys(salesReports.daily).forEach(date => {
+      if (date.startsWith(thisMonth)) {
+        monthData[date] = salesReports.daily[date];
+      }
+    });
+    return res.json({
+      daily: monthData,
+      monthly: { [thisMonth]: salesReports.monthly[thisMonth] || {} }
+    });
+  }
+  
   res.json(salesReports);
 });
 
@@ -931,6 +1191,49 @@ app.get('/api/saturday-menu', (req, res) => {
   });
 });
 
+// Menüyü Firestore'dan al endpoint
+app.get('/api/menu', async (req, res) => {
+  try {
+    if (!db) {
+      return res.status(503).json({ error: 'Firestore not initialized' });
+    }
+    
+    const menuSnapshot = await db.collection('menu').get();
+    const menu = [];
+    
+    menuSnapshot.forEach(doc => {
+      menu.push(doc.data());
+    });
+    
+    res.json(menu);
+  } catch (error) {
+    console.error(`[${getTimestamp()}] ❌ Menü okuma hatası:`, error.message);
+    res.status(500).json({ error: 'Failed to fetch menu' });
+  }
+});
+
+// Menüyü Firestore'a kaydet/güncelle endpoint
+app.post('/api/menu', async (req, res) => {
+  try {
+    if (!db) {
+      return res.status(503).json({ error: 'Firestore not initialized' });
+    }
+    
+    const menuData = req.body;
+    
+    // Her kategoriyi kaydet
+    for (const category of menuData) {
+      await db.collection('menu').doc(category.id).set(category);
+    }
+    
+    console.log(`[${getTimestamp()}] ✅ Menü Firestore'a kaydedildi`);
+    res.json({ success: true });
+  } catch (error) {
+    console.error(`[${getTimestamp()}] ❌ Menü kaydetme hatası:`, error.message);
+    res.status(500).json({ error: 'Failed to save menu' });
+  }
+});
+
 // Start main server
 server.listen(PORT, () => {
   console.log('═══════════════════════════════════════════════');
@@ -939,6 +1242,8 @@ server.listen(PORT, () => {
   console.log(`📡 Server running on: http://localhost:${PORT}`);
   console.log(`👥 Customer Menu: http://localhost:${PORT}/`);
   console.log(`📊 Admin Dashboard: http://localhost:${PORT}/admin`);
+  console.log(`📺 TV Hot Drinks Display: http://localhost:${PORT}/tv-sicak`);
+  console.log(`📺 TV Cold Drinks Display: http://localhost:${PORT}/tv-soguk`);
   console.log('═══════════════════════════════════════════════');
   console.log(`[${getTimestamp()}] Server is ready to accept connections`);
   
@@ -948,92 +1253,4 @@ server.listen(PORT, () => {
   scheduleDailyPrayerUpdate(); // Her gün yeni günün vakitlerini planla
 });
 
-// TV Display Servers - Hot Drinks (Port 3001)
-const appHot = express();
-const serverHot = http.createServer(appHot);
-const ioHot = socketIo(serverHot);
-
-appHot.use(express.static(path.join(__dirname, 'public')));
-
-appHot.get('/', (req, res) => {
-  res.sendFile(path.join(__dirname, 'public', 'tv-hot.html'));
-});
-
-ioHot.on('connection', (socket) => {
-  console.log(`[${getTimestamp()}] 📺 TV Hot Display connected`);
-  
-  // Stok durumunu gönder
-  socket.emit('stockStatus', stockStatus);
-  
-  // Cumartesi menü durumunu gönder
-  socket.emit('saturdayMenuStatus', {
-    isSaturdayEvening: isSaturdayEvening(),
-    items: saturdayMenuItems
-  });
-  
-  socket.on('getStock', () => {
-    socket.emit('stockStatus', stockStatus);
-  });
-  
-  socket.on('getSaturdayMenuStatus', () => {
-    socket.emit('saturdayMenuStatus', {
-      isSaturdayEvening: isSaturdayEvening(),
-      items: saturdayMenuItems
-    });
-  });
-  
-  socket.on('disconnect', () => {
-    console.log(`[${getTimestamp()}] 📺 TV Hot Display disconnected`);
-  });
-});
-
-serverHot.listen(3001, () => {
-  console.log('═══════════════════════════════════════════════');
-  console.log(`📺 TV Hot Drinks Display: http://localhost:3001`);
-  console.log('═══════════════════════════════════════════════');
-});
-
-// TV Display Servers - Cold Drinks (Port 3002)
-const appCold = express();
-const serverCold = http.createServer(appCold);
-const ioCold = socketIo(serverCold);
-
-appCold.use(express.static(path.join(__dirname, 'public')));
-
-appCold.get('/', (req, res) => {
-  res.sendFile(path.join(__dirname, 'public', 'tv-cold.html'));
-});
-
-ioCold.on('connection', (socket) => {
-  console.log(`[${getTimestamp()}] 📺 TV Cold Display connected`);
-  
-  // Stok durumunu gönder
-  socket.emit('stockStatus', stockStatus);
-  
-  // Cumartesi menü durumunu gönder
-  socket.emit('saturdayMenuStatus', {
-    isSaturdayEvening: isSaturdayEvening(),
-    items: saturdayMenuItems
-  });
-  
-  socket.on('getStock', () => {
-    socket.emit('stockStatus', stockStatus);
-  });
-  
-  socket.on('getSaturdayMenuStatus', () => {
-    socket.emit('saturdayMenuStatus', {
-      isSaturdayEvening: isSaturdayEvening(),
-      items: saturdayMenuItems
-    });
-  });
-  
-  socket.on('disconnect', () => {
-    console.log(`[${getTimestamp()}] 📺 TV Cold Display disconnected`);
-  });
-});
-
-serverCold.listen(3002, () => {
-  console.log('═══════════════════════════════════════════════');
-  console.log(`📺 TV Cold Drinks Display: http://localhost:3002`);
-  console.log('═══════════════════════════════════════════════');
-});
+// Socket.io connections for TV displays are now handled by main 'io' instance above

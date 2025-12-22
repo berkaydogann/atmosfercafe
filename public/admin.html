@@ -362,6 +362,28 @@
             flex-direction: column;
             gap: 30px;
         }
+        
+        .report-filter-btn {
+            background: var(--card-dark);
+            border: 2px solid rgba(255,255,255,0.1);
+            color: var(--text-muted);
+            padding: 12px 24px;
+            border-radius: 12px;
+            font-weight: 600;
+            cursor: pointer;
+            transition: all 0.3s ease;
+        }
+        
+        .report-filter-btn:hover {
+            border-color: var(--starbucks-green);
+            color: var(--text-white);
+        }
+        
+        .report-filter-btn.active {
+            background: var(--starbucks-green);
+            border-color: var(--starbucks-green);
+            color: white;
+        }
 
         .report-section h3 {
             color: var(--text-white);
@@ -572,6 +594,22 @@
     <!-- Raporlar Sekmesi -->
     <div id="reportsTab" class="tab-content">
         <div class="reports-container">
+            <!-- Filtre Butonları -->
+            <div style="margin-bottom: 20px; display: flex; gap: 10px; justify-content: center;">
+                <button class="report-filter-btn active" data-filter="all" onclick="filterReports('all')">
+                    📊 Tüm Raporlar
+                </button>
+                <button class="report-filter-btn" data-filter="daily" onclick="filterReports('daily')">
+                    📅 Bugün
+                </button>
+                <button class="report-filter-btn" data-filter="weekly" onclick="filterReports('weekly')">
+                    📆 Bu Hafta
+                </button>
+                <button class="report-filter-btn" data-filter="monthly" onclick="filterReports('monthly')">
+                    📈 Bu Ay
+                </button>
+            </div>
+            
             <div class="report-section">
                 <h3>📅 Günlük Raporlar</h3>
                 <div id="dailyReports" class="report-grid"></div>
@@ -759,27 +797,23 @@
             }
         }
 
-        // Menü ürünleri listesi
+        // Menü ürünleri listesi - menu.html ile uyumlu
         const allMenuItems = [
-            'Türk Kahvesi', 'Dibek Kahvesi', 'Menengiç', 'Damla Sakızlı',
-            'Espresso', 'Americano', 'Latte', 'Cappuccino', 'White Mocha', 'Filtre Kahve',
-            'Demleme Çay', 'Fincan Çay', 'Kış Çayı', 'Ada Çayı',
-            'Sıcak Çikolata', 'Salep', 'Ballı Süt',
-            'Ice Latte', 'Cold Brew', 'Limonata', 'Frozen Çilek', 'Milkshake Oreo',
-            'Boza', 'Özel Şıra',
-            // Pratik Soğuklar
-            'Cococream', 'Kokteyl', 'Mango', 'Sodali Mango Lime', 'Mango Lime', 'Sodali Cool Lime', 'Cool Lime', 'Churchill', 'Limonlu Soda', 'Sade Soda', 'Süt',
-            // Frozen
-            'Mixstyle Frozen', 'Cmix Frozen', 'Çilek Frozen', 'The Jungle Frozen', 'Sour Jungle', 'Jungle Fizz Frozen', 'Lime Frozen', 'Lime Fizz Frozen', 'Mango Frozen', 'Mango Lime Frozen', 'Mango Fizz Frozen',
-            // Milkshake
-            'Coconut Milkshake', 'Sahlep Milkshake', 'Mango Milkshake', 'Muz Milkshake', 'Çilek Milkshake', 'Çikolata Milkshake', 'Karamel Milkshake', 'Vanilya Milkshake',
-            // Geleneksel Kahveler
-            'Sütlü Filtre Kahve', 'Filtre Kahve', 'Sütlü Dibek Kahvesi', 'Sütlü Türk Kahvesi', 'Türk Kahvesi', 'Dibek Kahvesi',
-            // Sıcak Kahveler
-            'Macchiato', 'Americano', 'Black Eye', 'Red Eye', 'Espresso Flat White (1 oz)', 'Double Espresso Flat White (2 oz)', 'Cortado', 'Espresso', 'Double Espresso (Sert)', 'Vanilya Cappuccino', 'Sahlep Cappuccino', 'Çikolat Cappuccino', 'Cappuccino', 'Mix Çikolata Mocha', 'Mix Mocha', 'White Mocha', 'Mocha', 'Coconut Latte', 'Caramel Latte', 'Hazelnut Latte', 'Vanilya Latte', 'Çikolat Latte', 'Sahlep Latte', 'Latte', 'Sütlü Americano',
-            // Çay ve Sohbet
-            'Bitki Çayı', 'Bardak Çay', 'Atom Çayı', 'Bergamot Limonlu Kupa Çay', 'Bergamot Kupa Çay', 'Limonlu Çay', 'Yeşil Çay', 'Kupa Çay',
-            // Special Sıcaklar
+            // Çay ve Sohbet (8)
+            'Bardak Çay', 'Kupa Çay', 'Limonlu Çay', 'Yeşil Çay', 'Kupa Çay (Bergamot)', 'Limonlu Çay (Bergamot)', 'Bitki Çayı', 'Atom Çayı',
+            // Sıcak Kahveler (31)
+            'Espresso', 'Double Espresso', 'Cortado', 'Espresso Flat White', 'Double Espresso Flat White', 'Macchiato', 'Double Shot Macchiato', 'Red Eye', 'Black Eye', 'Filtre', 'Sütlü Filtre', 'Americano Hafif', 'Americano Yoğun', 'Sütlü Americano', 'Latte', 'Sahlep Latte', 'Çikolat Latte', 'Vanilya Latte', 'Karamel Latte', 'Coconut Latte', 'Mocha', 'White Mocha', 'Mix Mocha', 'Cappuccino', 'Çikolat Cappuccino', 'Sahlep Cappuccino', 'Vanilya Cappuccino', 'Türk Kahvesi', 'Sütlü Türk Kahvesi', 'Dibek Kahvesi', 'Sütlü Dibek Kahvesi', 'Atmosfer Coffee',
+            // Soğuk Kahveler (25)
+            'Shot Espresso', 'Shot Double Espresso', 'Ice Cortado', 'Ice Espresso Flat White', 'Ice Double Espresso Flat White', 'Ice Macchiato', 'Ice Double Shot Macchiato', 'Ice Red', 'Ice Black', 'Soğuk Filtre', 'Soğuk Sütlü Filtre', 'Ice Americano Hafif', 'Ice Americano Yoğun', 'Sparkling Americano', 'Ice Sütlü Americano', 'Ice Latte', 'Ice Sahlep Latte', 'Ice Çikolat Latte', 'Ice Vanilya Latte', 'Ice Hazelnut Latte', 'Ice Caramel Latte', 'Ice Coconut Latte', 'Ice White Mocha', 'Ice Mix Mocha', 'Cococream Latte',
+            // Hızlı Soğuklar (9)
+            'Süt', 'Sade Soda', 'Limon Soda', 'Cool Lime', 'Sodalı Cool Lime', 'Mango Lime', 'Sodalı Mango Lime', 'Cococream', 'Kokteyl',
+            // Frozen (10)
+            'Çilek Frozen', 'Lime Frozen', 'Lime Fizz Frozen', 'Mango Frozen', 'The Jungle', 'Sour Jungle', 'Jungle Fizz', 'Jungle Sour Fizz', 'Mix Frozen', 'Mikser Frozen',
+            // Milkshake (7)
+            'Vanilya Milkshake', 'Çikolata Milkshake', 'Çilek Milkshake', 'Muz Milkshake', 'Mango Milkshake', 'Sahlep Milkshake', 'Coconut Milkshake',
+            // Geleneksel Kahveler (6) - menu.html'de var ama admin de tekrar listelnmiş
+            'Filtre Kahve', 'Sütlü Filtre Kahve', 'Sütlü Dibek Kahvesi', 'Sütlü Türk Kahvesi', 'Türk Kahvesi', 'Dibek Kahvesi',
+            // Special Sıcaklar (3)
             'Chai Tea Latte', 'Sıcak Çikolata', 'Sahlep'
         ];
 
@@ -885,8 +919,10 @@
             document.getElementById('completedCount').textContent = stats.completed;
         }
 
+        let currentReportFilter = 'all'; // Aktif filtre
+        
         function loadReports() {
-            fetch('/api/reports')
+            fetch(`/api/reports?filter=${currentReportFilter}`)
                 .then(response => response.json())
                 .then(data => {
                     renderDailyReports(data.daily);
@@ -895,6 +931,19 @@
                 .catch(error => {
                     console.error('Rapor yükleme hatası:', error);
                 });
+        }
+        
+        function filterReports(filter) {
+            currentReportFilter = filter;
+            
+            // Buton stillerini güncelle
+            document.querySelectorAll('.report-filter-btn').forEach(btn => {
+                btn.classList.remove('active');
+            });
+            document.querySelector(`[data-filter="${filter}"]`).classList.add('active');
+            
+            // Raporları yeniden yükle
+            loadReports();
         }
 
         function loadActiveOrders() {

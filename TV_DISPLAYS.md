@@ -3,8 +3,8 @@
 ## Genel Bakış
 
 Kafe için iki ayrı TV menü ekranı oluşturulmuştur:
-- **Sıcak İçecekler TV** - Port 3001
-- **Soğuk İçecekler TV** - Port 3002
+- **Sıcak İçecekler TV** - /tv-sicak
+- **Soğuk İçecekler TV** - /tv-soguk
 
 Bu ekranlar geleneksel kafe menü tahtası gibi tasarlanmıştır - sadece ürün isimleri görünür (resim yok).
 
@@ -15,19 +15,19 @@ Bu ekranlar geleneksel kafe menü tahtası gibi tasarlanmıştır - sadece ürü
 node server.js
 ```
 
-Server başlatıldığında 3 port aktif olur:
+Server başlatıldığında tüm hizmetler Port 3000 üzerinde sunarılır:
 - **Port 3000** - Ana uygulama (müşteri menüsü + admin paneli)
-- **Port 3001** - Sıcak içecekler TV ekranı
-- **Port 3002** - Soğuk içecekler TV ekranı
+- **Port 3000/tv-sicak** - Sıcak içecekler TV ekranı
+- **Port 3000/tv-soguk** - Soğuk içecekler TV ekranı
 
 ### TV Ekranlarına Erişim
 
 1. **Sıcak İçecekler TV**
-   - Tarayıcıda açın: `http://localhost:3001`
+   - Tarayıcıda açın: `http://localhost:3000/tv-sicak`
    - Tam ekran için: `F11` tuşuna basın
    
 2. **Soğuk İçecekler TV**
-   - Tarayıcıda açın: `http://localhost:3002`
+   - Tarayıcıda açın: `http://localhost:3000/tv-soguk`
    - Tam ekran için: `F11` tuşuna basın
 
 ### Özellikler
@@ -51,18 +51,18 @@ Server başlatıldığında 3 port aktif olur:
 ### TV Başına Ayrı Bilgisayar/Cihaz Gerekli
 
 Her TV için ayrı bir tarayıcı gerekir:
-- TV 1: Bir bilgisayar/tablet üzerinden port 3001
-- TV 2: Başka bir bilgisayar/tablet üzerinden port 3002
+- TV 1: Bir bilgisayar/tablet üzerinden /tv-sicak
+- TV 2: Başka bir bilgisayar/tablet üzerinden /tv-soguk
 
 ### Ağ Ayarları
 
 Eğer farklı cihazlardan erişilecekse:
 1. Server'ın çalıştığı bilgisayarın IP adresini bulun
 2. TV cihazlarından şu şekilde erişin:
-   - Sıcak: `http://[SERVER_IP]:3001`
-   - Soğuk: `http://[SERVER_IP]:3002`
+   - Sıcak: `http://[SERVER_IP]:3000/tv-sicak`
+   - Soğuk: `http://[SERVER_IP]:3000/tv-soguk`
 
-Örnek: `http://192.168.1.100:3001`
+Örnek: `http://192.168.1.100:3000/tv-sicak`
 
 ## Sorun Giderme
 
@@ -80,13 +80,13 @@ Eğer farklı cihazlardan erişilecekse:
 
 ## Menü İçeriği
 
-### Sıcak İçecekler (Port 3001)
+### Sıcak İçecekler (/tv-sicak)
 - Geleneksel Kahveler (Türk Kahvesi, Dibek, Menengiç, vb.)
 - Espresso Bazlı (Latte, Cappuccino, Mocha, vb.)
 - Çaylar (Kupa Çay, Yeşil Çay, Bitki Çayı, vb.)
 - Özel Sıcaklar (Sahlep, Sıcak Çikolata, vb.)
 
-### Soğuk İçecekler (Port 3002)
+### Soğuk İçecekler (/tv-soguk)
 - Soğuk Kahveler (Ice Latte, Cold Brew)
 - Frozen (Çeşitli Frozen içecekler)
 - Milkshake (Çeşitli Milkshake'ler)

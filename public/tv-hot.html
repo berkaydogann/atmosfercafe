@@ -271,103 +271,96 @@
         let isSaturdayEvening = false;
         let cafeIsClosed = false;
 
-        // VERİLER (Sıcak İçecekler - EKSİKSİZ MENÜ)
+        // VERİLER (Sıcak İçecekler - MENU.HTML İLE UYUMLU)
         const menuSections = [
-            // KOLON 1: GELENEKSEL KAHVELER
+            // KOLON 1: ÇAYLAR (Çay ve Sohbet kategorisinden)
             { 
-                title: 'Geleneksel Kahve', 
-                icon: 'fa-mug-hot', 
-                items: [
-                    'Türk Kahvesi', 
-                    'Sütlü Türk Kahvesi', 
-                    'Dibek Kahvesi', 
-                    'Sütlü Dibek Kahvesi', 
-                    'Filtre Kahve', 
-                    'Sütlü Filtre Kahve'
-                ] 
-            },
-            
-            // KOLON 1: ESPRESSO
-            { 
-                title: 'Espresso', 
-                icon: 'fa-bolt', 
-                items: [
-                    'Espresso', 
-                    'Double Espresso (Sert)', 
-                    'Macchiato', 
-                    'Cortado', 
-                    'Espresso Flat White (1 oz)', 
-                    'Double Espresso Flat White (2 oz)', 
-                    'Americano', 
-                    'Sütlü Americano', 
-                    'Red Eye', 
-                    'Black Eye'
-                ] 
-            },
-            
-            // KOLON 2: LATTE
-            { 
-                title: 'Latte', 
-                icon: 'fa-mug-saucer', 
-                items: [
-                    'Latte', 
-                    'Sahlep Latte', 
-                    'Çikolat Latte', 
-                    'Vanilya Latte', 
-                    'Hazelnut Latte', 
-                    'Caramel Latte', 
-                    'Coconut Latte'
-                ] 
-            },
-            
-            // KOLON 2: CAPPUCCINO
-            { 
-                title: 'Cappuccino', 
-                icon: 'fa-coffee', 
-                items: [
-                    'Cappuccino', 
-                    'Sahlep Cappuccino', 
-                    'Çikolat Cappuccino', 
-                    'Vanilya Cappuccino'
-                ] 
-            },
-            
-            // KOLON 2: MOCHA
-            { 
-                title: 'Mocha', 
-                icon: 'fa-candy-cane', 
-                items: [
-                    'Mocha', 
-                    'White Mocha', 
-                    'Mix Mocha', 
-                    'Mix Çikolata Mocha'
-                ] 
-            },
-            
-            // KOLON 3: ÇAY
-            { 
-                title: 'Çay', 
+                title: 'Çay ve Sohbet', 
                 icon: 'fa-leaf', 
                 items: [
                     'Bardak Çay', 
                     'Kupa Çay', 
                     'Limonlu Çay', 
                     'Yeşil Çay', 
-                    'Bergamot Kupa Çay', 
-                    'Bergamot Limonlu Kupa Çay', 
-                    'Atom Çayı', 
-                    'Bitki Çayı'
+                    'Kupa Çay (Bergamot)', 
+                    'Limonlu Çay (Bergamot)', 
+                    'Bitki Çayı', 
+                    'Atom Çayı'
                 ] 
             },
             
-            // KOLON 3: SPECIAL
+            // KOLON 1: ESPRESSO & MACCHIATO (Sıcak Kahveler kategorisinden)
             { 
-                title: 'Special', 
+                title: 'Espresso & Macchiato', 
+                icon: 'fa-bolt', 
+                items: [
+                    'Espresso', 
+                    'Double Espresso', 
+                    'Cortado', 
+                    'Espresso Flat White', 
+                    'Double Espresso Flat White', 
+                    'Macchiato', 
+                    'Double Shot Macchiato', 
+                    'Red Eye', 
+                    'Black Eye'
+                ] 
+            },
+            
+            // KOLON 2: LATTE VE AROMA (Sıcak Kahveler kategorisinden)
+            { 
+                title: 'Latte & Aroma', 
+                icon: 'fa-mug-saucer', 
+                items: [
+                    'Latte', 
+                    'Sahlep Latte', 
+                    'Çikolat Latte', 
+                    'Vanilya Latte', 
+                    'Karamel Latte', 
+                    'Coconut Latte'
+                ] 
+            },
+            
+            // KOLON 2: CAPPUCCINO VE MOCHA (Sıcak Kahveler kategorisinden)
+            { 
+                title: 'Cappuccino & Mocha', 
+                icon: 'fa-coffee', 
+                items: [
+                    'Cappuccino', 
+                    'Çikolat Cappuccino', 
+                    'Sahlep Cappuccino', 
+                    'Vanilya Cappuccino', 
+                    'Mocha', 
+                    'White Mocha', 
+                    'Mix Mocha'
+                ] 
+            },
+            
+            // KOLON 3: GELENEKSEL & AMERICANO (Sıcak Kahveler kategorisinden)
+            { 
+                title: 'Geleneksel Kahve', 
+                icon: 'fa-mug-hot', 
+                items: [
+                    'Filtre', 
+                    'Sütlü Filtre', 
+                    'Americano Hafif', 
+                    'Americano Yoğun', 
+                    'Sütlü Americano', 
+                    'Türk Kahvesi', 
+                    'Sütlü Türk Kahvesi', 
+                    'Dibek Kahvesi', 
+                    'Sütlü Dibek Kahvesi'
+                ] 
+            },
+            
+            // KOLON 3: SPECIAL SICAKLAR (Special Sıcaklar kategorisinden)
+            { 
+                title: 'Special Sıcaklar', 
                 icon: 'fa-star', 
                 items: [
-                    'Sahlep', 
+                    'Chai Tea Latte', 
                     'Sıcak Çikolata', 
-                    'Chai Tea Latte'
+                    'Sahlep',
+                    'Atmosfer Coffee'
                 ] 
             }
         ];
@@ -415,7 +408,7 @@
                 section.items.forEach(item => {
                     let isUnavailable = stockStatus[item] === false;
                     let extraClass = isUnavailable ? 'unavailable' : '';
-                    let statusHtml = isUnavailable ? '<span class="stock-tag">YOK</span>' : '';
+                    let statusHtml = isUnavailable ? '<span class="stock-tag">TÜKENDİ</span>' : '';
                     
                     html += `
                         <div class="menu-item ${extraClass}">

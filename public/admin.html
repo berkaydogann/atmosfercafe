@@ -839,6 +839,28 @@
             });
         }
 
+        function updateStockButton(itemName, isAvailable) {
+            // Stok grid'indeki butonları güncelle
+            const stockContainer = document.getElementById('stockContainer');
+            if (stockContainer.innerHTML === '') return; // Grid doldurulmamışsa çık
+            
+            const buttons = stockContainer.querySelectorAll('.stock-toggle-btn');
+            buttons.forEach(btn => {
+                const parent = btn.closest('.stock-item');
+                const name = parent.querySelector('.stock-item-name').textContent;
+                
+                if (name === itemName) {
+                    const statusClass = isAvailable ? 'available' : 'unavailable';
+                    const statusText = isAvailable ? 'Stokta Var' : 'Stokta Yok';
+                    const icon = isAvailable ? 'bi-check-circle' : 'bi-exclamation-circle';
+                    
+                    btn.classList.toggle('available', isAvailable);
+                    btn.classList.toggle('unavailable', !isAvailable);
+                    btn.innerHTML = `<i class="bi ${icon}"></i> ${statusText}`;
+                }
+            });
+        }
+
         function toggleStockGlobal(btn, itemName) {
             const isCurrentlyAvailable = btn.classList.contains('available');
             const newStatus = !isCurrentlyAvailable;

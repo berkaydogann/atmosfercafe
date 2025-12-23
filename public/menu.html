@@ -1088,12 +1088,17 @@
         let isSaturdayEvening = false; // Cumartesi akşamı mı?
 
         document.addEventListener('DOMContentLoaded', () => {
+            // Stok durumunu iste (socket handler'ında renderMenu çağrılacak)
             socket.emit('getStock');
             socket.emit('getSaturdayMenuStatus'); // Cumartesi menü durumunu al
-            renderMenu();
             setupScrollSpy();
             checkCafeStatus();
         });
+
+        // Menüyü render etmek için hazır mı kontrol et
+        function isReadyToRender() {
+            return Object.keys(stockStatus).length > 0 && saturdayMenuItems.length >= 0;
+        }
 
         // --- Render Functions ---
         function renderMenu() {
@@ -1181,6 +1186,9 @@
                 section.appendChild(grid);
                 menuContainer.appendChild(section);
             });
+            
+            // Render edildikten sonra stok durumunu uygula
+            updateStockUI();
         }
 
         // --- Interaction Logic ---
@@ -1266,7 +1274,17 @@
         // --- Socket & Stock Logic ---
         socket.on('stockStatus', (status) => {
             stockStatus = status;
-            updateStockUI();
+            // Menü render edilmişse UI güncelleştir, yoksa render et
+            const menuContainer = document.getElementById('menuContainer');
+            if (menuContainer.innerHTML === '') {
+                // Menü henüz render edilmemişse, render et
+                if (isReadyToRender()) {
+                    renderMenu();
+                }
+            } else {
+                // Menü zaten render edildiyse, sadece stok UI'ını güncelle
+                updateStockUI();
+            }
         });
 
         socket.on('stockUpdated', (data) => {
@@ -1281,8 +1299,14 @@
             console.log('Cumartesi durumu:', isSaturdayEvening ? 'Cumartesi akşamı' : 'Normal menü');
             console.log('Cumartesi menüsü:', saturdayMenuItems.length, 'ürün');
             
-            // Menüyü yeniden render et
-            renderMenu();
+            // Eğer stok bilgisi varsa menüyü render et
+            const menuContainer = document.getElementById('menuContainer');
+            if (menuContainer.innerHTML === '' && isReadyToRender()) {
+                renderMenu();
+            } else if (menuContainer.innerHTML !== '') {
+                // Menü zaten render edildiyse, sadece güncelle
+                renderMenu();
+            }
         });
 
         // Cumartesi menüsü güncellendiğinde

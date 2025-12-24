@@ -1,0 +1,363 @@
+<!DOCTYPE html>
+<html lang="tr">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Atmosfer Kafe - TV Reklam</title>
+    <link href="https://fonts.googleapis.com/css2?family=Outfit:wght@300;500;700;900&display=swap" rel="stylesheet">
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: 'Outfit', sans-serif;
+            background-color: #000000;
+            color: #ffffff;
+            height: 100vh;
+            width: 100vw;
+            overflow: hidden;
+            display: flex;
+        }
+
+        /* --- VIDEO BÖLÜMÜ (SOL) --- */
+        .video-section {
+            flex: 1;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            background: linear-gradient(135deg, #1a1a1a 0%, #000000 100%);
+            position: relative;
+        }
+
+        .video-container {
+            width: 95%;
+            height: 95%;
+            max-width: 90vw;
+            max-height: 90vh;
+            background: #000000;
+            border-radius: 20px;
+            overflow: hidden;
+            box-shadow: 0 20px 60px rgba(0, 0, 0, 0.8);
+        }
+
+        video {
+            width: 100%;
+            height: 100%;
+            object-fit: contain;
+            background: #000000;
+        }
+
+        .no-video {
+            width: 100%;
+            height: 100%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            background: linear-gradient(135deg, #222222 0%, #111111 100%);
+            color: #666666;
+            font-size: 2rem;
+            text-align: center;
+            padding: 40px;
+        }
+
+        /* --- ORDERS COLUMN (SAĞ) --- */
+        .orders-section {
+            width: 300px;
+            background: linear-gradient(135deg, #1a1a1a 0%, #0a0a0a 100%);
+            border-left: 2px solid rgba(0, 176, 80, 0.3);
+            padding: 20px;
+            display: flex;
+            flex-direction: column;
+            gap: 15px;
+            overflow-y: auto;
+            scrollbar-width: thin;
+            scrollbar-color: rgba(0, 176, 80, 0.3) rgba(0, 0, 0, 0.5);
+        }
+
+        .orders-section::-webkit-scrollbar {
+            width: 8px;
+        }
+
+        .orders-section::-webkit-scrollbar-track {
+            background: rgba(0, 0, 0, 0.5);
+        }
+
+        .orders-section::-webkit-scrollbar-thumb {
+            background: rgba(0, 176, 80, 0.3);
+            border-radius: 4px;
+        }
+
+        .orders-header {
+            font-size: 1.4rem;
+            font-weight: 700;
+            text-align: center;
+            color: #00b050;
+            padding: 0 0 10px 0;
+            border-bottom: 2px solid rgba(0, 176, 80, 0.2);
+            text-transform: uppercase;
+            letter-spacing: 2px;
+        }
+
+        .orders-list {
+            display: flex;
+            flex-direction: column;
+            gap: 12px;
+            flex: 1;
+            overflow-y: auto;
+        }
+
+        .order-badge {
+            padding: 12px 15px;
+            background: rgba(0, 176, 80, 0.1);
+            border: 2px solid #00b050;
+            border-radius: 8px;
+            text-align: center;
+            font-weight: 600;
+            font-size: 1.1rem;
+            color: #00b050;
+            transition: all 0.3s ease;
+            animation: blink 1s infinite;
+        }
+
+        .order-badge.highlight {
+            background: rgba(0, 176, 80, 0.3);
+            box-shadow: 0 0 15px rgba(0, 176, 80, 0.5);
+            transform: scale(1.05);
+        }
+
+        @keyframes blink {
+            0%, 100% {
+                opacity: 1;
+                box-shadow: 0 0 10px rgba(0, 176, 80, 0.3);
+            }
+            50% {
+                opacity: 0.5;
+                box-shadow: 0 0 20px rgba(0, 176, 80, 0.6);
+            }
+        }
+
+        .order-number {
+            font-size: 1.4rem;
+            letter-spacing: 4px;
+        }
+
+        .order-customer {
+            font-size: 0.85rem;
+            color: #00b050;
+            opacity: 0.8;
+            margin-top: 4px;
+            word-break: break-word;
+        }
+
+        .empty-orders {
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            height: 100px;
+            color: #666666;
+            font-size: 1rem;
+            text-align: center;
+        }
+
+        /* Scrollbar özelleştirmesi */
+        .orders-list::-webkit-scrollbar {
+            width: 6px;
+        }
+
+        .orders-list::-webkit-scrollbar-track {
+            background: transparent;
+        }
+
+        .orders-list::-webkit-scrollbar-thumb {
+            background: rgba(0, 176, 80, 0.4);
+            border-radius: 3px;
+        }
+
+        /* --- RESPONSIVE --- */
+        @media (max-width: 1024px) {
+            .orders-section {
+                width: 250px;
+                padding: 15px;
+            }
+
+            .orders-header {
+                font-size: 1.1rem;
+            }
+
+            .order-badge {
+                padding: 10px 12px;
+                font-size: 1rem;
+            }
+
+            .order-number {
+                font-size: 1.2rem;
+            }
+        }
+
+        @media (max-width: 768px) {
+            body {
+                flex-direction: column;
+            }
+
+            .video-section {
+                flex: 1;
+            }
+
+            .orders-section {
+                width: 100%;
+                border-left: none;
+                border-top: 2px solid rgba(0, 176, 80, 0.3);
+                max-height: 200px;
+                padding: 10px;
+            }
+
+            .orders-list {
+                flex-direction: row;
+                gap: 10px;
+                overflow-x: auto;
+            }
+
+            .order-badge {
+                min-width: 100px;
+                padding: 8px 10px;
+                font-size: 0.9rem;
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="video-section">
+        <div class="video-container">
+            <video id="adVideo" controls playsinline></video>
+            <iframe id="youtubeFrame" style="display: none; width: 100%; height: 100%; border: none;" allow="autoplay"></iframe>
+            <div class="no-video" id="noVideoPlaceholder">
+                Reklam Bekleniyor...
+            </div>
+        </div>
+    </div>
+
+    <div class="orders-section">
+        <div class="orders-header">📋 SİPARİŞLER</div>
+        <div class="orders-list" id="ordersList">
+            <div class="empty-orders">Hazır sipariş yok</div>
+        </div>
+    </div>
+
+    <script src="https://cdn.socket.io/4.5.4/socket.io.min.js"></script>
+    <script>
+        const socket = io();
+        const videoElement = document.getElementById('adVideo');
+        const youtubeFrame = document.getElementById('youtubeFrame');
+        const noVideoPlaceholder = document.getElementById('noVideoPlaceholder');
+        const ordersList = document.getElementById('ordersList');
+
+        let readyOrders = [];
+
+        // Video stream'ini dinle
+        socket.on('playVideo', (data) => {
+            if (data && data.videoUrl) {
+                console.log('Video URL alındı:', data.videoUrl);
+                
+                if (data.isYouTube) {
+                    // YouTube iframe'ini göster
+                    videoElement.style.display = 'none';
+                    youtubeFrame.style.display = 'block';
+                    noVideoPlaceholder.style.display = 'none';
+                    
+                    youtubeFrame.src = `${data.videoUrl}?autoplay=1&controls=1`;
+                } else {
+                    // Normal video'yu göster
+                    youtubeFrame.style.display = 'none';
+                    videoElement.style.display = 'block';
+                    noVideoPlaceholder.style.display = 'none';
+                    
+                    videoElement.src = data.videoUrl;
+                    videoElement.autoplay = true;
+                    videoElement.play().catch(e => console.log('Video oynatma hatası:', e));
+                }
+            }
+        });
+
+        // Videoyu durdur
+        socket.on('stopVideo', () => {
+            videoElement.pause();
+            videoElement.src = '';
+            youtubeFrame.src = '';
+            videoElement.style.display = 'none';
+            youtubeFrame.style.display = 'none';
+            noVideoPlaceholder.style.display = 'flex';
+        });
+
+        // Yeni hazır sipariş
+        socket.on('orderReady', (orderData) => {
+            console.log('Hazır sipariş:', orderData);
+            addReadyOrder(orderData);
+        });
+
+        // Siparişi tamamlandı olarak işaretle
+        socket.on('orderCompleted', (orderId) => {
+            console.log('Sipariş tamamlandı:', orderId);
+            removeReadyOrder(orderId);
+        });
+
+        // Tüm hazır siparişleri yükle (sayfa yüklendiğinde)
+        socket.on('readyOrders', (orders) => {
+            console.log('Hazır siparişler yüklendi:', orders);
+            readyOrders = orders || [];
+            renderOrders();
+        });
+
+        function addReadyOrder(order) {
+            // Zaten var mı kontrol et
+            if (readyOrders.some(o => o.id === order.id)) {
+                return;
+            }
+
+            readyOrders.push(order);
+            renderOrders();
+
+            // Animasyon efekti
+            setTimeout(() => {
+                const badge = document.querySelector(`[data-order-id="${order.id}"]`);
+                if (badge) {
+                    badge.classList.add('highlight');
+                    setTimeout(() => {
+                        badge.classList.remove('highlight');
+                    }, 2000);
+                }
+            }, 100);
+        }
+
+        function removeReadyOrder(orderId) {
+            readyOrders = readyOrders.filter(o => o.id !== orderId);
+            renderOrders();
+        }
+
+        function renderOrders() {
+            ordersList.innerHTML = '';
+
+            if (readyOrders.length === 0) {
+                ordersList.innerHTML = '<div class="empty-orders">Hazır sipariş yok</div>';
+                return;
+            }
+
+            readyOrders.forEach(order => {
+                const badge = document.createElement('div');
+                badge.className = 'order-badge';
+                badge.setAttribute('data-order-id', order.id);
+                badge.innerHTML = `
+                    <div class="order-number">#${order.orderNumber}</div>
+                    <div class="order-customer">${order.guestName}</div>
+                `;
+                ordersList.appendChild(badge);
+            });
+        }
+
+        // İlk yüklenmede hazır siparişleri iste
+        socket.emit('getReadyOrders');
+    </script>
+</body>
+</html>

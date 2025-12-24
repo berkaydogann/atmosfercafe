@@ -540,6 +540,9 @@
         <button class="tab-btn active" onclick="switchTab('orders', this)">
             <i class="bi bi-cup-hot"></i> Siparişler
         </button>
+        <button class="tab-btn" onclick="switchTab('video', this)">
+            <i class="bi bi-film"></i> TV Reklam
+        </button>
         <button class="tab-btn" onclick="switchTab('stock', this)">
             <i class="bi bi-boxes"></i> Stok Yönetimi
         </button>
@@ -559,6 +562,70 @@
                 <h3>Şu an sakin...</h3>
                 <p>Yeni siparişler buraya düşecek 🚀</p>
             </div>
+        </div>
+    </div>
+
+    <!-- TV Reklam Sekmesi -->
+    <div id="videoTab" class="tab-content">
+        <div style="background: var(--card-dark); padding: 20px; border-radius: 16px; margin-bottom: 20px;">
+            <h3 style="color: var(--starbucks-green); margin-bottom: 10px;">
+                <i class="bi bi-film"></i> TV Reklam Yönetimi
+            </h3>
+            <p style="color: var(--text-gray); margin-bottom: 0;">
+                Tv-reklam ekranında oynatacak videoyu seçin ve yönetin.
+            </p>
+        </div>
+
+        <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 20px; margin-bottom: 20px;">
+            <!-- Video Seçme -->
+            <div style="background: var(--card-dark); padding: 20px; border-radius: 16px;">
+                <h4 style="color: var(--starbucks-green); margin-bottom: 15px;">
+                    <i class="bi bi-upload"></i> Video Seç
+                </h4>
+                <input type="file" id="videoInput" accept="video/*" style="margin-bottom: 15px; color: var(--text-gray);">
+                <button onclick="uploadAndPlayVideo()" style="background: var(--starbucks-green); color: white; border: none; padding: 12px 20px; border-radius: 10px; cursor: pointer; width: 100%; font-weight: 600;">
+                    <i class="bi bi-play-circle"></i> Oynat
+                </button>
+            </div>
+
+            <!-- Video Kontrolleri -->
+            <div style="background: var(--card-dark); padding: 20px; border-radius: 16px;">
+                <h4 style="color: var(--starbucks-green); margin-bottom: 15px;">
+                    <i class="bi bi-sliders"></i> Kontroller
+                </h4>
+                <button onclick="stopVideoPlayback()" style="background: var(--danger); color: white; border: none; padding: 12px 20px; border-radius: 10px; cursor: pointer; width: 100%; font-weight: 600; margin-bottom: 10px;">
+                    <i class="bi bi-stop-circle"></i> Videoyu Durdur
+                </button>
+                <div style="color: var(--text-gray); font-size: 0.9rem; margin-top: 10px;">
+                    <p><strong>Durum:</strong> <span id="videoStatus">Hazır</span></p>
+                </div>
+            </div>
+        </div>
+
+        <!-- Örnek Video URL'si -->
+        <div style="background: var(--card-dark); padding: 20px; border-radius: 16px; margin-bottom: 20px;">
+            <h4 style="color: var(--starbucks-green); margin-bottom: 15px;">
+                <i class="bi bi-link"></i> URL ile Video Oynat
+            </h4>
+            <div style="display: flex; gap: 10px;">
+                <input type="text" id="videoUrlInput" placeholder="Video URL'sini girin..." style="flex: 1; padding: 10px 15px; background: rgba(255,255,255, 0.1); border: 1px solid rgba(255,255,255, 0.2); border-radius: 8px; color: var(--text-white);">
+                <button onclick="playVideoFromUrl()" style="background: var(--starbucks-green); color: white; border: none; padding: 10px 20px; border-radius: 8px; cursor: pointer; font-weight: 600;">
+                    <i class="bi bi-play-fill"></i> Oynat
+                </button>
+            </div>
+        </div>
+
+        <!-- Hazır Siparişler Gösterimi -->
+        <div style="background: var(--card-dark); padding: 20px; border-radius: 16px;">
+            <h4 style="color: var(--starbucks-green); margin-bottom: 15px;">
+                <i class="bi bi-list-check"></i> Hazır Siparişleri Yönet
+            </h4>
+            <div style="background: rgba(0, 112, 74, 0.1); padding: 15px; border-radius: 10px; border-left: 3px solid var(--starbucks-green);">
+                <p style="color: var(--text-gray); margin-bottom: 0;">
+                    TV Reklam ekranında hazır olan siparişler listesi gösterilir. Aşağıda siparişleri yönetebilirsiniz.
+                </p>
+            </div>
+            <div id="tvReadyOrdersList" style="margin-top: 15px; display: grid; gap: 10px;"></div>
         </div>
     </div>
 
@@ -1222,6 +1289,174 @@
             // Sunucuya gönder
             socket.emit('updateStock', { itemName: itemName, isAvailable: newStatus });
         };
+
+        // === TV REKLAM FONKSİYONLARI ===
+        let tvReadyOrders = [];
+
+        // Video yükleme ve oynatma
+        window.uploadAndPlayVideo = function() {
+            const fileInput = document.getElementById('videoInput');
+            const file = fileInput.files[0];
+
+            if (!file) {
+                alert('Lütfen bir video dosyası seçin');
+                return;
+            }
+
+            // Dosya boyutunu kontrol et (1GB limit)
+            if (file.size > 1 * 1024 * 1024 * 1024) {
+                alert('Video dosyası 1GB\'dan küçük olmalı');
+                return;
+            }
+
+            // Dosya tipini kontrol et
+            if (!file.type.startsWith('video/')) {
+                alert('Lütfen bir video dosyası seçin');
+                return;
+            }
+
+            document.getElementById('videoStatus').textContent = 'Yükleniyor...';
+
+            // Video dosyasını multipart/form-data ile gönder
+            const formData = new FormData();
+            formData.append('video', file);
+
+            // Sunucuya HTTP POST ile gönder
+            fetch('/api/upload-video', {
+                method: 'POST',
+                body: formData
+            })
+            .then(response => response.json())
+            .then(data => {
+                if (data.success) {
+                    // Sunucudan gelen URL'i oynat
+                    socket.emit('playVideo', {
+                        videoUrl: data.videoUrl
+                    });
+                    document.getElementById('videoStatus').textContent = `Oynatılıyor: ${file.name}`;
+                    updateTvReadyOrdersList();
+                } else {
+                    alert('Video yüklenemedi: ' + data.error);
+                    document.getElementById('videoStatus').textContent = 'Hata!';
+                }
+            })
+            .catch(error => {
+                console.error('Video yükleme hatası:', error);
+                alert('Video yüklenemedi');
+                document.getElementById('videoStatus').textContent = 'Hata!';
+            });
+        };
+
+        // URL'den video oynatma
+        window.playVideoFromUrl = function() {
+            const urlInput = document.getElementById('videoUrlInput');
+            const videoUrl = urlInput.value.trim();
+
+            if (!videoUrl) {
+                alert('Lütfen bir URL girin');
+                return;
+            }
+
+            // YouTube URL kontrolü - YouTube desteği ekle
+            if (videoUrl.includes('youtube.com') || videoUrl.includes('youtu.be')) {
+                // YouTube URL'den video ID'yi çıkar
+                let videoId = '';
+                
+                try {
+                    if (videoUrl.includes('youtube.com')) {
+                        const params = new URL(videoUrl).searchParams;
+                        videoId = params.get('v');
+                    } else if (videoUrl.includes('youtu.be')) {
+                        // youtu.be/ID veya youtu.be/ID?t=... formatından ID'yi çıkar
+                        const pathParts = videoUrl.split('/');
+                        videoId = pathParts[pathParts.length - 1].split('?')[0].split('&')[0];
+                    }
+                } catch (e) {
+                    console.error('YouTube URL çözümleme hatası:', e);
+                }
+
+                if (videoId && videoId.length > 0) {
+                    // YouTube embed URL'si oluştur
+                    const embedUrl = `https://www.youtube.com/embed/${videoId}?autoplay=1`;
+                    console.log('YouTube embed URL:', embedUrl);
+                    socket.emit('playVideo', {
+                        videoUrl: embedUrl,
+                        isYouTube: true
+                    });
+                    document.getElementById('videoStatus').textContent = 'YouTube Video Oynatılıyor...';
+                } else {
+                    alert('YouTube URL\'si geçersiz');
+                    return;
+                }
+            } else {
+                // Normal video URL'si
+                socket.emit('playVideo', {
+                    videoUrl: videoUrl
+                });
+                document.getElementById('videoStatus').textContent = 'Oynatılıyor...';
+            }
+
+            updateTvReadyOrdersList();
+        };
+
+        // Video oynatmayı durdur
+        window.stopVideoPlayback = function() {
+            socket.emit('stopVideo');
+            document.getElementById('videoStatus').textContent = 'Hazır';
+            document.getElementById('videoInput').value = '';
+            document.getElementById('videoUrlInput').value = '';
+        };
+
+        // Hazır siparişleri TV sayfasında göster
+        socket.on('readyOrders', (orders) => {
+            tvReadyOrders = orders || [];
+            updateTvReadyOrdersList();
+        });
+
+        // Yeni siparişin hazır olduğunu al
+        socket.on('orderReadyForTv', (order) => {
+            tvReadyOrders.push(order);
+            updateTvReadyOrdersList();
+        });
+
+        // Siparişin tamamlandığını al
+        socket.on('orderCompletedOnTv', (orderId) => {
+            tvReadyOrders = tvReadyOrders.filter(o => o.id !== orderId);
+            updateTvReadyOrdersList();
+        });
+
+        // Hazır siparişler listesini güncelle
+        function updateTvReadyOrdersList() {
+            const container = document.getElementById('tvReadyOrdersList');
+            
+            if (!tvReadyOrders || tvReadyOrders.length === 0) {
+                container.innerHTML = '<div style="color: var(--text-gray); padding: 20px; text-align: center;">Hazır sipariş bulunmamaktadır</div>';
+                return;
+            }
+
+            container.innerHTML = tvReadyOrders.map(order => `
+                <div style="background: rgba(0, 112, 74, 0.2); padding: 15px; border-radius: 10px; border-left: 3px solid var(--starbucks-green); display: flex; justify-content: space-between; align-items: center;">
+                    <div>
+                        <div style="font-weight: 700; color: var(--starbucks-green); font-size: 1.1rem;">#${order.orderNumber}</div>
+                        <div style="color: var(--text-gray); font-size: 0.9rem; margin-top: 4px;">${order.guestName}</div>
+                    </div>
+                    <button onclick="completeOrderFromTv('${order.id}')" style="background: var(--starbucks-green); color: white; border: none; padding: 8px 16px; border-radius: 8px; cursor: pointer; font-weight: 600;">
+                        <i class="bi bi-check-circle"></i> Tamamlandı
+                    </button>
+                </div>
+            `).join('');
+        }
+
+        // TV'den sipariş tamamlama
+        window.completeOrderFromTv = function(orderId) {
+            socket.emit('completeOrderFromTv', { orderId: orderId });
+            // Listeden kaldır
+            tvReadyOrders = tvReadyOrders.filter(o => o.id !== orderId);
+            updateTvReadyOrdersList();
+        };
+
+        // İlk yüklenmede hazır siparişleri iste
+        socket.emit('getReadyOrdersForTv');
 
         window.finishOrder = function(btn, id) {
             const card = btn.parentElement.parentElement;

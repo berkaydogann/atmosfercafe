@@ -5,6 +5,7 @@ const path = require('path');
 const axios = require('axios');
 const fs = require('fs');
 const admin = require('firebase-admin');
+const multer = require('multer');
 
 // Initialize Firebase Admin SDK
 let db;
@@ -45,6 +46,36 @@ const io = socketIo(server);
 app.use(express.json());
 app.use(express.static(path.join(__dirname, 'public')));
 
+// Multer konfigürasyonu - Video yükleme için
+const videosDir = path.join(__dirname, 'public', 'videos');
+if (!fs.existsSync(videosDir)) {
+  fs.mkdirSync(videosDir, { recursive: true });
+}
+
+const storage = multer.diskStorage({
+  destination: function (req, file, cb) {
+    cb(null, videosDir);
+  },
+  filename: function (req, file, cb) {
+    const timestamp = Date.now();
+    const ext = path.extname(file.originalname);
+    cb(null, `video_${timestamp}${ext}`);
+  }
+});
+
+const upload = multer({
+  storage: storage,
+  limits: { fileSize: 1 * 1024 * 1024 * 1024 }, // 1GB limit
+  fileFilter: function (req, file, cb) {
+    // Sadece video dosyaları
+    if (file.mimetype.startsWith('video/')) {
+      cb(null, true);
+    } else {
+      cb(new Error('Sadece video dosyaları yüklenebilir'));
+    }
+  }
+});
+
 // Port configuration
 const PORT = process.env.PORT || 3000;
 
@@ -62,6 +93,10 @@ const SATURDAY_MENU_FILE = path.join(__dirname, 'saturday_menu.json');
 
 // Aktif siparişler
 let activeOrders = [];
+
+// TV Reklam Sistemi
+let tvReadyOrders = []; // Hazır siparişlerin TV'de gösterilmesi için liste
+let currentVideoUrl = null; // Şu anda oynatılan video
 
 // Aktif siparişler dosyası yolu
 const ACTIVE_ORDERS_FILE = path.join(__dirname, 'active_orders.json');
@@ -1052,6 +1087,55 @@ io.on('connection', (socket) => {
     });
   });
 
+  // === TV REKLAM EVENTS ===
+  
+  // Video oynatma
+  socket.on('playVideo', (data) => {
+    console.log(`[${getTimestamp()}] 🎬 Video oynatma talebi alındı`);
+    
+    if (data.videoUrl) {
+      currentVideoUrl = data.videoUrl;
+      console.log(`[${getTimestamp()}] 📹 Video URL: ${data.videoUrl}`);
+      
+      // Tüm TV reklam istemcilerine video'yu oynat (YouTube flag'ı ile birlikte)
+      io.emit('playVideo', { 
+        videoUrl: currentVideoUrl,
+        isYouTube: data.isYouTube || false
+      });
+    } else {
+      console.error(`[${getTimestamp()}] ❌ Video URL gönderilmedi`);
+    }
+  });
+
+  // Video durdurma
+  socket.on('stopVideo', () => {
+    console.log(`[${getTimestamp()}] ⏹️  Video durdurma talebi alındı`);
+    currentVideoUrl = null;
+    io.emit('stopVideo');
+  });
+
+  // Hazır siparişleri getir (TV sayfası için)
+  socket.on('getReadyOrders', () => {
+    socket.emit('readyOrders', tvReadyOrders);
+  });
+
+  // Hazır siparişleri getir (Admin paneli için)
+  socket.on('getReadyOrdersForTv', () => {
+    socket.emit('readyOrders', tvReadyOrders);
+  });
+
+  // TV'den sipariş tamamlama (Admin panelinden)
+  socket.on('completeOrderFromTv', (data) => {
+    console.log(`[${getTimestamp()}] ✅ TV siparişi tamamlandı: ${data.orderId}`);
+    
+    // Listeden çıkar
+    tvReadyOrders = tvReadyOrders.filter(o => o.id !== data.orderId);
+    
+    // Tüm istemcilere bildir
+    io.emit('orderCompletedOnTv', data.orderId);
+    io.emit('orderCompleted', data.orderId);
+  });
+
   // Handle client disconnect
   socket.on('disconnect', () => {
     console.log(`[${getTimestamp()}] 🔴 Client disconnected: ${socket.id}`);
@@ -1095,6 +1179,32 @@ io.on('connection', (socket) => {
     activeOrders = activeOrders.filter(order => order.id !== orderData.orderId);
     saveActiveOrders();
     
+    // TV Reklam Sistemine ekle (hazır siparişlere)
+    if (order) {
+      tvReadyOrders.push({
+        id: orderData.orderId,
+        orderNumber: orderData.orderNumber,
+        guestName: orderData.guestName,
+        item: orderData.item
+      });
+      
+      // TV'ye sipariş hazır olduğunu bildir
+      io.emit('orderReady', {
+        orderId: orderData.orderId,
+        orderNumber: orderData.orderNumber,
+        guestName: orderData.guestName,
+        item: orderData.item
+      });
+      
+      // TV Reklam sayfasına hazır siparişi gönder
+      io.emit('orderReadyForTv', {
+        id: orderData.orderId,
+        orderNumber: orderData.orderNumber,
+        guestName: orderData.guestName,
+        item: orderData.item
+      });
+    }
+    
     // Satışı rapora kaydet
     recordSale(orderData.guestName, orderData.item);
     
@@ -1115,6 +1225,23 @@ app.get('/', (req, res) => {
   res.sendFile(path.join(__dirname, 'public', 'menu.html'));
 });
 
+// Video upload endpoint
+app.post('/api/upload-video', upload.single('video'), (req, res) => {
+  try {
+    if (!req.file) {
+      return res.status(400).json({ success: false, error: 'Video dosyası bulunamadı' });
+    }
+
+    const videoUrl = `/videos/${req.file.filename}`;
+    console.log(`[${getTimestamp()}] 📹 Video yüklendi: ${videoUrl}`);
+    
+    res.json({ success: true, videoUrl: videoUrl });
+  } catch (error) {
+    console.error(`[${getTimestamp()}] ❌ Video yükleme hatası:`, error.message);
+    res.status(500).json({ success: false, error: error.message });
+  }
+});
+
 app.get('/admin', (req, res) => {
   res.sendFile(path.join(__dirname, 'public', 'admin.html'));
 });
@@ -1125,6 +1252,10 @@ app.get('/tv-sicak', (req, res) => {
 
 app.get('/tv-soguk', (req, res) => {
   res.sendFile(path.join(__dirname, 'public', 'tv-cold.html'));
+});
+
+app.get('/tv-reklam', (req, res) => {
+  res.sendFile(path.join(__dirname, 'public', 'tv-reklam.html'));
 });
 
 // Aktif siparişleri al endpoint
@@ -1248,6 +1379,7 @@ server.listen(PORT, () => {
   console.log(`📊 Admin Dashboard: http://localhost:${PORT}/admin`);
   console.log(`📺 TV Hot Drinks Display: http://localhost:${PORT}/tv-sicak`);
   console.log(`📺 TV Cold Drinks Display: http://localhost:${PORT}/tv-soguk`);
+  console.log(`📺 TV Ad Display: http://localhost:${PORT}/tv-reklam`);
   console.log('═══════════════════════════════════════════════');
   console.log(`[${getTimestamp()}] Server is ready to accept connections`);
   

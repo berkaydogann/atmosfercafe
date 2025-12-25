@@ -1181,40 +1181,39 @@ io.on('connection', (socket) => {
     
     // TV Reklam Sistemine ekle (hazır siparişlere)
     if (order) {
-      tvReadyOrders.push({
-        id: orderData.orderId,
-        orderNumber: orderData.orderNumber,
-        guestName: orderData.guestName,
-        item: orderData.item
-      });
+      // Duplicate kontrol - aynı ID'den yalnızca bir tane olmalı
+      const alreadyExists = tvReadyOrders.some(o => o.id === orderData.orderId);
       
-      // TV'ye sipariş hazır olduğunu bildir
-      io.emit('orderReady', {
-        orderId: orderData.orderId,
-        orderNumber: orderData.orderNumber,
-        guestName: orderData.guestName,
-        item: orderData.item
-      });
-      
-      // TV Reklam sayfasına hazır siparişi gönder
-      io.emit('orderReadyForTv', {
-        id: orderData.orderId,
-        orderNumber: orderData.orderNumber,
-        guestName: orderData.guestName,
-        item: orderData.item
-      });
+      if (!alreadyExists) {
+        tvReadyOrders.push({
+          id: orderData.orderId,
+          orderNumber: orderData.orderNumber,
+          guestName: orderData.guestName,
+          item: orderData.item
+        });
+        
+        // TV'ye sipariş hazır olduğunu bildir
+        io.emit('orderReady', {
+          id: orderData.orderId,
+          orderNumber: orderData.orderNumber,
+          guestName: orderData.guestName,
+          item: orderData.item
+        });
+        
+        // TV Reklam sayfasına hazır siparişi gönder
+        io.emit('orderReadyForTv', {
+          id: orderData.orderId,
+          orderNumber: orderData.orderNumber,
+          guestName: orderData.guestName,
+          item: orderData.item
+        });
+      } else {
+        console.log(`[${getTimestamp()}] ⚠️  TV siparişi zaten listede var: ${orderData.orderId}`);
+      }
     }
     
     // Satışı rapora kaydet
     recordSale(orderData.guestName, orderData.item);
-    
-    // Broadcast to all clients (orderNumber'ı gönder)
-    io.emit('orderReady', {
-      orderId: orderData.orderId,
-      orderNumber: orderData.orderNumber,
-      guestName: orderData.guestName,
-      item: orderData.item
-    });
     
     console.log(`[${getTimestamp()}] 📢 Notification sent to customer (Order #${orderData.orderNumber})`);
   });

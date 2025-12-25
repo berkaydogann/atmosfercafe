@@ -146,7 +146,7 @@ const menuData = [
   },
   {
     id: 'pratik_soguklar',
-    title: 'Pratik Soğuklar',
+    title: 'Special Soğuklar',
     icon: 'bi-cup',
     items: [
       { name: 'Cococream', desc: 'Hindistan cevizi kaymağı', img: 'img/cococream.png' },

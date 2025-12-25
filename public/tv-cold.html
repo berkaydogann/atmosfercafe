@@ -116,7 +116,7 @@
         .column {
             display: flex;
             flex-direction: column;
-            gap: 2.5vh; /* Kartlar arası boşluk */
+            gap: 1.2vh; /* Kartlar arası boşluk - azaltıldı */
         }
 
         /* --- MENÜ KARTI --- */
@@ -124,7 +124,7 @@
             background: var(--glass-bg);
             border: 1px solid var(--glass-border);
             border-radius: 12px;
-            padding: 2vh;
+            padding: 1.2vh 1.5vh;
             position: relative;
             backdrop-filter: blur(16px);
             box-shadow: 0 10px 30px rgba(0,0,0,0.5);
@@ -135,30 +135,30 @@
         .section-header {
             display: flex;
             align-items: center;
-            gap: 1.5vh;
-            margin-bottom: 1.5vh;
-            padding-bottom: 1vh;
+            gap: 1vh;
+            margin-bottom: 0.8vh;
+            padding-bottom: 0.6vh;
             border-bottom: 1px solid rgba(0, 242, 255, 0.3);
         }
 
         .section-icon { 
-            font-size: 2.8vh; 
+            font-size: 2.2vh; 
             color: var(--neon-blue);
             filter: drop-shadow(0 0 8px var(--neon-glow));
         }
         
         .section-title {
-            font-size: 3.2vh;
+            font-size: 2.4vh;
             color: #fff;
             text-transform: uppercase;
             font-family: 'Rajdhani', sans-serif;
             font-weight: 700;
-            letter-spacing: 1px;
+            letter-spacing: 0.5px;
             text-shadow: 0 0 10px rgba(0, 242, 255, 0.3);
         }
 
         /* --- LİSTE ELEMANLARI --- */
-        .menu-list { display: flex; flex-direction: column; gap: 0.8vh; }
+        .menu-list { display: flex; flex-direction: column; gap: 0.4vh; }
 
         .menu-item {
             display: flex;
@@ -247,6 +247,26 @@
         /* Giriş Animasyonu */
         .fade-in { animation: fadeIn 0.6s ease-out forwards; opacity: 0; }
         @keyframes fadeIn { from { opacity: 0; transform: translateY(10px); } to { opacity: 1; transform: translateY(0); } }
+
+        /* --- QR KOD --- */
+        .qr-code {
+            position: fixed;
+            bottom: 2vh;
+            right: 2vh;
+            width: 160px;
+            height: 160px;
+            background: rgba(255, 255, 255, 0.95);
+            padding: 10px;
+            border-radius: 8px;
+            box-shadow: 0 8px 20px rgba(0, 0, 0, 0.5);
+            z-index: 1000;
+        }
+
+        .qr-code img {
+            width: 100%;
+            height: 100%;
+            object-fit: contain;
+        }
 
     </style>
 </head>
@@ -340,7 +360,7 @@
                 ] 
             },
             { 
-                title: 'Hızlı Soğuklar', 
+                title: 'Special Soğuklar', 
                 icon: 'fa-bottle-water', 
                 items: [
                     'Süt', 'Sade Soda', 'Limon Soda', 
@@ -453,5 +473,10 @@
 
         renderMenu();
     </script>
+
+    <!-- QR KOD -->
+    <div class="qr-code">
+        <img src="qr.png" alt="Sipariş QR Kodu" onerror="this.parentElement.style.display='none'">
+    </div>
 </body>
 </html>

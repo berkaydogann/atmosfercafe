@@ -499,6 +499,118 @@
             color: white;
         }
 
+        /* Cafe durum kontrol kartı */
+        .cafe-control-card {
+            background: var(--card-bg);
+            border-radius: 16px;
+            padding: 14px 16px;
+            margin: 12px 0;
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(220px, 1fr));
+            gap: 12px;
+            border: 1px solid var(--card-border);
+            box-shadow: var(--shadow-soft);
+        }
+
+        .cafe-control-card h4 {
+            grid-column: 1 / -1;
+            margin: 0;
+            font-size: 1rem;
+            color: var(--text-white);
+            display: flex;
+            align-items: center;
+            gap: 8px;
+        }
+
+        .cafe-control-card .muted {
+            grid-column: 1 / -1;
+            color: var(--text-dimmed);
+            font-size: 0.9rem;
+            margin-top: -4px;
+        }
+
+        .cafe-control-card label {
+            display: block;
+            margin-bottom: 6px;
+            color: var(--text-dimmed);
+            font-size: 0.9rem;
+        }
+
+        .cafe-control-card input {
+            width: 100%;
+            padding: 10px 12px;
+            border-radius: 10px;
+            border: 1px solid var(--card-border);
+            background: var(--card-bg-dark);
+            color: var(--text-white);
+            font-size: 0.95rem;
+        }
+
+        .cafe-control-actions {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 10px;
+        }
+
+        .cafe-control-btn {
+            flex: 1;
+            min-width: 160px;
+            padding: 10px 12px;
+            border-radius: 10px;
+            border: 1px solid var(--card-border);
+            background: var(--accent-3);
+            color: var(--text-white);
+            font-weight: 700;
+            cursor: pointer;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 8px;
+            transition: all 0.2s;
+        }
+
+        .cafe-control-btn.secondary {
+            background: var(--card-bg-dark);
+        }
+
+        .cafe-control-btn.danger {
+            background: rgba(255, 95, 87, 0.15);
+            border-color: var(--danger);
+            color: var(--danger);
+        }
+
+        .cafe-control-btn:hover {
+            filter: brightness(1.05);
+        }
+
+        .input-with-quick-select {
+            position: relative;
+        }
+
+        .quick-select-buttons {
+            display: flex;
+            gap: 8px;
+            flex-wrap: wrap;
+            margin-top: 8px;
+        }
+
+        .quick-select-btn {
+            padding: 6px 12px;
+            border-radius: 6px;
+            border: 1px solid var(--card-border);
+            background: rgba(0, 112, 74, 0.1);
+            color: var(--starbucks-green);
+            font-size: 0.85rem;
+            font-weight: 600;
+            cursor: pointer;
+            transition: all 0.2s;
+        }
+
+        .quick-select-btn:hover {
+            background: var(--starbucks-green);
+            color: white;
+        }
+
     </style>
 </head>
 <body>
@@ -533,6 +645,70 @@
             <span class="stat-label">Toplam</span>
             <span class="stat-value" id="totalCount">0</span>
         </div>
+    </div>
+
+    <div class="cafe-control-card">
+        <h4><i class="bi bi-megaphone"></i> Kafe Durumu / Ekran Mesajı</h4>
+        <div class="muted">15/30 dk kısayolları geri sayımı başlatır, ekrana kalan süre düşer.</div>
+        <div class="input-with-quick-select">
+            <label>Başlık / Not</label>
+            <input id="customNoteInput" type="text" placeholder="Özel başlık yazın veya hazır seçeneklerden seçin">
+            <div class="quick-select-buttons">
+                <button type="button" class="quick-select-btn" onclick="document.getElementById('customNoteInput').value='Sohbet Hazırlığı'">Sohbet Hazırlığı</button>
+                <button type="button" class="quick-select-btn" onclick="document.getElementById('customNoteInput').value='Namaz Vakti'">Namaz Vakti</button>
+                <button type="button" class="quick-select-btn" onclick="document.getElementById('customNoteInput').value='Mola'">Mola</button>
+            </div>
+        </div>
+        <div>
+            <label>Alt Bilgi</label>
+            <input id="customDetailInput" type="text" placeholder="Akşam - 19:45, 20 dk ara vb.">
+        </div>
+        <div class="input-with-quick-select">
+            <label>Namaz Adı</label>
+            <input id="prayerNameInput" type="text" placeholder="Özel namaz adı yazın veya hazır seçeneklerden seçin">
+            <div class="quick-select-buttons">
+                <button type="button" class="quick-select-btn" onclick="document.getElementById('prayerNameInput').value='Sabah Namazı Vakti'">Sabah Namazı Vakti</button>
+                <button type="button" class="quick-select-btn" onclick="document.getElementById('prayerNameInput').value='Öğle Namazı Vakti'">Öğle Namazı Vakti</button>
+                <button type="button" class="quick-select-btn" onclick="document.getElementById('prayerNameInput').value='İkindi Namazı Vakti'">İkindi Namazı Vakti</button>
+                <button type="button" class="quick-select-btn" onclick="document.getElementById('prayerNameInput').value='Akşam Namazı Vakti'">Akşam Namazı Vakti</button>
+                <button type="button" class="quick-select-btn" onclick="document.getElementById('prayerNameInput').value='Yatsı Namazı Vakti'">Yatsı Namazı Vakti</button>
+            </div>
+        </div>
+        <div class="cafe-control-actions">
+            <button class="cafe-control-btn" id="btnSetCustom">
+                <i class="bi bi-chat-dots"></i> Sohbet Hazırlığı
+            </button>
+            <button class="cafe-control-btn secondary" id="btnSetPrayer">
+                <i class="bi bi-moon-stars"></i> Namaz Vakti
+            </button>
+            <button class="cafe-control-btn secondary" id="btnTimer15" style="display: none;">
+                <i class="bi bi-stopwatch"></i> 15 dk Geri Sayım
+            </button>
+            <button class="cafe-control-btn secondary" id="btnTimer30" style="display: none;">
+                <i class="bi bi-stopwatch"></i> 30 dk Geri Sayım
+            </button>
+            <button class="cafe-control-btn danger" id="btnOpenCafe">
+                <i class="bi bi-door-open"></i> Kafeyi Aç (Temizle)
+            </button>
+        </div>
+        <div id="prayerTimerOptions" style="display: none; margin-top: 10px; padding: 15px; background: rgba(0, 112, 74, 0.1); border-radius: 10px; border: 1px solid var(--starbucks-green);">
+            <div style="margin-bottom: 10px; font-weight: 600; color: var(--starbucks-green);">Geri sayım süresi seçin:</div>
+            <div style="display: flex; gap: 10px; flex-wrap: wrap;">
+                <button class="cafe-control-btn" id="btnPrayer15" style="min-width: 100px;">
+                    <i class="bi bi-stopwatch"></i> 15 dk
+                </button>
+                <button class="cafe-control-btn" id="btnPrayer30" style="min-width: 100px;">
+                    <i class="bi bi-stopwatch"></i> 30 dk
+                </button>
+                <button class="cafe-control-btn" id="btnPrayer45" style="min-width: 100px;">
+                    <i class="bi bi-stopwatch"></i> 45 dk
+                </button>
+                <button class="cafe-control-btn secondary" id="btnCancelPrayer" style="min-width: 100px;">
+                    <i class="bi bi-x"></i> İptal
+                </button>
+            </div>
+        </div>
+        <div class="muted" id="countdownInfo"></div>
     </div>
 
     <!-- Sekmeler -->
@@ -703,6 +879,12 @@
         let cafeIsClosed = false; // Kafe kapalı mı
         let saturdayMenuItems = []; // Cumartesi menüsü için seçilen ürünler
         let saturdayTestMode = false; // Cumartesi test modu
+        const customNoteInput = document.getElementById('customNoteInput');
+        const customDetailInput = document.getElementById('customDetailInput');
+        const prayerNameInput = document.getElementById('prayerNameInput');
+        const countdownInfo = document.getElementById('countdownInfo');
+        let countdownEnd = null;
+        let countdownInterval = null;
 
         // Service Worker register et (bildirim için gerekli)
         if ('serviceWorker' in navigator) {
@@ -719,6 +901,7 @@
 
         // Sayfa yüklendiğinde aktif siparişleri çek
         loadActiveOrders();
+        socket.emit('getPrayerInfo');
 
         // Notification izni iste
         function requestNotificationPermission() {
@@ -803,35 +986,173 @@
             cafeIsClosed = !cafeIsClosed;
             socket.emit('toggleCafeStatus', { isClosed: cafeIsClosed });
             
-            // UI'ı güncelle
+            updateCafeStatusButton();
+        };
+
+        function updateCafeStatusButton(noteText) {
             const btn = document.getElementById('cafeStatusBtn');
-            const text = document.getElementById('cafeStatusText');
-            
+            const label = noteText ? `Kapalı - ${noteText}` : (cafeIsClosed ? 'Kapalı' : 'Açık');
             if (cafeIsClosed) {
                 btn.classList.remove('cafe-open');
                 btn.classList.add('cafe-closed');
-                btn.innerHTML = '<i class="bi bi-door-closed"></i> <span id="cafeStatusText">Kapalı</span>';
+                btn.innerHTML = `<i class="bi bi-door-closed"></i> <span id="cafeStatusText">${label}</span>`;
             } else {
                 btn.classList.remove('cafe-closed');
                 btn.classList.add('cafe-open');
-                btn.innerHTML = '<i class="bi bi-door-open"></i> <span id="cafeStatusText">Açık</span>';
+                btn.innerHTML = `<i class="bi bi-door-open"></i> <span id="cafeStatusText">${label}</span>`;
             }
-        };
+        }
+
+        function clearCountdown() {
+            countdownEnd = null;
+            if (countdownInterval) {
+                clearInterval(countdownInterval);
+                countdownInterval = null;
+            }
+            if (countdownInfo) countdownInfo.textContent = '';
+        }
+
+        function formatRemaining(ms) {
+            if (ms <= 0) return '00:00';
+            const totalSeconds = Math.floor(ms / 1000);
+            const m = Math.floor(totalSeconds / 60).toString().padStart(2, '0');
+            const s = (totalSeconds % 60).toString().padStart(2, '0');
+            return `${m}:${s}`;
+        }
+
+        function startCountdown(endTs) {
+            countdownEnd = endTs;
+            if (countdownInterval) clearInterval(countdownInterval);
+            const update = () => {
+                if (!countdownEnd) { clearCountdown(); return; }
+                const remaining = countdownEnd - Date.now();
+                if (remaining <= 0) {
+                    clearCountdown();
+                    updateCafeStatusButton();
+                    return;
+                }
+                if (countdownInfo) countdownInfo.textContent = `Kalan süre: ${formatRemaining(remaining)}`;
+            };
+            update();
+            countdownInterval = setInterval(update, 1000);
+        }
+
+        function applyCustomClose({ note, detail }) {
+            const customNote = note && note.trim() ? note.trim() : 'Sohbet Hazırlığı';
+            const customDetail = detail && detail.trim() ? detail.trim() : '';
+
+            cafeIsClosed = true;
+            updateCafeStatusButton(customNote);
+
+            socket.emit('toggleCafeStatus', {
+                isClosed: true,
+                closedReason: 'custom',
+                customNote: customNote,
+                customDetail: customDetail || null,
+                countdownEnd: countdownEnd
+            });
+        }
+
+        function applyPrayerClose({ prayerName, prayerTime }) {
+            cafeIsClosed = true;
+            updateCafeStatusButton(prayerName || 'Namaz Vakti');
+
+            socket.emit('toggleCafeStatus', {
+                isClosed: true,
+                closedReason: 'prayer',
+                prayerName: prayerName || 'Namaz Vakti',
+                prayerTime: prayerTime || null,
+                countdownEnd: countdownEnd || null
+            });
+        }
+
+        // Hızlı butonlar
+        document.getElementById('btnSetCustom').addEventListener('click', () => {
+            applyCustomClose({
+                note: customNoteInput.value || 'Sohbet Hazırlığı',
+                detail: customDetailInput.value
+            });
+        });
+
+        document.getElementById('btnSetPrayer').addEventListener('click', () => {
+            const timerOptions = document.getElementById('prayerTimerOptions');
+            timerOptions.style.display = timerOptions.style.display === 'none' ? 'block' : 'none';
+        });
+
+        document.getElementById('btnPrayer15').addEventListener('click', () => {
+            countdownEnd = Date.now() + 15 * 60 * 1000;
+            startCountdown(countdownEnd);
+            applyPrayerClose({
+                prayerName: prayerNameInput.value || 'Namaz Vakti',
+                prayerTime: null
+            });
+            document.getElementById('prayerTimerOptions').style.display = 'none';
+        });
+
+        document.getElementById('btnPrayer30').addEventListener('click', () => {
+            countdownEnd = Date.now() + 30 * 60 * 1000;
+            startCountdown(countdownEnd);
+            applyPrayerClose({
+                prayerName: prayerNameInput.value || 'Namaz Vakti',
+                prayerTime: null
+            });
+            document.getElementById('prayerTimerOptions').style.display = 'none';
+        });
+
+        document.getElementById('btnPrayer45').addEventListener('click', () => {
+            countdownEnd = Date.now() + 45 * 60 * 1000;
+            startCountdown(countdownEnd);
+            applyPrayerClose({
+                prayerName: prayerNameInput.value || 'Namaz Vakti',
+                prayerTime: null
+            });
+            document.getElementById('prayerTimerOptions').style.display = 'none';
+        });
+
+        document.getElementById('btnCancelPrayer').addEventListener('click', () => {
+            document.getElementById('prayerTimerOptions').style.display = 'none';
+        });
+
+        document.getElementById('btnTimer15').addEventListener('click', () => {
+            countdownEnd = Date.now() + 15 * 60 * 1000;
+            startCountdown(countdownEnd);
+            applyCustomClose({
+                note: customNoteInput.value || 'Kısa Ara',
+                detail: customDetailInput.value || '15 dk'
+            });
+        });
+
+        document.getElementById('btnTimer30').addEventListener('click', () => {
+            countdownEnd = Date.now() + 30 * 60 * 1000;
+            startCountdown(countdownEnd);
+            applyCustomClose({
+                note: customNoteInput.value || 'Kısa Ara',
+                detail: customDetailInput.value || '30 dk'
+            });
+        });
+
+        document.getElementById('btnOpenCafe').addEventListener('click', () => {
+            cafeIsClosed = false;
+            updateCafeStatusButton();
+            clearCountdown();
+            socket.emit('toggleCafeStatus', { isClosed: false });
+        });
 
         // Kafe durumunu al
         socket.on('cafeStatus', (status) => {
             cafeIsClosed = status.isClosed;
+            if (status.customNote) customNoteInput.value = status.customNote;
+            if (status.customDetail) customDetailInput.value = status.customDetail;
+            if (status.prayerName) prayerNameInput.value = status.prayerName;
+            if (status.countdownEnd) startCountdown(status.countdownEnd); else clearCountdown();
             
-            const btn = document.getElementById('cafeStatusBtn');
-            if (cafeIsClosed) {
-                btn.classList.remove('cafe-open');
-                btn.classList.add('cafe-closed');
-                btn.innerHTML = '<i class="bi bi-door-closed"></i> <span id="cafeStatusText">Kapalı</span>';
-            } else {
-                btn.classList.remove('cafe-closed');
-                btn.classList.add('cafe-open');
-                btn.innerHTML = '<i class="bi bi-door-open"></i> <span id="cafeStatusText">Açık</span>';
-            }
+            updateCafeStatusButton(status.customNote || (status.prayerName ? status.prayerName : undefined));
+        });
+
+        // Anlık namaz bilgisi (API'den gelen) için alanları otomatik doldur
+        socket.on('prayerInfo', (info) => {
+            if (!info) return;
+            if (info.name) prayerNameInput.value = info.name;
         });
 
         // Tab Yönetimi

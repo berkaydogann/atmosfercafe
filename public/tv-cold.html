@@ -3,279 +3,330 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Atmosfer Kafe - Crystal Cold Menu</title>
-    <link href="https://fonts.googleapis.com/css2?family=Oswald:wght@300;400;600&family=Rajdhani:wght@500;700&display=swap" rel="stylesheet">
+    <title>Atmosfer Kafe - Soğuk Menü</title>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@500;600&family=Oswald:wght@500;700&display=swap" rel="stylesheet">
     <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css" rel="stylesheet">
     
     <style>
         :root {
-            /* RENK PALETİ */
-            --bg-dark: #02040a;
-            --glass-bg: rgba(18, 26, 43, 0.65); /* Daha koyu, daha okunabilir cam */
-            --glass-border: rgba(100, 200, 255, 0.15);
-            --neon-blue: #00f2ff;
-            --neon-glow: rgba(0, 242, 255, 0.4);
-            --text-main: #ffffff;
-            --text-dim: #8b9bb4;
-            --danger: #ff3366;
-            --danger-glow: rgba(255, 51, 102, 0.4);
+            /* --- ATMOSFER PREMIUM TEMA --- */
+            --bg-deep: #030705; 
+            --brand-green: #00dc82; 
+            --brand-green-dim: rgba(0, 220, 130, 0.15);
+            --brand-green-glow: rgba(0, 220, 130, 0.5);
+            
+            --text-bright: #FFFFFF;
+            --text-item: #eeeeee; /* Daha parlak beyaz */
+            --text-muted: #888888;
+            --danger: #ff4d4d;
+            
+            --glass: rgba(10, 20, 15, 0.85); /* Daha belirgin zemin */
+            --border: rgba(0, 220, 130, 0.3);
         }
 
         * { margin: 0; padding: 0; box-sizing: border-box; }
 
         body {
-            background-color: var(--bg-dark);
-            /* Hafif hareketli arka plan */
-            background-image: 
-                radial-gradient(circle at 10% 10%, rgba(0, 40, 80, 0.4), transparent 40%),
-                radial-gradient(circle at 90% 80%, rgba(0, 100, 150, 0.2), transparent 40%);
-            color: var(--text-main);
-            font-family: 'Oswald', sans-serif;
+            background-color: var(--bg-deep);
+            color: var(--text-bright);
+            font-family: 'Inter', sans-serif;
             height: 100vh;
             width: 100vw;
-            overflow: hidden;
-            padding: 2vh 3vw;
+            overflow: hidden; /* Taşma yok */
+            padding: 1.5vh 2vw; /* Kenar boşlukları ideal */
             display: flex;
             flex-direction: column;
-            user-select: none; /* TV'de seçim yapılmasın */
+            user-select: none;
+            position: relative;
         }
+
+        /* --- ARKA PLAN (SİNEMATİK) --- */
+        .scene {
+            position: fixed;
+            inset: 0;
+            z-index: 0;
+            overflow: hidden;
+            pointer-events: none;
+        }
+
+        .aurora {
+            position: absolute;
+            width: 150%;
+            height: 150%;
+            top: -25%;
+            left: -25%;
+            background-image: 
+                radial-gradient(circle at 30% 40%, rgba(0, 220, 130, 0.12) 0%, transparent 50%),
+                radial-gradient(circle at 70% 60%, rgba(0, 220, 130, 0.08) 0%, transparent 50%);
+            filter: blur(70px);
+            animation: auroraFlow 25s ease-in-out infinite alternate;
+            opacity: 0.8;
+        }
+
+        @keyframes auroraFlow {
+            0% { transform: scale(1) rotate(0deg); }
+            100% { transform: scale(1.1) rotate(2deg); }
+        }
+
+        .smoke {
+            position: absolute;
+            inset: 0;
+            background-image: url('data:image/svg+xml;utf8,<svg xmlns="http://www.w3.org/2000/svg" width="100" height="100"><rect width="1" height="1" fill="rgba(255,255,255,0.02)"/></svg>');
+            z-index: 1;
+            animation: smokeDrift 40s linear infinite;
+        }
+        @keyframes smokeDrift { to { background-position: 100% 100%; } }
 
         /* --- HEADER --- */
         .header {
-            height: 12vh;
+            height: 11vh; /* Header biraz daha belirgin */
             display: flex;
             align-items: center;
             justify-content: space-between;
             margin-bottom: 2vh;
-            padding: 0 1vw;
-            border-bottom: 1px solid rgba(255,255,255,0.05);
+            padding: 0 2.5vw;
+            background: var(--glass);
+            backdrop-filter: blur(20px);
+            border: 1px solid var(--border);
+            border-radius: 14px;
+            position: relative;
+            z-index: 10;
+            box-shadow: 0 10px 30px rgba(0,0,0,0.5);
         }
 
-        .brand-block { display: flex; flex-direction: column; }
+        .header::after {
+            content: '';
+            position: absolute;
+            bottom: 0; left: 10%; right: 10%;
+            height: 2px;
+            background: linear-gradient(90deg, transparent, var(--brand-green), transparent);
+            box-shadow: 0 0 10px var(--brand-green);
+        }
+
+        .brand-block { display: flex; flex-direction: column; justify-content: center; }
 
         .brand-title {
-            font-family: 'Rajdhani', sans-serif; /* Daha fütüristik başlık */
-            font-size: 7vh;
+            font-family: 'Oswald', sans-serif;
+            font-size: 5.5vh; /* Başlık büyütüldü */
             font-weight: 700;
-            color: #fff;
+            color: var(--text-bright);
+            letter-spacing: 3px;
             text-transform: uppercase;
-            line-height: 0.8;
-            letter-spacing: 2px;
-            text-shadow: 0 0 20px var(--neon-glow);
+            line-height: 1;
+            text-shadow: 0 0 15px rgba(255,255,255,0.1);
         }
 
         .brand-subtitle {
-            font-size: 2.2vh;
-            color: var(--neon-blue);
+            font-size: 2vh;
+            color: var(--brand-green);
             letter-spacing: 6px;
             text-transform: uppercase;
-            font-weight: 400;
-            margin-top: 0.5vh;
-            margin-left: 4px;
+            font-weight: 600;
             display: flex;
             align-items: center;
             gap: 10px;
+            margin-top: 5px;
+            text-shadow: 0 0 10px var(--brand-green-glow);
         }
 
         .header-right { display: flex; align-items: center; gap: 2vw; }
 
         .header-logo-mini {
-            height: 9vh;
-            filter: drop-shadow(0 0 15px rgba(255,255,255,0.1));
+            height: 8.5vh;
+            filter: drop-shadow(0 0 10px var(--brand-green-glow));
         }
 
         .mode-badge {
-            background: rgba(0, 242, 255, 0.1);
-            border: 1px solid var(--neon-blue);
-            color: var(--neon-blue);
+            background: rgba(0, 220, 130, 0.1);
+            color: var(--brand-green);
+            border: 1px solid var(--brand-green);
             padding: 0.8vh 2vh;
-            border-radius: 4px;
+            border-radius: 6px;
+            font-family: 'Oswald', sans-serif;
             font-size: 2vh;
             font-weight: 600;
-            letter-spacing: 2px;
-            box-shadow: 0 0 15px var(--neon-glow);
-            animation: pulseBadge 2s infinite;
-            display: none; /* JS ile açılır */
+            letter-spacing: 1px;
+            text-transform: uppercase;
+            display: none;
+            box-shadow: 0 0 15px var(--brand-green-dim);
+            animation: badgePulse 2s infinite;
         }
+        @keyframes badgePulse { 50% { box-shadow: 0 0 25px var(--brand-green-glow); } }
 
-        @keyframes pulseBadge {
-            0% { box-shadow: 0 0 10px var(--neon-glow); }
-            50% { box-shadow: 0 0 25px var(--neon-glow), inset 0 0 10px var(--neon-glow); }
-            100% { box-shadow: 0 0 10px var(--neon-glow); }
-        }
-
-        /* --- GRID YAPISI --- */
+        /* --- GRID DÜZENİ (4 KOLON) --- */
         .main-content {
             display: grid;
-            grid-template-columns: repeat(3, 1fr);
-            gap: 2.5vw; /* Kolonlar arası boşluk */
-            height: 84vh;
+            grid-template-columns: repeat(4, 1fr); /* 4 Sütun */
+            gap: 1.5vw;
+            height: 85vh; /* Kalan alan */
             width: 100%;
+            position: relative;
+            z-index: 10;
         }
 
         .column {
             display: flex;
             flex-direction: column;
-            gap: 1.2vh; /* Kartlar arası boşluk - azaltıldı */
+            gap: 2vh; /* Kartlar arası boşluk */
         }
 
         /* --- MENÜ KARTI --- */
         .menu-section {
-            background: var(--glass-bg);
-            border: 1px solid var(--glass-border);
+            background: var(--glass);
+            backdrop-filter: blur(15px);
+            border: 1px solid var(--border);
             border-radius: 12px;
-            padding: 1.2vh 1.5vh;
+            padding: 1.8vh;
             position: relative;
-            backdrop-filter: blur(16px);
-            box-shadow: 0 10px 30px rgba(0,0,0,0.5);
+            box-shadow: 0 15px 40px rgba(0,0,0,0.4);
             transition: all 0.3s ease;
         }
 
-        /* Kategori Başlığı */
+        /* Neon Çizgi */
+        .menu-section::before {
+            content: '';
+            position: absolute;
+            top: 0; left: 0; right: 0;
+            height: 3px;
+            background: linear-gradient(90deg, transparent, var(--brand-green), transparent);
+            opacity: 0.8;
+            box-shadow: 0 0 8px var(--brand-green);
+        }
+
+        /* Başlıklar */
         .section-header {
             display: flex;
             align-items: center;
-            gap: 1vh;
-            margin-bottom: 0.8vh;
-            padding-bottom: 0.6vh;
-            border-bottom: 1px solid rgba(0, 242, 255, 0.3);
+            gap: 1.2vh;
+            margin-bottom: 1.5vh;
+            padding-bottom: 1vh;
+            border-bottom: 1px solid rgba(255,255,255,0.1);
         }
 
-        .section-icon { 
-            font-size: 2.2vh; 
-            color: var(--neon-blue);
-            filter: drop-shadow(0 0 8px var(--neon-glow));
+        .icon-wrapper {
+            width: 4vh;
+            height: 4vh;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            border-radius: 50%;
+            background: rgba(0, 220, 130, 0.15);
+            border: 1px solid var(--brand-green);
+            box-shadow: 0 0 10px var(--brand-green-dim);
         }
-        
+
+        .section-icon { font-size: 2vh; color: var(--brand-green); }
+
         .section-title {
-            font-size: 2.4vh;
-            color: #fff;
+            font-family: 'Oswald', sans-serif;
+            font-size: 2.8vh; /* BAŞLIKLAR BÜYÜDÜ */
+            color: var(--text-bright);
             text-transform: uppercase;
-            font-family: 'Rajdhani', sans-serif;
-            font-weight: 700;
-            letter-spacing: 0.5px;
-            text-shadow: 0 0 10px rgba(0, 242, 255, 0.3);
+            font-weight: 600;
+            letter-spacing: 1px;
         }
 
-        /* --- LİSTE ELEMANLARI --- */
-        .menu-list { display: flex; flex-direction: column; gap: 0.4vh; }
+        /* --- ÜRÜN LİSTESİ --- */
+        .menu-list {
+            display: flex;
+            flex-direction: column;
+            gap: 0.9vh; /* Satır arası boşluk */
+        }
 
         .menu-item {
             display: flex;
             justify-content: space-between;
             align-items: center;
-            font-size: 2.3vh;
-            color: #e0e6ed;
-            font-weight: 400;
-            letter-spacing: 0.5px;
-            height: 3.2vh; /* Sabit yükseklik hizalama için */
+            font-size: 2.2vh; /* YAZILAR CİDDİ ORANDA BÜYÜDÜ (1.65 -> 2.2) */
+            color: var(--text-item);
+            font-weight: 500;
+            letter-spacing: 0.3px;
+            line-height: 1.2;
         }
 
-        .item-name {
-            z-index: 2;
-            white-space: nowrap; /* Satır kaymasını engelle */
-        }
+        .item-name { white-space: nowrap; }
 
-        /* Lider Noktalar (Dotted Line) */
+        /* Noktalar */
         .dots {
             flex-grow: 1;
             margin: 0 10px;
-            border-bottom: 2px dotted rgba(255, 255, 255, 0.15);
+            border-bottom: 2px dotted rgba(0, 220, 130, 0.25); /* Daha belirgin noktalar */
             position: relative;
-            top: -4px;
+            top: -5px;
         }
 
-        /* Stok Durumu */
-        .item-status { font-size: 1.8vh; }
-
-        .menu-item.unavailable .item-name { 
-            color: var(--text-dim); 
-            opacity: 0.6; 
-            text-decoration: none; /* Üstü çizili yerine sönük yapalım, daha modern */
+        .menu-item.unavailable .item-name {
+            color: var(--text-muted);
+            opacity: 0.6;
+            text-decoration: line-through;
         }
-        
+
         .stock-tag {
-            color: var(--danger);
-            border: 1px solid var(--danger);
-            padding: 0.1vh 0.8vh;
+            color: #fff;
+            background: rgba(255, 77, 77, 0.9);
+            padding: 0.2vh 0.8vh;
             border-radius: 4px;
             font-weight: 700;
-            background: rgba(255, 51, 102, 0.1);
-            box-shadow: 0 0 8px var(--danger-glow);
             font-size: 1.6vh;
+            font-family: 'Oswald', sans-serif;
             letter-spacing: 1px;
+            box-shadow: 0 0 8px rgba(255, 77, 77, 0.4);
         }
 
-        /* --- NAMAZ VAKTİ EKRANI --- */
+        /* --- DİĞER --- */
+        .fade-in { animation: waterfallIn 0.6s ease-out forwards; opacity: 0; transform: translateY(15px); }
+        @keyframes waterfallIn { to { opacity: 1; transform: translateY(0); } }
+
+        /* Namaz Vakti Ekranı */
         #cafeStatusBanner {
             display: none;
-            position: fixed; top: 0; left: 0; width: 100vw; height: 100vh;
-            background: rgba(0, 0, 0, 0.96);
+            position: fixed;
+            top: 0; left: 0; width: 100vw; height: 100vh;
+            background-color: #000;
+            background-image: radial-gradient(circle at 50% 40%, rgba(0, 220, 130, 0.1) 0%, transparent 70%);
             z-index: 9999;
-            flex-direction: column; justify-content: center; align-items: center;
-            backdrop-filter: blur(20px);
+            flex-direction: column;
+            justify-content: center;
+            align-items: center;
         }
+        .status-logo-img { height: 25vh; margin-bottom: 4vh; filter: drop-shadow(0 0 30px var(--brand-green-glow)); animation: floatStatus 4s infinite; }
+        @keyframes floatStatus { 0%,100%{transform:translateY(0)} 50%{transform:translateY(-15px)} }
+        .status-title { font-family: 'Oswald', sans-serif; font-size: 12vh; font-weight: 700; color: var(--brand-green); text-shadow: 0 0 40px var(--brand-green-glow); }
+        .status-subtitle { font-size: 3.5vh; color: #fff; opacity: 0.8; margin-top: 2vh; border-top: 1px solid var(--border); padding-top: 2vh; }
+        .status-detail { font-size: 2.8vh; color: #c7f3dd; margin-top: 1vh; opacity: 0.85; }
+        .status-countdown { font-size: 8vh; font-weight: 700; color: var(--brand-green); text-shadow: 0 0 30px var(--brand-green-glow); font-family: 'Oswald', sans-serif; letter-spacing: 2px; margin-top: 2vh; }
 
-        .status-logo-img {
-            height: 30vh;
-            width: auto;
-            margin-bottom: 4vh;
-            filter: grayscale(100%) brightness(200%) drop-shadow(0 0 30px rgba(255,255,255,0.2));
-        }
-
-        .status-title {
-            font-family: 'Rajdhani', sans-serif;
-            font-size: 14vh;
-            color: #fff;
-            font-weight: 700;
-            text-transform: uppercase;
-            letter-spacing: 10px;
-            margin-bottom: 1vh;
-            text-shadow: 0 0 40px rgba(255,255,255,0.3);
-        }
-        
-        .status-subtitle {
-            font-size: 4vh;
-            color: var(--neon-blue);
-            font-weight: 300;
-            letter-spacing: 4px;
-            text-transform: uppercase;
-            border-top: 1px solid var(--glass-border);
-            padding-top: 2vh;
-        }
-
-        /* Giriş Animasyonu */
-        .fade-in { animation: fadeIn 0.6s ease-out forwards; opacity: 0; }
-        @keyframes fadeIn { from { opacity: 0; transform: translateY(10px); } to { opacity: 1; transform: translateY(0); } }
-
-        /* --- QR KOD --- */
+        /* QR Kod */
         .qr-code {
             position: fixed;
             bottom: 2vh;
             right: 2vh;
-            width: 160px;
-            height: 160px;
+            width: 13vh;
+            height: 13vh;
             background: rgba(255, 255, 255, 0.95);
-            padding: 10px;
-            border-radius: 8px;
-            box-shadow: 0 8px 20px rgba(0, 0, 0, 0.5);
+            padding: 8px;
+            border-radius: 12px;
             z-index: 1000;
+            border: 2px solid var(--brand-green);
+            box-shadow: 0 0 20px rgba(0,220,130,0.3);
         }
-
-        .qr-code img {
-            width: 100%;
-            height: 100%;
-            object-fit: contain;
-        }
+        .qr-code img { width: 100%; height: 100%; object-fit: contain; }
 
     </style>
 </head>
 <body>
 
-    <div class="header">
+    <div class="scene">
+        <div class="aurora"></div>
+        <div class="smoke"></div>
+    </div>
+
+    <div class="header fade-in">
         <div class="brand-block">
             <div class="brand-title">ATMOSFER KAFE</div>
-            <div class="brand-subtitle"><i class="fas fa-snowflake fa-spin" style="--fa-animation-duration: 10s;"></i> KRİSTAL SOĞUK MENÜ</div>
+            <div class="brand-subtitle">
+                <i class="fas fa-snowflake"></i> SOĞUK İÇECEK MENÜSÜ
+            </div>
         </div>
         <div class="header-right">
             <div id="saturdayBadge" class="mode-badge">CUMARTESİ ÖZEL</div>
@@ -283,27 +334,34 @@
         </div>
     </div>
 
-    <div class="main-content" id="mainContainer">
-        </div>
+    <div class="main-content" id="mainContainer"></div>
 
     <div id="cafeStatusBanner">
         <img src="cinarlogo3.png" alt="Logo" class="status-logo-img" onerror="this.style.display='none'">
-        <div class="status-title">NAMAZ VAKTİ</div>
-        <div class="status-subtitle">Hizmetimize kısa bir ara veriyoruz</div>
+        <div class="status-title" id="statusTitle">NAMAZ VAKTİ</div>
+        <div class="status-subtitle" id="statusSubtitle">Hizmetimize kısa bir ara veriyoruz</div>
+        <div class="status-countdown" id="statusCountdown" style="display: none;"></div>
+        <div class="status-detail" id="statusDetail"></div>
+    </div>
+
+    <div class="qr-code fade-in" style="animation-delay: 0.8s;">
+        <img src="qr.png" alt="Sipariş QR Kodu" onerror="this.parentElement.style.display='none'">
     </div>
 
     <script src="/socket.io/socket.io.js"></script>
     <script>
+        // Hata önleyici Socket başlatma
         const socket = typeof io !== 'undefined' ? io() : { emit:()=>{}, on:(e,c)=>{if(e==='stockStatus')c({})} };
         
         let stockStatus = {};
         let saturdayMenuItems = []; 
         let isSaturdayEvening = false;
         let cafeIsClosed = false;
+        let cafeStatusDetails = {};
+        let countdownTimer = null;
 
-        // VERİLER (MENÜ İÇERİĞİ)
+        // VERİLER
         const menuSections = [
-            // SOL KOLON
             { 
                 title: 'Ice Espresso', 
                 icon: 'fa-cube', 
@@ -322,8 +380,6 @@
                     'Soğuk Filtre', 'Soğuk Sütlü Filtre'
                 ] 
             },
-            
-            // ORTA KOLON
             { 
                 title: 'Ice Latte', 
                 icon: 'fa-whiskey-glass', 
@@ -348,8 +404,6 @@
                     'Muz Milkshake', 'Mango Milkshake', 'Sahlep Milkshake'
                 ] 
             },
-            
-            // SAĞ KOLON
             { 
                 title: 'Frozen', 
                 icon: 'fa-snowflake', 
@@ -372,23 +426,25 @@
 
         function renderMenu() {
             const container = document.getElementById('mainContainer');
+            if(!container) return;
             container.innerHTML = ''; 
 
             const columns = [];
-            const colHeights = [0, 0, 0]; 
+            // 4 Kolon için yükseklik takibi dizisi
+            const colHeights = [0, 0, 0, 0]; 
 
-            // 3 Kolon Oluştur
-            for(let i=0; i<3; i++) {
+            // 4 Kolon Oluştur
+            for(let i=0; i<4; i++) {
                 const div = document.createElement('div');
                 div.className = 'column';
                 container.appendChild(div);
                 columns.push(div);
             }
 
-            // Cumartesi Filtresi
             let sectionsToRender = JSON.parse(JSON.stringify(menuSections));
             if (isSaturdayEvening) {
-                document.getElementById('saturdayBadge').style.display = 'block';
+                const badge = document.getElementById('saturdayBadge');
+                if(badge) badge.style.display = 'block';
                 if (saturdayMenuItems.length > 0) {
                     sectionsToRender = sectionsToRender.map(s => {
                         s.items = s.items.filter(i => saturdayMenuItems.includes(i));
@@ -396,18 +452,19 @@
                     }).filter(s => s.items.length > 0);
                 }
             } else {
-                document.getElementById('saturdayBadge').style.display = 'none';
+                const badge = document.getElementById('saturdayBadge');
+                if(badge) badge.style.display = 'none';
             }
 
-            // Kartları Dağıt (Basit Yükseklik Algoritması)
+            // Kartları En Kısa Kolona Dağıt
             sectionsToRender.forEach((section, idx) => {
                 const secDiv = document.createElement('div');
                 secDiv.className = 'menu-section fade-in';
-                secDiv.style.animationDelay = `${idx * 0.05}s`; // Waterfall efekti
+                secDiv.style.animationDelay = `${idx * 0.05}s`;
 
                 let html = `
                     <div class="section-header">
-                        <i class="fas ${section.icon} section-icon"></i>
+                        <div class="icon-wrapper"><i class="fas ${section.icon} section-icon"></i></div>
                         <span class="section-title">${section.title}</span>
                     </div>
                     <div class="menu-list">
@@ -415,11 +472,8 @@
 
                 section.items.forEach(item => {
                     let isUnavailable = stockStatus[item] === false;
-                    if (isUnavailable) {
-                        console.log(`🚫 Item "${item}" is unavailable. stockStatus[${item}] =`, stockStatus[item]);
-                    }
                     let extraClass = isUnavailable ? 'unavailable' : '';
-                    let statusHtml = isUnavailable ? '<span class="stock-tag">TÜKENDİ</span>' : ''; // "YOK" yerine "TÜKENDİ" daha şık
+                    let statusHtml = isUnavailable ? '<span class="stock-tag">TÜKENDİ</span>' : '';
                     
                     html += `
                         <div class="menu-item ${extraClass}">
@@ -432,51 +486,126 @@
                 html += '</div>';
                 secDiv.innerHTML = html;
 
-                // En kısa kolona ekle
+                // En kısa kolonu bul ve ekle
                 const minCol = colHeights.indexOf(Math.min(...colHeights));
                 columns[minCol].appendChild(secDiv);
-                // Yükseklik tahmini (Header + Items)
-                colHeights[minCol] += (section.items.length * 1.2 + 4); 
+                
+                // Yükseklik tahmini (Yazılar büyüdüğü için katsayı arttı)
+                colHeights[minCol] += (section.items.length * 1.2 + 4.5); 
             });
         }
 
         function updateCafeStatus() {
-            document.getElementById('cafeStatusBanner').style.display = cafeIsClosed ? 'flex' : 'none';
+            const banner = document.getElementById('cafeStatusBanner');
+            if(!banner) return;
+
+            if(!cafeIsClosed) {
+                banner.style.display = 'none';
+                if(countdownTimer) { clearInterval(countdownTimer); countdownTimer = null; }
+                return;
+            }
+
+            banner.style.display = 'flex';
+
+            const titleEl = document.getElementById('statusTitle');
+            const subtitleEl = document.getElementById('statusSubtitle');
+            const countdownEl = document.getElementById('statusCountdown');
+            const detailEl = document.getElementById('statusDetail');
+
+            const reason = cafeStatusDetails.closedReason;
+            const isPrayer = reason === 'prayer';
+            const prayerLine = (cafeStatusDetails.prayerName || cafeStatusDetails.prayerTime)
+                ? `${cafeStatusDetails.prayerName || ''}${(cafeStatusDetails.prayerName && cafeStatusDetails.prayerTime) ? ' - ' : ''}${cafeStatusDetails.prayerTime || ''}`
+                : '';
+
+            const titleText = cafeStatusDetails.customNote || (isPrayer ? 'Namaz Vakti' : 'Kısa Ara');
+            let subtitleText = cafeStatusDetails.customDetail || (isPrayer ? 'Hizmetimize kısa bir ara veriyoruz' : 'Hizmetimize kısa bir ara veriyoruz');
+            let detailText = cafeStatusDetails.customDetail || prayerLine;
+
+            if(countdownTimer) { clearInterval(countdownTimer); countdownTimer = null; }
+            const endTs = cafeStatusDetails.countdownEnd ? Number(cafeStatusDetails.countdownEnd) : null;
+            
+            const updateCountdown = () => {
+                if(!endTs || !countdownEl) return;
+                const remaining = endTs - Date.now();
+                if(remaining <= 0) {
+                    countdownEl.textContent = '00:00';
+                    countdownEl.style.display = 'block';
+                    if(detailEl) detailEl.textContent = prayerLine || '';
+                    clearInterval(countdownTimer);
+                    countdownTimer = null;
+                    return;
+                }
+                const totalSeconds = Math.floor(remaining / 1000);
+                const m = Math.floor(totalSeconds / 60).toString().padStart(2,'0');
+                const s = (totalSeconds % 60).toString().padStart(2,'0');
+                countdownEl.textContent = `${m}:${s}`;
+                countdownEl.style.display = 'block';
+            };
+
+            if(endTs && countdownEl) {
+                updateCountdown();
+                countdownTimer = setInterval(updateCountdown, 1000);
+            } else if(countdownEl) {
+                countdownEl.style.display = 'none';
+            }
+
+            if(titleEl) titleEl.textContent = titleText;
+            if(subtitleEl) subtitleEl.textContent = subtitleText;
+            if(detailEl) {
+                detailEl.textContent = detailText || '';
+                detailEl.style.display = detailText ? 'block' : 'none';
+            }
         }
 
-        // Socket Events
+        function setupCustomStatusBadge() {
+            const badge = document.getElementById('saturdayBadge');
+            if(!badge || badge.dataset.bound === 'true') return;
+            badge.dataset.bound = 'true';
+            badge.style.cursor = 'pointer';
+            badge.title = 'Özel mesaj gir';
+
+            badge.addEventListener('click', () => {
+                const note = prompt('Ekranda gösterilecek başlık', cafeStatusDetails.customNote || 'Sohbet Hazırlığı');
+                if(!note) return;
+                const detail = prompt('Alt bilgi (örn. Akşam - 19:45) - opsiyonel', cafeStatusDetails.customDetail || '');
+
+                cafeStatusDetails.customNote = note;
+                cafeStatusDetails.customDetail = detail || '';
+                cafeStatusDetails.closedReason = 'custom';
+                cafeIsClosed = true;
+                updateCafeStatus();
+
+                socket.emit('toggleCafeStatus', {
+                    isClosed: true,
+                    closedReason: 'custom',
+                    customNote: note,
+                    customDetail: detail || null
+                });
+            });
+        }
+
         socket.emit('getStock');
         socket.emit('getSaturdayMenuStatus');
         socket.emit('getCafeStatus');
 
-        socket.on('stockStatus', s => { 
-            console.log('📦 stockStatus received:', JSON.stringify(s, null, 2));
-            stockStatus = s; 
-            renderMenu(); 
-        });
-        socket.on('stockUpdated', d => { 
-            console.log('🔄 stockUpdated received:', d);
-            console.log('   Item name:', d.itemName, 'Is Available:', d.isAvailable);
-            stockStatus[d.itemName] = d.isAvailable;
-            console.log('✅ Updated stockStatus after update:', JSON.stringify(stockStatus, null, 2));
-            renderMenu(); 
-        });
+        socket.on('stockStatus', s => { stockStatus = s; renderMenu(); });
+        socket.on('stockUpdated', d => { stockStatus[d.itemName] = d.isAvailable; renderMenu(); });
         socket.on('saturdayMenuStatus', d => { saturdayMenuItems = d.items || []; isSaturdayEvening = d.isSaturdayEvening; renderMenu(); });
         socket.on('saturdayMenuUpdated', i => { saturdayMenuItems = i; isSaturdayEvening = i.length > 0; renderMenu(); });
-        socket.on('cafeStatus', s => { cafeIsClosed = s.isClosed; updateCafeStatus(); });
+        socket.on('cafeStatus', s => { 
+            cafeStatusDetails = s || {};
+            cafeIsClosed = !!(s && s.isClosed); 
+            updateCafeStatus(); 
+        });
 
-        // Klavye Kısayolları (Test İçin)
         document.addEventListener('keydown', e => {
             if(e.key === 's') { isSaturdayEvening = !isSaturdayEvening; if(!saturdayMenuItems.length) saturdayMenuItems=['Ice Latte', 'Cool Lime']; renderMenu(); }
             if(e.key === 'c') { cafeIsClosed = !cafeIsClosed; updateCafeStatus(); }
         });
 
+        setupCustomStatusBadge();
         renderMenu();
     </script>
-
-    <!-- QR KOD -->
-    <div class="qr-code">
-        <img src="qr.png" alt="Sipariş QR Kodu" onerror="this.parentElement.style.display='none'">
-    </div>
 </body>
 </html>

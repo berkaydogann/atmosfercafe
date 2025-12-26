@@ -11,15 +11,18 @@
 
     <style>
         :root {
-            --bg-dark: #0f0f0f;
-            --surface-dark: #181818;
-            --surface-light: #252525;
-            --primary-color: #00dc82;
-            --accent-color: #ff9f1c;
-            --text-main: #ffffff;
-            --text-sec: #9ca3af;
-            --glass-bg: rgba(15, 15, 15, 0.85);
-            --card-radius: 16px;
+            --bg-premium: #F2F4F8;
+            --card-white: #ffffff;
+            --text-dark: #111111;
+            --text-medium: #6b7280;
+            --text-light: #9ca3af;
+            --accent-green: #00dc82;
+            --accent-green-hover: #00c472;
+            --border-soft: rgba(0, 0, 0, 0.06);
+            --shadow-soft: 0 4px 12px rgba(0, 0, 0, 0.05);
+            --shadow-medium: 0 8px 24px rgba(0, 0, 0, 0.07);
+            --shadow-deep: 0 10px 40px rgba(0, 0, 0, 0.08);
+            --shadow-hero: 0 20px 60px rgba(0, 0, 0, 0.12);
             --safe-area-top: env(safe-area-inset-top);
             --safe-area-bottom: env(safe-area-inset-bottom);
             --safe-area-left: env(safe-area-inset-left);
@@ -29,297 +32,487 @@
         * {
             -webkit-tap-highlight-color: transparent;
             -webkit-touch-callout: none;
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        html {
+            scroll-behavior: smooth;
+            overflow-x: hidden;
         }
 
         body {
-            font-family: 'Outfit', sans-serif;
-            background-color: var(--bg-dark);
-            color: var(--text-main);
+            font-family: 'Outfit', -apple-system, BlinkMacSystemFont, sans-serif;
+            background: var(--bg-premium);
+            color: var(--text-dark);
             padding-bottom: calc(100px + var(--safe-area-bottom));
             overscroll-behavior: none;
             -webkit-font-smoothing: antialiased;
             -moz-osx-font-smoothing: grayscale;
+            overflow-x: hidden;
+            position: relative;
         }
 
-        /* --- Hero Header (Kompakt) --- */
-        .hero-header {
-            height: clamp(160px, 25vh, 200px);
-            background: linear-gradient(to bottom, rgba(15,15,15,0) 0%, var(--bg-dark) 100%),
-                        linear-gradient(rgba(0,0,0,0.3), rgba(0,0,0,0.3)),
-                        url('https://images.unsplash.com/photo-1509042239860-f550ce710b93?w=800&q=80') center/cover;
-            display: flex;
-            align-items: flex-end;
-            padding: max(20px, var(--safe-area-top)) max(20px, var(--safe-area-right)) 20px max(20px, var(--safe-area-left));
+        /* Subtle Aurora Background Mesh */
+        body::before {
+            content: '';
+            position: fixed;
+            inset: 0;
+            background: 
+                radial-gradient(circle at 20% 30%, rgba(0, 220, 130, 0.12) 0%, transparent 50%),
+                radial-gradient(circle at 80% 70%, rgba(255, 179, 71, 0.12) 0%, transparent 50%),
+                radial-gradient(circle at 50% 10%, rgba(0, 220, 130, 0.08) 0%, transparent 40%),
+                radial-gradient(circle at 10% 80%, rgba(255, 179, 71, 0.08) 0%, transparent 40%),
+                linear-gradient(135deg, #F2F4F8 0%, #F5F7FA 50%, #F2F4F8 100%);
+            filter: blur(80px);
+            z-index: 0;
+            pointer-events: none;
+            animation: auroraFloat 20s ease-in-out infinite;
+        }
+
+        @keyframes auroraFloat {
+            0%, 100% {
+                transform: translate(0, 0) scale(1);
+                opacity: 1;
+            }
+            33% {
+                transform: translate(2%, -1%) scale(1.02);
+                opacity: 0.95;
+            }
+            66% {
+                transform: translate(-1%, 2%) scale(0.98);
+                opacity: 1;
+            }
+        }
+
+        body::after {
+            content: '';
+            position: fixed;
+            inset: 0;
+            background: 
+                radial-gradient(ellipse at 30% 50%, rgba(0, 220, 130, 0.06) 0%, transparent 60%),
+                radial-gradient(ellipse at 70% 50%, rgba(255, 179, 71, 0.06) 0%, transparent 60%);
+            filter: blur(120px);
+            z-index: 0;
+            pointer-events: none;
+            animation: auroraFloat 25s ease-in-out infinite reverse;
+        }
+
+        /* ========================================
+           HERO SECTION - Premium with Gradient
+        ======================================== */
+        .hero-section {
             position: relative;
+            height: clamp(140px, 18vh, 180px);
+            overflow: hidden;
+            margin-bottom: 0;
+            z-index: 1;
+        }
+
+        .hero-section::after {
+            content: '';
+            position: absolute;
+            bottom: 0;
+            left: 0;
+            right: 0;
+            height: 60px;
+            background: linear-gradient(to top, var(--bg-premium) 0%, rgba(242, 244, 248, 0.9) 50%, transparent 100%);
+            pointer-events: none;
+            z-index: 3;
+        }
+
+        .hero-bg {
+            position: absolute;
+            inset: 0;
+            background: 
+                linear-gradient(180deg, rgba(17, 17, 17, 0.3) 0%, rgba(17, 17, 17, 0.5) 50%, rgba(242, 244, 248, 0.85) 85%, var(--bg-premium) 100%),
+                url('https://images.unsplash.com/photo-1509042239860-f550ce710b93?w=1200&q=85') center/cover;
+            background-size: cover;
+            background-position: center 40%;
+        }
+
+        .hero-bg::before {
+            content: '';
+            position: absolute;
+            inset: 0;
+            background: radial-gradient(ellipse at 50% 30%, rgba(0, 220, 130, 0.08) 0%, transparent 70%);
+            mix-blend-mode: screen;
+        }
+
+        .hero-content {
+            position: relative;
+            height: 100%;
+            display: flex;
+            flex-direction: column;
+            justify-content: center;
+            padding: max(20px, var(--safe-area-top)) max(28px, var(--safe-area-right)) 20px max(28px, var(--safe-area-left));
+            z-index: 4;
         }
 
         .hero-logo {
             position: absolute;
             top: max(20px, var(--safe-area-top));
-            right: max(20px, var(--safe-area-right));
-            height: 60px;
+            right: max(24px, var(--safe-area-right));
+            height: 48px;
             width: auto;
             object-fit: contain;
-            z-index: 10;
+            filter: drop-shadow(0 4px 16px rgba(0, 0, 0, 0.5)) drop-shadow(0 8px 32px rgba(0, 0, 0, 0.3));
+            animation: fadeInScale 0.8s cubic-bezier(0.34, 1.56, 0.64, 1);
+            z-index: 4;
         }
 
-        .hero-content h1 {
+        .hero-title {
+            font-size: clamp(1.8rem, 6vw, 2.4rem);
             font-weight: 900;
-            font-size: clamp(1.75rem, 5vw, 2.25rem);
-            margin: 0;
-            letter-spacing: -1px;
-            color: #fff;
-            text-shadow: 0 2px 10px rgba(0,0,0,0.5);
-        }
-        
-        .hero-content p {
-            color: rgba(255,255,255,0.85);
-            margin: 5px 0 0 0;
-            font-size: clamp(0.8rem, 2.5vw, 0.9rem);
-            text-shadow: 0 1px 5px rgba(0,0,0,0.5);
+            letter-spacing: -0.5px;
+            margin: 0 0 6px 0;
+            color: #ffffff;
+            text-shadow: 
+                0 2px 4px rgba(0, 0, 0, 0.4),
+                0 4px 12px rgba(0, 0, 0, 0.3),
+                0 8px 24px rgba(0, 0, 0, 0.2);
+            animation: fadeInUp 0.8s cubic-bezier(0.16, 1, 0.3, 1) 0.1s both;
+            line-height: 1.1;
         }
 
-        /* --- Sticky Navigation --- */
-        .sticky-wrapper {
+        .hero-subtitle {
+            font-size: clamp(0.85rem, 2.5vw, 1rem);
+            font-weight: 600;
+            color: rgba(255, 255, 255, 0.95);
+            display: flex;
+            align-items: center;
+            gap: 6px;
+            animation: fadeInUp 0.8s cubic-bezier(0.16, 1, 0.3, 1) 0.2s both;
+            letter-spacing: 0.3px;
+            text-shadow: 0 2px 8px rgba(0, 0, 0, 0.4);
+        }
+
+        .hero-subtitle i {
+            color: var(--accent-green);
+            filter: drop-shadow(0 2px 8px rgba(0, 220, 130, 0.8)) drop-shadow(0 0 16px rgba(0, 220, 130, 0.5));
+            font-size: 1.1em;
+        }
+
+        /* Order Rights Banner */
+        .info-banner {
+            background: var(--card-white);
+            border-radius: 16px;
+            padding: 16px max(20px, var(--safe-area-right)) 16px max(20px, var(--safe-area-left));
+            margin: 20px max(20px, var(--safe-area-left)) 20px max(20px, var(--safe-area-right));
+            display: flex;
+            align-items: flex-start;
+            gap: 12px;
+            font-size: 0.875rem;
+            line-height: 1.5;
+            color: var(--text-medium);
+            box-shadow: var(--shadow-soft);
+            animation: fadeIn 0.8s cubic-bezier(0.16, 1, 0.3, 1) 0.3s both;
+            position: relative;
+            z-index: 1;
+        }
+
+        .info-banner i {
+            color: var(--accent-green);
+            font-size: 1.15rem;
+            flex-shrink: 0;
+            margin-top: 2px;
+        }
+
+        /* ========================================
+           STICKY NAVIGATION - iOS Glass Effect
+        ======================================== */
+        .sticky-nav {
             position: sticky;
             top: 0;
             z-index: 1000;
-            background: var(--glass-bg);
-            backdrop-filter: blur(16px) saturate(180%);
-            -webkit-backdrop-filter: blur(16px) saturate(180%);
-            border-bottom: 1px solid rgba(255,255,255,0.08);
-            padding-top: max(10px, var(--safe-area-top));
-            padding-bottom: 5px;
-            box-shadow: 0 4px 12px rgba(0,0,0,0.3);
+            background: rgba(255, 255, 255, 0.8);
+            backdrop-filter: blur(20px) saturate(180%);
+            -webkit-backdrop-filter: blur(20px) saturate(180%);
+            border-bottom: 1px solid var(--border-soft);
+            padding: max(12px, var(--safe-area-top)) 0 12px 0;
+            box-shadow: var(--shadow-medium);
+            transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
         }
 
-        .search-container {
-            padding: 0 max(15px, var(--safe-area-left)) 10px max(15px, var(--safe-area-right));
+        /* Search Bar */
+        .search-wrapper {
+            padding: 0 max(20px, var(--safe-area-left)) 12px max(20px, var(--safe-area-right));
+            position: relative;
         }
 
-        .search-bar {
-            background: var(--surface-light);
-            border: 2px solid transparent;
-            border-radius: 14px;
-            color: white;
-            padding: 12px 15px 12px 42px;
+        .search-input {
             width: 100%;
-            font-size: clamp(0.9rem, 3vw, 1rem);
-            transition: all 0.25s ease;
-            -webkit-appearance: none;
-            min-height: 44px;
+            background: var(--card-white);
+            border: none;
+            border-radius: 14px;
+            color: var(--text-dark);
+            padding: 14px 16px 14px 46px;
+            font-size: 0.95rem;
+            font-weight: 500;
+            transition: all 0.25s cubic-bezier(0.4, 0, 0.2, 1);
+            min-height: 50px;
+            box-shadow: var(--shadow-soft);
         }
 
-        .search-bar::placeholder {
-            color: rgba(156, 163, 175, 0.7);
+        .search-input::placeholder {
+            color: var(--text-light);
         }
 
-        .search-bar:focus {
-            background: #2a2a2a;
-            border-color: var(--primary-color);
+        .search-input:focus {
             outline: none;
-            box-shadow: 0 0 0 4px rgba(0, 220, 130, 0.2);
+            box-shadow: 0 0 0 4px rgba(0, 220, 130, 0.15), var(--shadow-medium);
             transform: translateY(-1px);
         }
 
         .search-icon {
             position: absolute;
-            left: calc(max(15px, var(--safe-area-left)) + 13px);
-            top: 13px;
-            color: var(--text-sec);
-            font-size: 1rem;
+            left: calc(max(20px, var(--safe-area-left)) + 16px);
+            top: 17px;
+            color: var(--text-light);
+            font-size: 1.05rem;
             pointer-events: none;
         }
 
-        /* --- Horizontal Category Scroll --- */
-        .category-nav {
+        /* Category Pills - 3D Button Style */
+        .category-scroll {
             display: flex;
             overflow-x: auto;
             overflow-y: hidden;
             gap: 10px;
-            padding: 5px max(15px, var(--safe-area-left)) 15px max(15px, var(--safe-area-right));
+            padding: 0 max(20px, var(--safe-area-left)) 0 max(20px, var(--safe-area-right));
             scrollbar-width: none;
             scroll-behavior: smooth;
             -webkit-overflow-scrolling: touch;
-            scroll-snap-type: x proximity;
         }
-        .category-nav::-webkit-scrollbar { display: none; }
 
-        .cat-item {
-            background: rgba(255,255,255,0.06);
-            color: var(--text-sec);
-            padding: 10px 18px;
-            border-radius: 24px;
-            font-size: clamp(0.8rem, 2.5vw, 0.9rem);
-            font-weight: 600;
+        .category-scroll::-webkit-scrollbar {
+            display: none;
+        }
+
+        .category-pill {
+            background: var(--card-white);
+            color: var(--text-dark);
+            padding: 11px 22px;
+            border-radius: 28px;
+            font-size: 0.875rem;
+            font-weight: 700;
             white-space: nowrap;
-            border: 2px solid transparent;
-            transition: all 0.25s cubic-bezier(0.4, 0, 0.2, 1);
+            border: none;
+            transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
             cursor: pointer;
             flex-shrink: 0;
-            min-height: 40px;
+            min-height: 46px;
             display: flex;
             align-items: center;
-            scroll-snap-align: center;
             user-select: none;
+            box-shadow: var(--shadow-soft);
         }
 
-        .cat-item:active {
-            transform: scale(0.95);
+        .category-pill:active {
+            animation: buttonBounce 0.4s cubic-bezier(0.68, -0.55, 0.265, 1.55);
         }
 
-        .cat-item.active {
-            background: var(--primary-color);
-            color: #000;
-            box-shadow: 0 6px 16px rgba(0, 220, 130, 0.35);
-            font-weight: 700;
-            border-color: var(--primary-color);
+        @keyframes buttonBounce {
+            0% {
+                transform: scale(1);
+            }
+            50% {
+                transform: scale(0.9);
+            }
+            70% {
+                transform: scale(1.05);
+            }
+            100% {
+                transform: scale(1);
+            }
+        }
+
+        .category-pill.active {
+            background: var(--text-dark);
+            color: var(--card-white);
+            box-shadow: var(--shadow-medium);
             transform: scale(1.02);
         }
 
-        /* --- Menu Grid Layout --- */
+        /* ========================================
+           MENU CONTAINER
+        ======================================== */
         .menu-container {
-            padding: 15px max(15px, var(--safe-area-right)) 15px max(15px, var(--safe-area-left));
+            padding: 24px max(20px, var(--safe-area-right)) 20px max(20px, var(--safe-area-left));
+            position: relative;
+            z-index: 1;
         }
 
         .menu-section {
-            scroll-margin-top: 140px; /* Sticky header payı */
-            margin-bottom: 30px;
+            scroll-margin-top: 150px;
+            margin-bottom: 48px;
+            opacity: 0;
+            animation: fadeInUp 0.6s cubic-bezier(0.16, 1, 0.3, 1) forwards;
         }
 
         .section-header {
             display: flex;
             align-items: center;
-            gap: 10px;
-            margin-bottom: 15px;
-            padding-bottom: 8px;
-            border-bottom: 1px solid rgba(255,255,255,0.05);
+            gap: 12px;
+            margin-bottom: 20px;
         }
 
-        .section-header i {
-            color: var(--primary-color);
-            font-size: 1.2rem;
-        }
-
-        .section-header h3 {
-            font-size: 1.2rem;
+        .section-icon {
+            width: 44px;
+            height: 44px;
+            background: linear-gradient(135deg, var(--text-dark), #2a2a2a);
+            border-radius: 14px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 1.1rem;
+            color: var(--card-white);
+            box-shadow: var(--shadow-medium);
             font-weight: 700;
+        }
+
+        .section-title {
+            font-size: 1.5rem;
+            font-weight: 800;
+            letter-spacing: -0.8px;
             margin: 0;
-            color: var(--text-main);
+            color: var(--text-dark);
         }
 
-        /* --- Product Card (Grid) --- */
-        .products-grid {
+        /* Product Grid */
+        .product-grid {
             display: grid;
-            grid-template-columns: repeat(2, 1fr);
-            gap: clamp(10px, 2vw, 14px);
+            grid-template-columns: repeat(auto-fill, minmax(165px, 1fr));
+            gap: 16px;
         }
 
-        @media (min-width: 380px) {
-            .products-grid {
-                gap: 14px;
+        @media (min-width: 400px) {
+            .product-grid {
+                gap: 18px;
             }
         }
 
         @media (min-width: 768px) {
-            .products-grid {
-                grid-template-columns: repeat(auto-fill, minmax(250px, 1fr));
-                gap: 16px;
+            .product-grid {
+                grid-template-columns: repeat(auto-fill, minmax(240px, 1fr));
+                gap: 20px;
             }
         }
 
+        /* Product Card - Premium Floating Design */
         .product-card {
-            background: var(--surface-dark);
-            border-radius: var(--card-radius);
+            background: var(--card-white);
+            border: none;
+            border-radius: 20px;
             overflow: hidden;
-            border: 1.5px solid rgba(255,255,255,0.05);
             display: flex;
             flex-direction: column;
+            transition: all 0.4s cubic-bezier(0.4, 0, 0.2, 1);
+            box-shadow: var(--shadow-medium);
+            cursor: pointer;
             position: relative;
-            transition: all 0.25s cubic-bezier(0.4, 0, 0.2, 1);
-            box-shadow: 0 2px 8px rgba(0,0,0,0.3);
+            transform-style: preserve-3d;
+        }
+
+        .product-card:hover {
+            transform: translateY(-8px) rotateX(2deg) rotateY(-1deg);
+            box-shadow: 
+                0 12px 40px rgba(0, 0, 0, 0.12),
+                0 0 30px rgba(0, 220, 130, 0.15);
         }
 
         .product-card:active {
-            transform: scale(0.96);
-            box-shadow: 0 1px 4px rgba(0,0,0,0.4);
+            transform: translateY(-4px) rotateX(1deg) scale(0.98);
         }
 
-        .card-img-wrapper {
+        .product-img-wrapper {
             width: 100%;
-            aspect-ratio: 1/1;
+            height: 180px;
             position: relative;
-            background: linear-gradient(135deg, #1a1a1a 0%, #222 100%);
+            background: linear-gradient(135deg, #f5f7fa 0%, #e8eaf0 100%);
             overflow: hidden;
+        }
+
+        @media (min-width: 768px) {
+            .product-img-wrapper {
+                height: 220px;
+            }
         }
 
         .product-img {
             width: 100%;
             height: 100%;
             object-fit: cover;
-            transition: transform 0.3s ease;
+            transition: transform 0.5s cubic-bezier(0.4, 0, 0.2, 1);
         }
 
-        .product-card:active .product-img {
-            transform: scale(0.95);
+        .product-card:hover .product-img {
+            transform: scale(1.1);
+        }
+
+        /* Out of Stock - Grayscale + Overlay */
+        .product-card.out-of-stock .product-img {
+            filter: grayscale(1);
+            opacity: 0.4;
+        }
+
+        .product-card.out-of-stock::after {
+            content: 'Tükendi';
+            position: absolute;
+            top: 50%;
+            left: 50%;
+            transform: translate(-50%, -50%);
+            background: rgba(0, 0, 0, 0.85);
+            color: white;
+            padding: 8px 20px;
+            border-radius: 12px;
+            font-size: 0.85rem;
+            font-weight: 700;
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
+            z-index: 10;
+            box-shadow: var(--shadow-medium);
         }
 
         .special-badge {
             position: absolute;
-            top: 10px;
-            right: 10px;
-            background: var(--accent-color);
-            color: #000;
-            font-size: clamp(0.6rem, 2vw, 0.7rem);
+            top: 12px;
+            right: 12px;
+            background: linear-gradient(135deg, #FF6B6B, #FF5252);
+            color: white;
+            font-size: 0.7rem;
             font-weight: 800;
-            padding: 4px 10px;
-            border-radius: 8px;
-            z-index: 2;
-            box-shadow: 0 3px 10px rgba(255, 159, 28, 0.4);
+            padding: 6px 14px;
+            border-radius: 10px;
+            z-index: 3;
             text-transform: uppercase;
-            letter-spacing: 0.3px;
+            letter-spacing: 0.5px;
+            box-shadow: 0 4px 16px rgba(255, 107, 107, 0.4);
         }
 
-        .out-stock-overlay {
-            position: absolute;
-            inset: 0;
-            background: rgba(0,0,0,0.8);
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            flex-direction: column;
-            color: #ff5f57;
-            font-weight: 700;
-            font-size: clamp(0.85rem, 2.5vw, 1rem);
-            z-index: 5;
-            backdrop-filter: blur(3px);
-            -webkit-backdrop-filter: blur(3px);
-        }
-
-        .card-body {
-            padding: 12px;
+        .card-content {
+            padding: 16px;
             display: flex;
             flex-direction: column;
+            gap: 8px;
             flex-grow: 1;
-            gap: 6px;
         }
 
-        .product-title {
-            font-size: clamp(0.9rem, 2.8vw, 1rem);
-            font-weight: 600;
-            margin-bottom: 0;
+        .product-name {
+            font-size: 1rem;
+            font-weight: 700;
             line-height: 1.3;
+            color: var(--text-dark);
             display: -webkit-box;
             -webkit-line-clamp: 2;
             -webkit-box-orient: vertical;
             overflow: hidden;
-            color: rgba(255, 255, 255, 0.95);
         }
 
         .product-desc {
-            font-size: clamp(0.7rem, 2.2vw, 0.8rem);
-            color: var(--text-sec);
-            margin-bottom: 8px;
+            font-size: 0.8rem;
+            color: var(--text-medium);
             line-height: 1.4;
             display: -webkit-box;
             -webkit-line-clamp: 2;
@@ -330,389 +523,613 @@
 
         .btn-add {
             width: 100%;
-            background: rgba(0, 220, 130, 0.1);
-            color: var(--primary-color);
-            border: 2px solid rgba(0, 220, 130, 0.3);
-            padding: 10px 6px;
-            border-radius: 10px;
-            font-size: clamp(0.75rem, 2.5vw, 0.85rem);
+            background: var(--accent-green);
+            color: var(--card-white);
+            border: none;
+            padding: 13px 12px;
+            border-radius: 14px;
+            font-size: 0.875rem;
             font-weight: 700;
             cursor: pointer;
-            transition: all 0.2s cubic-bezier(0.4, 0, 0.2, 1);
+            transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
             display: flex;
             align-items: center;
             justify-content: center;
             gap: 6px;
-            min-height: 40px;
+            min-height: 46px;
             text-transform: uppercase;
             letter-spacing: 0.5px;
+            margin-top: 8px;
+            box-shadow: 0 4px 12px rgba(0, 220, 130, 0.3);
         }
-        
+
+        .btn-add:not(:disabled):hover {
+            background: var(--accent-green-hover);
+            transform: translateY(-2px);
+            box-shadow: 0 6px 20px rgba(0, 220, 130, 0.4);
+        }
+
         .btn-add:not(:disabled):active {
-            background: var(--primary-color);
-            color: #000;
-            border-color: var(--primary-color);
-            transform: scale(0.96);
+            animation: buttonBounce 0.4s cubic-bezier(0.68, -0.55, 0.265, 1.55);
         }
 
         .btn-add:disabled {
-            opacity: 0.5;
+            background: #e5e7eb;
+            color: var(--text-light);
             cursor: not-allowed;
-            filter: grayscale(1);
-            background: rgba(255,255,255,0.03);
-            border-color: rgba(255,255,255,0.05);
+            box-shadow: none;
         }
 
-        /* --- Modals & Alerts --- */
-        .modal-content {
-            background: #1a1a1a;
-            color: white;
-            border-radius: 24px;
-            border: 2px solid rgba(255,255,255,0.1);
-            box-shadow: 0 20px 40px rgba(0,0,0,0.6);
-            margin: max(10px, var(--safe-area-left)) max(10px, var(--safe-area-right));
-        }
-
-        .modal-header {
-            padding: 20px 20px 10px 20px;
-        }
-
-        .modal-body {
-            padding: 20px;
-        }
-        
-        .form-control-dark {
-            background: #0a0a0a;
-            border: 2px solid #333;
-            color: white !important;
-            border-radius: 14px;
-            padding: 14px 16px;
-            font-size: clamp(0.9rem, 3vw, 1rem);
-            min-height: 48px;
-            -webkit-appearance: none;
-        }
-        .form-control-dark::placeholder {
-            color: rgba(156, 163, 175, 0.6);
-        }
-        .form-control-dark:focus {
-            background: #0a0a0a;
-            border-color: var(--primary-color);
-            box-shadow: 0 0 0 4px rgba(0, 220, 130, 0.15);
-            outline: none;
-        }
-
-        .btn-primary-custom {
-            background: var(--primary-color);
-            color: #000;
-            font-weight: 700;
-            border-radius: 14px;
-            padding: 14px 12px;
-            width: 100%;
-            border: none;
-            font-size: clamp(0.95rem, 3vw, 1.05rem);
-            min-height: 52px;
-            transition: all 0.2s ease;
-            box-shadow: 0 6px 20px rgba(0, 220, 130, 0.3);
-            text-transform: uppercase;
-            letter-spacing: 0.5px;
-        }
-        
-        .btn-primary-custom:active {
-            transform: scale(0.97);
-            box-shadow: 0 3px 10px rgba(0, 220, 130, 0.4);
-        }
-
-        /* Scroll Top Button */
-        .scroll-top-btn {
+        /* ========================================
+           iOS BOTTOM SHEET MODAL - Premium White
+        ======================================== */
+        .bottom-sheet-backdrop {
             position: fixed;
-            bottom: calc(20px + var(--safe-area-bottom));
-            right: calc(20px + var(--safe-area-right));
-            width: 50px;
-            height: 50px;
-            background: var(--surface-light);
-            border: 2px solid rgba(255,255,255,0.15);
-            color: white;
+            inset: 0;
+            background: rgba(0, 0, 0, 0.5);
+            backdrop-filter: blur(4px);
+            -webkit-backdrop-filter: blur(4px);
+            z-index: 10000;
+            opacity: 0;
+            visibility: hidden;
+            transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+        }
+
+        .bottom-sheet-backdrop.show {
+            opacity: 1;
+            visibility: visible;
+        }
+
+        .bottom-sheet {
+            position: fixed;
+            bottom: 0;
+            left: 0;
+            right: 0;
+            background: var(--card-white);
+            border-radius: 28px 28px 0 0;
+            padding: 24px max(24px, var(--safe-area-left)) calc(24px + var(--safe-area-bottom)) max(24px, var(--safe-area-right));
+            z-index: 10001;
+            transform: translateY(100%);
+            transition: transform 0.4s cubic-bezier(0.4, 0, 0.2, 1);
+            box-shadow: 0 -20px 60px rgba(0, 0, 0, 0.25);
+            max-height: 85vh;
+            overflow-y: auto;
+        }
+
+        .bottom-sheet.show {
+            transform: translateY(0);
+        }
+
+        .sheet-handle {
+            width: 48px;
+            height: 5px;
+            background: #e5e7eb;
+            border-radius: 3px;
+            margin: 0 auto 24px;
+        }
+
+        .sheet-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 28px;
+        }
+
+        .sheet-title {
+            font-size: 1.5rem;
+            font-weight: 800;
+            color: var(--text-dark);
+        }
+
+        .btn-close-sheet {
+            width: 40px;
+            height: 40px;
+            background: var(--bg-premium);
+            border: none;
             border-radius: 50%;
             display: flex;
             align-items: center;
             justify-content: center;
-            font-size: 1.3rem;
-            box-shadow: 0 6px 20px rgba(0,0,0,0.6);
-            opacity: 0;
-            pointer-events: none;
-            transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
-            z-index: 900;
             cursor: pointer;
-        }
-        .scroll-top-btn.visible {
-            opacity: 1;
-            pointer-events: auto;
-        }
-        .scroll-top-btn:active {
-            transform: scale(0.9);
-            box-shadow: 0 3px 10px rgba(0,0,0,0.7);
+            transition: all 0.2s ease;
         }
 
-        /* Kafe Kapalı Uyarısı */
+        .btn-close-sheet:active {
+            transform: scale(0.9);
+            background: #e5e7eb;
+        }
+
+        .btn-close-sheet i {
+            color: var(--text-dark);
+            font-size: 1.25rem;
+        }
+
+        .sheet-product-preview {
+            text-align: center;
+            margin-bottom: 32px;
+        }
+
+        .sheet-icon {
+            width: 72px;
+            height: 72px;
+            background: linear-gradient(135deg, var(--accent-green), var(--accent-green-hover));
+            border-radius: 18px;
+            display: inline-flex;
+            align-items: center;
+            justify-content: center;
+            margin-bottom: 16px;
+            box-shadow: 0 8px 24px rgba(0, 220, 130, 0.3);
+        }
+
+        .sheet-icon i {
+            font-size: 2rem;
+            color: white;
+        }
+
+        .sheet-item-name {
+            font-size: 1.3rem;
+            font-weight: 800;
+            color: var(--text-dark);
+            margin-bottom: 6px;
+        }
+
+        .sheet-item-subtitle {
+            font-size: 0.95rem;
+            color: var(--text-medium);
+        }
+
+        .form-group {
+            margin-bottom: 18px;
+        }
+
+        .form-label {
+            display: block;
+            font-size: 0.95rem;
+            font-weight: 700;
+            color: var(--text-dark);
+            margin-bottom: 10px;
+        }
+
+        .form-input {
+            width: 100%;
+            background: var(--bg-premium);
+            border: 2px solid transparent;
+            border-radius: 14px;
+            color: var(--text-dark);
+            padding: 16px 18px;
+            font-size: 1rem;
+            font-family: 'Outfit', sans-serif;
+            font-weight: 500;
+            transition: all 0.25s cubic-bezier(0.4, 0, 0.2, 1);
+            min-height: 56px;
+        }
+
+        .form-input::placeholder {
+            color: var(--text-light);
+        }
+
+        .form-input:focus {
+            background: var(--card-white);
+            border-color: var(--accent-green);
+            outline: none;
+            box-shadow: 0 0 0 4px rgba(0, 220, 130, 0.1);
+        }
+
+        .btn-submit {
+            width: 100%;
+            background: linear-gradient(135deg, var(--accent-green), var(--accent-green-hover));
+            color: white;
+            border: none;
+            border-radius: 16px;
+            padding: 18px;
+            font-size: 1.05rem;
+            font-weight: 800;
+            font-family: 'Outfit', sans-serif;
+            cursor: pointer;
+            transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+            min-height: 60px;
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
+            margin-top: 12px;
+            box-shadow: 0 8px 24px rgba(0, 220, 130, 0.3);
+        }
+
+        .btn-submit:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 12px 32px rgba(0, 220, 130, 0.4);
+        }
+
+        .btn-submit:active {
+            animation: buttonBounce 0.4s cubic-bezier(0.68, -0.55, 0.265, 1.55);
+        }
+
+        /* ========================================
+           SUCCESS OVERLAY - Premium
+        ======================================== */
+        .success-overlay {
+            position: fixed;
+            inset: 0;
+            background: var(--card-white);
+            z-index: 10002;
+            display: none;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            padding: max(30px, var(--safe-area-left)) max(30px, var(--safe-area-right));
+            animation: fadeIn 0.3s ease;
+        }
+
+        .success-overlay.show {
+            display: flex;
+        }
+
+        .success-icon {
+            font-size: clamp(4.5rem, 16vw, 6.5rem);
+            color: var(--accent-green);
+            margin-bottom: 28px;
+            filter: drop-shadow(0 8px 24px rgba(0, 220, 130, 0.3));
+            animation: scaleInBounce 0.6s cubic-bezier(0.34, 1.56, 0.64, 1);
+        }
+
+        .success-title {
+            font-size: clamp(1.8rem, 7vw, 2.5rem);
+            font-weight: 900;
+            color: var(--text-dark);
+            margin-bottom: 12px;
+        }
+
+        .success-subtitle {
+            font-size: clamp(1rem, 4vw, 1.25rem);
+            color: var(--text-medium);
+            margin-bottom: 36px;
+        }
+
+        .order-number-card {
+            background: var(--bg-premium);
+            border: 3px solid var(--accent-green);
+            border-radius: 20px;
+            padding: 28px 56px;
+            text-align: center;
+            box-shadow: var(--shadow-deep);
+        }
+
+        .order-label {
+            font-size: 0.8rem;
+            color: var(--text-medium);
+            text-transform: uppercase;
+            letter-spacing: 2px;
+            font-weight: 700;
+            margin-bottom: 12px;
+        }
+
+        .order-number {
+            font-size: clamp(3.5rem, 14vw, 5rem);
+            font-weight: 900;
+            color: var(--accent-green);
+            font-family: 'Courier New', monospace;
+            line-height: 1;
+        }
+
+        /* ========================================
+           SCROLL TO TOP BUTTON
+        ======================================== */
+        .scroll-top {
+            position: fixed;
+            bottom: calc(28px + var(--safe-area-bottom));
+            right: calc(28px + var(--safe-area-right));
+            width: 56px;
+            height: 56px;
+            background: var(--card-white);
+            border: none;
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 1.4rem;
+            color: var(--text-dark);
+            box-shadow: var(--shadow-deep);
+            cursor: pointer;
+            opacity: 0;
+            visibility: hidden;
+            transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+            z-index: 999;
+        }
+
+        .scroll-top.visible {
+            opacity: 1;
+            visibility: visible;
+        }
+
+        .scroll-top:active {
+            transform: scale(0.9);
+        }
+
+        /* ========================================
+           CAFE CLOSED OVERLAY
+        ======================================== */
         .cafe-closed-overlay {
             position: fixed;
             inset: 0;
-            background: var(--bg-dark);
-            z-index: 9999;
-            display: flex;
+            background: var(--card-white);
+            z-index: 10003;
+            display: none;
             flex-direction: column;
             align-items: center;
             justify-content: center;
             text-align: center;
-            padding: max(30px, var(--safe-area-top)) max(30px, var(--safe-area-right)) max(30px, var(--safe-area-bottom)) max(30px, var(--safe-area-left));
+            padding: max(40px, var(--safe-area-top)) max(32px, var(--safe-area-right)) max(40px, var(--safe-area-bottom)) max(32px, var(--safe-area-left));
         }
-        .cafe-closed-overlay.hidden { display: none; }
-        
-        /* Success Animation */
-        .success-overlay {
-            position: fixed;
-            inset: 0;
-            background: rgba(0,0,0,0.95);
-            z-index: 10000;
+
+        .cafe-closed-overlay.show {
             display: flex;
-            flex-direction: column;
-            align-items: center;
-            justify-content: center;
-            animation: fadeIn 0.3s;
-            padding: max(30px, var(--safe-area-left)) max(30px, var(--safe-area-right));
         }
-        
-        .success-overlay i {
+
+        .closed-icon {
+            font-size: clamp(4rem, 14vw, 6rem);
+            color: var(--text-light);
+            margin-bottom: 32px;
+            opacity: 0.6;
+        }
+
+        .closed-title {
+            font-size: clamp(2rem, 8vw, 2.8rem);
+            font-weight: 900;
+            color: var(--text-dark);
+            margin-bottom: 12px;
+        }
+
+        .closed-message {
+            font-size: clamp(1.05rem, 4.5vw, 1.3rem);
+            color: var(--text-medium);
+            margin-bottom: 28px;
+        }
+
+        .closed-reason {
+            background: var(--bg-premium);
+            border: 2px solid #e5e7eb;
+            color: var(--text-medium);
+            padding: 16px 28px;
+            border-radius: 14px;
+            font-size: clamp(0.95rem, 3.5vw, 1.1rem);
+            font-weight: 600;
+        }
+
+        .closed-countdown {
+            font-size: clamp(3rem, 12vw, 5rem);
+            font-weight: 900;
+            color: var(--accent-green);
+            margin: 24px 0;
+            letter-spacing: 4px;
+            text-shadow: 0 0 20px rgba(0, 112, 74, 0.3);
+        }
+
+        /* ========================================
+           EMPTY STATE
+        ======================================== */
+        .empty-state {
+            text-align: center;
+            padding: 60px 20px;
+            opacity: 0;
+            animation: fadeIn 0.5s ease forwards;
+        }
+
+        .empty-icon {
             font-size: clamp(3.5rem, 12vw, 5rem);
-            margin-bottom: 20px;
-            animation: scaleIn 0.5s cubic-bezier(0.4, 0, 0.2, 1);
+            color: var(--text-light);
+            opacity: 0.4;
+            margin-bottom: 24px;
         }
-        
-        .success-overlay h3 {
-            font-size: clamp(1.3rem, 5vw, 1.8rem);
-            font-weight: 700;
-        }
-        
-        .success-overlay p {
-            font-size: clamp(0.9rem, 3vw, 1.1rem);
-        }
-        
-        @keyframes fadeIn { 
-            from { opacity: 0; } 
-            to { opacity: 1; } 
-        }
-        
-        @keyframes scaleIn {
-            from { 
-                transform: scale(0.5); 
-                opacity: 0; 
-            }
-            to { 
-                transform: scale(1); 
-                opacity: 1; 
-            }
-        }
-        
-        /* Modal improvements */
-        .modal-dialog {
-            margin: 1rem max(1rem, var(--safe-area-left)) !important;
-        }
-        
-        .btn-close {
-            padding: 12px;
-            min-width: 44px;
-            min-height: 44px;
-        }
-        
-        /* Cafe closed overlay improvements */
-        .cafe-closed-overlay i {
-            font-size: clamp(3rem, 10vw, 4rem);
-            margin-bottom: 20px;
-        }
-        
-        .cafe-closed-overlay h2 {
-            font-size: clamp(1.5rem, 6vw, 2rem);
+
+        .empty-title {
+            font-size: clamp(1.3rem, 5vw, 1.7rem);
             font-weight: 800;
+            color: var(--text-dark);
             margin-bottom: 10px;
         }
-        
-        .cafe-closed-overlay p {
-            font-size: clamp(0.9rem, 3vw, 1.1rem);
+
+        .empty-subtitle {
+            font-size: clamp(0.95rem, 3.5vw, 1.1rem);
+            color: var(--text-medium);
         }
-        
-        #closedReason {
-            background: rgba(255,95,87,0.1);
-            color: #ff5f57;
-            padding: 12px 20px;
-            border-radius: 12px;
-            margin-top: 20px;
-            font-size: clamp(0.85rem, 3vw, 1rem);
+
+        /* ========================================
+           ANIMATIONS
+        ======================================== */
+        @keyframes fadeIn {
+            from { opacity: 0; }
+            to { opacity: 1; }
         }
-        
-        /* Improved focus states for accessibility */
-        input:focus-visible,
-        button:focus-visible {
-            outline: 3px solid var(--primary-color);
-            outline-offset: 2px;
+
+        @keyframes fadeInUp {
+            from {
+                opacity: 0;
+                transform: translateY(30px);
+            }
+            to {
+                opacity: 1;
+                transform: translateY(0);
+            }
         }
-        
-        /* Better scrollbar for desktop */
+
+        @keyframes fadeInScale {
+            from {
+                opacity: 0;
+                transform: scale(0.85);
+            }
+            to {
+                opacity: 1;
+                transform: scale(1);
+            }
+        }
+
+        @keyframes scaleInBounce {
+            0% {
+                transform: scale(0.3);
+                opacity: 0;
+            }
+            50% {
+                transform: scale(1.1);
+            }
+            70% {
+                transform: scale(0.95);
+            }
+            100% {
+                transform: scale(1);
+                opacity: 1;
+            }
+        }
+
+        /* ========================================
+           RESPONSIVE ADJUSTMENTS
+        ======================================== */
+        @media (max-width: 360px) {
+            .product-grid {
+                grid-template-columns: repeat(auto-fill, minmax(145px, 1fr));
+                gap: 14px;
+            }
+
+            .card-content {
+                padding: 14px;
+            }
+
+            .product-img-wrapper {
+                height: 160px;
+            }
+        }
+
         @media (min-width: 768px) {
             ::-webkit-scrollbar {
-                width: 8px;
-                height: 8px;
+                width: 10px;
+                height: 10px;
             }
-            
+
             ::-webkit-scrollbar-track {
-                background: var(--surface-dark);
+                background: var(--bg-premium);
             }
-            
+
             ::-webkit-scrollbar-thumb {
-                background: var(--surface-light);
-                border-radius: 4px;
+                background: #d1d5db;
+                border-radius: 5px;
             }
-            
+
             ::-webkit-scrollbar-thumb:hover {
-                background: var(--primary-color);
-            }
-        }
-        
-        /* Smooth transitions on orientation change */
-        @media (orientation: landscape) {
-            .hero-header {
-                height: clamp(140px, 20vh, 180px);
-            }
-        }
-        
-        /* Extra small phones optimization */
-        @media (max-width: 360px) {
-            .products-grid {
-                gap: 8px;
-            }
-            
-            .card-body {
-                padding: 10px;
-            }
-            
-            .menu-container {
-                padding: 12px max(12px, var(--safe-area-right)) 12px max(12px, var(--safe-area-left));
+                background: #9ca3af;
             }
         }
 
-        /* Basit Sipariş Hakları Banner */
-        .order-rights-banner {
-            background: linear-gradient(135deg, rgba(0, 220, 130, 0.1) 0%, rgba(0, 220, 130, 0.05) 100%);
-            border: 1px solid rgba(0, 220, 130, 0.3);
-            border-radius: 12px;
-            padding: 12px max(20px, var(--safe-area-right)) 12px max(20px, var(--safe-area-left));
-            margin: 15px max(15px, var(--safe-area-right)) 15px max(15px, var(--safe-area-left));
-            display: flex;
-            align-items: center;
-            gap: 10px;
-            font-size: 0.9rem;
-            font-weight: 500;
-            color: var(--text-main);
+        /* Saturday Special Banner */
+        .saturday-banner {
+            background: var(--card-white);
+            border: 3px solid var(--accent-green);
+            border-radius: 16px;
+            padding: 18px 24px;
+            margin: 0 max(20px, var(--safe-area-left)) 28px max(20px, var(--safe-area-right));
+            text-align: center;
+            color: var(--accent-green);
+            font-weight: 800;
+            font-size: 1rem;
+            box-shadow: var(--shadow-medium);
         }
 
-        .order-rights-banner i {
-            color: var(--primary-color);
-            font-size: 1.1rem;
-            flex-shrink: 0;
-        }
-
-        @media (max-width: 360px) {
-            .order-rights-banner {
-                padding: 10px max(15px, var(--safe-area-right)) 10px max(15px, var(--safe-area-left));
-                margin: 12px max(12px, var(--safe-area-right)) 12px max(12px, var(--safe-area-left));
-                font-size: 0.8rem;
-            }
+        .saturday-banner i {
+            margin-right: 8px;
         }
     </style>
 </head>
 <body>
 
-    <div id="cafeClosedAlert" class="cafe-closed-overlay hidden">
-        <i class="bi bi-shop-window" style="font-size: 4rem; color: var(--text-sec); margin-bottom: 20px;"></i>
-        <h2 id="closedTitle" style="font-weight: 800; margin-bottom: 10px;">Kafe Kapalı</h2>
-        <p id="closedMessage" style="color: var(--text-sec);">Şu an hizmet veremiyoruz.</p>
-        <div id="closedReason" style="background: rgba(255,95,87,0.1); color: #ff5f57; padding: 10px 20px; border-radius: 12px; margin-top: 20px;">
+    <!-- Cafe Closed Overlay -->
+    <div id="cafeClosedAlert" class="cafe-closed-overlay">
+        <i class="bi bi-shop-window closed-icon"></i>
+        <h2 id="closedTitle" class="closed-title">Kafe Kapalı</h2>
+        <p id="closedMessage" class="closed-message">Şu an hizmet veremiyoruz.</p>
+        <div id="closedCountdown" class="closed-countdown" style="display: none;"></div>
+        <div id="closedReason" class="closed-reason">
             Daha sonra tekrar bekleriz.
         </div>
     </div>
 
-    <div class="hero-header">
+    <!-- Hero Section -->
+    <div class="hero-section">
+        <div class="hero-bg"></div>
         <img src="cinarlogo3.png" alt="Çınar Logo" class="hero-logo">
         <div class="hero-content">
-            <h1>Atmosfer Kafe</h1>
-            <p><i class="bi bi-geo-alt-fill" style="color:var(--primary-color)"></i> Lezzetin Buluşma Noktası</p>
+            <h1 class="hero-title">Atmosfer Kafe</h1>
+            <p class="hero-subtitle">
+                <i class="bi bi-geo-alt-fill"></i>
+                Lezzetin Buluşma Noktası
+            </p>
         </div>
     </div>
 
-    <div class="order-rights-banner">
+    <!-- Order Rights Banner -->
+    <div class="info-banner">
         <i class="bi bi-info-circle"></i>
         <span>Belirtilen saatler araliklarinda 1 adet içecek sipariş hakkınız var (16:00-18:00, 18:00-20:00, 20:00-22:00, 22:00 sonrasi)</span>
     </div>
 
-    <div class="sticky-wrapper">
-        <div class="search-container position-relative">
+    <!-- Sticky Navigation -->
+    <div class="sticky-nav" id="stickyNav">
+        <div class="search-wrapper">
             <i class="bi bi-search search-icon"></i>
-            <input type="text" class="search-bar" id="searchInput" placeholder="Kahve, çay, tatlı...">
+            <input type="text" class="search-input" id="searchInput" placeholder="Kahve, çay, tatlı ara...">
         </div>
-        
-        <div class="category-nav" id="categoryNav">
-            </div>
+        <div class="category-scroll" id="categoryNav"></div>
     </div>
 
-    <div id="menuContainer" class="menu-container">
-        </div>
+    <!-- Menu Container -->
+    <div id="menuContainer" class="menu-container"></div>
 
-    <div id="emptyState" class="text-center py-5 d-none" style="padding-left: max(20px, var(--safe-area-left)); padding-right: max(20px, var(--safe-area-right));">
-        <i class="bi bi-cup-hot" style="font-size: clamp(2.5rem, 8vw, 3.5rem); opacity: 0.2;"></i>
-        <h5 class="mt-3 text-white" style="font-size: clamp(1rem, 4vw, 1.2rem);">Sonuç Bulunamadı</h5>
-        <p class="text-secondary" style="font-size: clamp(0.85rem, 3vw, 0.95rem);">Farklı bir arama yapmayı dene.</p>
+    <!-- Empty State -->
+    <div id="emptyState" class="empty-state d-none">
+        <i class="bi bi-cup-hot empty-icon"></i>
+        <h5 class="empty-title">Sonuç Bulunamadı</h5>
+        <p class="empty-subtitle">Farklı bir arama yapmayı dene.</p>
     </div>
 
-    <div class="scroll-top-btn" onclick="window.scrollTo({top:0, behavior:'smooth'})">
+    <!-- Scroll to Top Button -->
+    <div class="scroll-top" id="scrollTop">
         <i class="bi bi-arrow-up"></i>
     </div>
 
-    <div class="modal fade" id="orderModal" tabindex="-1">
-        <div class="modal-dialog modal-dialog-centered modal-sm">
-            <div class="modal-content">
-                <div class="modal-header border-0 pb-0">
-                    <h5 class="modal-title fw-bold">Sipariş Onayı</h5>
-                    <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal"></button>
-                </div>
-                <div class="modal-body">
-                    <div class="text-center mb-4">
-                        <div class="bg-dark d-inline-block p-3 rounded-circle mb-2">
-                            <i class="bi bi-bag-check fs-2 text-success"></i>
-                        </div>
-                        <h6 id="modalItemName" class="fw-bold">...</h6>
-                        <small class="text-secondary">Siparişini oluşturuyoruz</small>
-                    </div>
-                    
-                    <div class="mb-3">
-                        <input type="text" id="guestName" class="form-control form-control-dark" placeholder="Ad Soyad" required>
-                    </div>
-                    <div class="mb-3">
-                        <input type="tel" id="guestPhone" class="form-control form-control-dark" placeholder="Tel (5xxxxxxxxx)" required>
-                    </div>
-                    <button class="btn btn-primary-custom" onclick="submitOrder()">
-                        Siparişi Tamamla
-                    </button>
-                </div>
-            </div>
+    <!-- iOS Bottom Sheet Modal -->
+    <div class="bottom-sheet-backdrop" id="modalBackdrop"></div>
+    <div class="bottom-sheet" id="orderModal">
+        <div class="sheet-handle"></div>
+        <div class="sheet-header">
+            <h5 class="sheet-title">Sipariş Onayı</h5>
+            <button class="btn-close-sheet" id="closeModalBtn">
+                <i class="bi bi-x-lg"></i>
+            </button>
         </div>
+        <div class="sheet-product-preview">
+            <div class="sheet-icon">
+                <i class="bi bi-bag-check"></i>
+            </div>
+            <h6 class="sheet-item-name" id="modalItemName">...</h6>
+            <small class="sheet-item-subtitle">Siparişini oluşturuyoruz</small>
+        </div>
+        <div class="form-group">
+            <label class="form-label">Ad Soyad</label>
+            <input type="text" id="guestName" class="form-input" placeholder="Adınız ve soyadınız" required>
+        </div>
+        <div class="form-group">
+            <label class="form-label">Telefon Numarası</label>
+            <input type="tel" id="guestPhone" class="form-input" placeholder="5xxxxxxxxx" required>
+        </div>
+        <button class="btn-submit" onclick="submitOrder()">
+            Siparişi Tamamla
+        </button>
     </div>
 
-    <div id="successScreen" class="success-overlay d-none">
-        <i class="bi bi-check-circle-fill text-success" style="font-size: 5rem; margin-bottom: 20px;"></i>
-        <h3 class="fw-bold text-white">Sipariş Alındı!</h3>
-        <p class="text-secondary" style="margin-bottom: 25px;">Hazırlanmaya başlıyor...</p>
-        <div style="background: rgba(0, 220, 130, 0.2); border: 2px solid #00dc82; border-radius: 15px; padding: 20px 40px; text-align: center; margin-bottom: 10px;">
-            <p style="font-size: 0.85rem; color: #9ca3af; margin: 0 0 10px 0; text-transform: uppercase; letter-spacing: 1px;">Sipariş Numarası</p>
-            <p style="font-size: 3rem; color: #00dc82; font-weight: 900; margin: 0; font-family: 'Courier New', monospace;">
+    <!-- Success Overlay -->
+    <div id="successScreen" class="success-overlay">
+        <i class="bi bi-check-circle-fill success-icon"></i>
+        <h3 class="success-title">Sipariş Alındı!</h3>
+        <p class="success-subtitle">Hazırlanmaya başlıyor...</p>
+        <div class="order-number-card">
+            <p class="order-label">Sipariş Numarası</p>
+            <p class="order-number">
                 <span id="orderNumberDisplay">000</span>
             </p>
         </div>
@@ -750,12 +1167,9 @@
                 navigator.serviceWorker.register('/firebase-messaging-sw.js')
                     .then((registration) => {
                         console.log('Service Worker registered successfully:', registration);
-                        // Initialize messaging with the service worker
                         messaging = firebase.messaging();
                         messaging.useServiceWorker(registration);
                         console.log('Firebase initialized successfully');
-                        
-                        // Now that messaging is ready, initialize FCM
                         initFirebase();
                     })
                     .catch((error) => {
@@ -778,20 +1192,17 @@
             }
 
             try {
-                // Request notification permission
                 const permission = await Notification.requestPermission();
                 
                 if (permission === 'granted') {
                     console.log('Notification permission granted');
                     
-                    // Get FCM token
                     fcmToken = await messaging.getToken({
-                        vapidKey: 'BEdYqvd8leroGph2B-IXQPE2quPnRtDDb2h8irs0gpCLQfyLRqCor56wJJ-Y5Ayq8Z5Xw1wcKoZcQ1uVDIErENU' // Replace with your VAPID key from Firebase Console
+                        vapidKey: 'BEdYqvd8leroGph2B-IXQPE2quPnRtDDb2h8irs0gpCLQfyLRqCor56wJJ-Y5Ayq8Z5Xw1wcKoZcQ1uVDIErENU'
                     });
                     
                     if (fcmToken) {
                         console.log('FCM Token:', fcmToken);
-                        // Store token in localStorage for persistence
                         localStorage.setItem('fcmToken', fcmToken);
                     } else {
                         console.warn('No FCM token available');
@@ -818,25 +1229,15 @@
                     requireInteraction: true
                 };
 
-                // Show notification if browser supports it
                 if ('Notification' in window && Notification.permission === 'granted') {
                     new Notification(notificationTitle, notificationOptions);
                 }
 
-                // Also show in-app alert
                 alert(`🎉 ${notificationTitle}\n\n${notificationOptions.body}`);
             });
         }
 
-        // Initialize Firebase on page load
-        // Note: initFirebase() is now called automatically after Service Worker registration
-        document.addEventListener('DOMContentLoaded', () => {
-            // Firebase initialization happens above in the try-catch block
-        });
-
-        // --- BİLDİRİM SİSTEMİ BAŞLANGICI ---
-
-        // 1. İzin İsteme Fonksiyonu
+        // --- NOTIFICATION SYSTEM ---
         async function requestNotificationPermission() {
             if (!('Notification' in window)) {
                 console.log('Bu tarayıcı bildirimleri desteklemiyor.');
@@ -844,7 +1245,6 @@
             }
 
             if (Notification.permission === 'default') {
-                // Kullanıcıya izin sor
                 const accept = confirm("Siparişiniz hazırlandığında size haber verebilmemiz için bildirim izni vermeniz gerekiyor. İzin veriyor musunuz?");
                 if (accept) {
                     try {
@@ -863,7 +1263,6 @@
             }
         }
 
-        // 2. Güçlü Bildirim Gönderme (Service Worker ile)
         function sendNotification(title, options = {}) {
             if (Notification.permission === 'granted' && 'serviceWorker' in navigator) {
                 navigator.serviceWorker.ready.then(registration => {
@@ -876,20 +1275,17 @@
                         body: options.body
                     });
                     
-                    // Ses çalma (Opsiyonel)
                     const audio = new Audio('data:audio/wav;base64,UklGRnoGAABXQVZFZm10IBAAAAABAAEAQB8AAEAfAAABAAgAZGF0YQoGAACBhYqFbF1fdJivrJBhNjVgodDbq2EcBj+a2/LDciUFLIHO8tiJNwgZaLvt559NEAxQp+PwtmMcBjiR1/LMeSwFJHfH8N2QQAoUXrTp66hVFApGn+DyvmwhBSuBzvLZiTYIGGi77eeeSwwPUKXh8LdjHQU2kdXy0HotBSJ1xe/ajz8KE12y6OynUxQLRp7e8r9pIAUsgs/y24o4CBhpvO7om0kMEE+k4PG5ZBkFNo/T8tR6LgUjdMPs2Ys+CRNbsOjqqVcVCkSb3fHAah4FK4HOuN2KNwgaab3v6qJODRBPo9/ytWUaBTWO0vHVei4FI3PD7tiLPwkSW6/n6qlXFQpFnN3xw2sfBSt/zLbci0AIG2m98OqiTg0RTqHf8rVlGgU1jtLx1XouBSNzw+7Yiz8JElqv5+qoVhYKQ5vb8MRsHwUrfsy13oxBCRtov+/ro00NEFCA4fK2Zx0FNI7R8tZ8MAUiccTt15A/CRJYrunqqVgWCkOb2/DGbSEFK37LtN+MQQgbZ7/u6qRODRBPf+DxtWccBTOO0fLYfTAFInHE7deQPgkRV6/o6atZFglCmtnwyG0jBSp9yrf0L/JTh+AAAAAAAA=');
                     audio.play().catch(e => console.log('Ses çalma engellendi.'));
                 });
             }
         }
 
-        // 3. Sipariş Hazır Sinyalini Dinleme
         socket.on('orderReady', (data) => {
             const lastOrderNumber = localStorage.getItem('lastOrderNumber');
             
             console.log('Sipariş hazır sinyali:', data);
 
-            // Sipariş numarası eşleşiyorsa bildirim gönder
             if (lastOrderNumber && data.orderNumber && lastOrderNumber == data.orderNumber) {
                 sendNotification('☕ SİPARİŞİNİZ HAZIR!', {
                     body: `Sipariş No: #${data.orderNumber} - ${data.item} hazırlanmıştır. Afiyet olsun!`,
@@ -898,12 +1294,10 @@
             }
         });
 
-        // 4. Sayfa yüklendiğinde Service Worker kontrolü ve İzin İsteği
         window.addEventListener('load', () => {
             if ('serviceWorker' in navigator) {
                 navigator.serviceWorker.register('/sw.js').then(() => {
                     console.log('Service Worker Yüklendi');
-                    // Kayıttan 1.5 saniye sonra izin iste
                     setTimeout(requestNotificationPermission, 1500);
                 }).catch(err => {
                     console.log('Service Worker kayıt hatası:', err);
@@ -911,9 +1305,7 @@
             }
         });
         
-        // --- BİLDİRİM SİSTEMİ SONU ---
-        
-        // ZENGİN MENÜ VERİSİ
+        // MENU DATA - DO NOT MODIFY
         const menuData = [
             
                 {
@@ -1084,23 +1476,22 @@
 
        let stockStatus = {}; 
         let selectedItemName = "";
-        let saturdayMenuItems = []; // Cumartesi menüsü ürünleri
-        let isSaturdayEvening = false; // Cumartesi akşamı mı?
+        let saturdayMenuItems = [];
+        let isSaturdayEvening = false;
 
         document.addEventListener('DOMContentLoaded', () => {
-            // Stok durumunu iste (socket handler'ında renderMenu çağrılacak)
             socket.emit('getStock');
-            socket.emit('getSaturdayMenuStatus'); // Cumartesi menü durumunu al
-            setupScrollSpy();
+            socket.emit('getSaturdayMenuStatus');
+            setupScrollEffects();
+            setupModalHandlers();
             checkCafeStatus();
         });
 
-        // Menüyü render etmek için hazır mı kontrol et
         function isReadyToRender() {
             return Object.keys(stockStatus).length > 0 && saturdayMenuItems.length >= 0;
         }
 
-        // --- Render Functions ---
+        // Render Menu
         function renderMenu() {
             const navContainer = document.getElementById('categoryNav');
             const menuContainer = document.getElementById('menuContainer');
@@ -1108,11 +1499,9 @@
             navContainer.innerHTML = '';
             menuContainer.innerHTML = '';
 
-            // Cumartesi akşamıysa ve menü ürünleri varsa, sadece o ürünleri göster
             let categoriesToRender = menuData;
             
             if (isSaturdayEvening && saturdayMenuItems.length > 0) {
-                // Sadece seçili ürünleri içeren kategorileri filtrele
                 categoriesToRender = menuData.map(cat => {
                     const filteredItems = cat.items.filter(item => 
                         saturdayMenuItems.includes(item.name)
@@ -1122,61 +1511,61 @@
                         ...cat,
                         items: filteredItems
                     };
-                }).filter(cat => cat.items.length > 0); // Boş kategorileri çıkar
+                }).filter(cat => cat.items.length > 0);
                 
-                // Cumartesi menüsü banner'ı ekle
                 const banner = document.createElement('div');
-                banner.style.cssText = 'background: linear-gradient(135deg, rgba(0, 220, 130, 0.15) 0%, rgba(0, 220, 130, 0.05) 100%); border: 2px solid rgba(0, 220, 130, 0.4); border-radius: 16px; padding: 16px; margin: 15px; text-align: center; color: var(--primary-color); font-weight: 700;';
+                banner.className = 'saturday-banner';
                 banner.innerHTML = '<i class="bi bi-calendar-week"></i> Cumartesi Özel Menüsü (18:00 sonrası)';
                 menuContainer.appendChild(banner);
             }
 
             categoriesToRender.forEach((cat, index) => {
-                // 1. Navigation Pills
-                const navBtn = document.createElement('div');
-                navBtn.className = `cat-item ${index === 0 ? 'active' : ''}`;
-                navBtn.textContent = cat.title;
-                navBtn.dataset.target = cat.id;
-                navBtn.onclick = () => scrollToSection(cat.id);
-                navContainer.appendChild(navBtn);
+                // Navigation Pills
+                const pill = document.createElement('div');
+                pill.className = `category-pill ${index === 0 ? 'active' : ''}`;
+                pill.textContent = cat.title;
+                pill.dataset.target = cat.id;
+                pill.onclick = () => scrollToSection(cat.id);
+                navContainer.appendChild(pill);
 
-                // 2. Menu Sections
+                // Menu Section
                 const section = document.createElement('div');
                 section.className = 'menu-section';
                 section.id = cat.id;
+                section.style.animationDelay = `${index * 0.08}s`;
                 
-                // Section Header
                 const header = document.createElement('div');
                 header.className = 'section-header';
-                header.innerHTML = `<i class="bi ${cat.icon}"></i><h3>${cat.title}</h3>`;
+                header.innerHTML = `
+                    <div class="section-icon">
+                        <i class="${cat.icon}"></i>
+                    </div>
+                    <h3 class="section-title">${cat.title}</h3>
+                `;
                 section.appendChild(header);
 
-                // Products Grid
+                // Product Grid
                 const grid = document.createElement('div');
-                grid.className = 'products-grid';
+                grid.className = 'product-grid';
 
                 cat.items.forEach(item => {
                     const card = document.createElement('div');
                     card.className = 'product-card';
                     card.dataset.itemName = item.name;
+                    card.onclick = () => openModal(item.name);
                     
-                    // Use local image path
                     const imgUrl = item.img;
 
                     card.innerHTML = `
                         ${cat.special ? '<div class="special-badge">ÖZEL</div>' : ''}
-                        <div class="card-img-wrapper">
+                        <div class="product-img-wrapper">
                             <img src="${imgUrl}" class="product-img" loading="lazy" alt="${item.name}">
-                            <div class="out-stock-overlay d-none">
-                                <i class="bi bi-x-circle fs-2"></i>
-                                <span>Tükendi</span>
-                            </div>
                         </div>
-                        <div class="card-body">
-                            <div class="product-title">${item.name}</div>
+                        <div class="card-content">
+                            <div class="product-name">${item.name}</div>
                             <div class="product-desc">${item.desc}</div>
-                            <button class="btn-add" onclick="openModal('${item.name}')">
-                                <i class="bi bi-plus-lg"></i> EKLE
+                            <button class="btn-add" onclick="event.stopPropagation(); openModal('${item.name}')">
+                                <i class="bi bi-plus-lg"></i> Ekle
                             </button>
                         </div>
                     `;
@@ -1187,16 +1576,13 @@
                 menuContainer.appendChild(section);
             });
             
-            // Render edildikten sonra stok durumunu uygula
             updateStockUI();
         }
 
-        // --- Interaction Logic ---
         function scrollToSection(id) {
             const element = document.getElementById(id);
             if(element) {
-                // Smooth scroll yap
-                const headerOffset = 130;
+                const headerOffset = 150;
                 const elementPosition = element.getBoundingClientRect().top;
                 const offsetPosition = elementPosition + window.pageYOffset - headerOffset;
             
@@ -1207,21 +1593,29 @@
             }
         }
 
-        function setupScrollSpy() {
-            const navItems = document.querySelectorAll('.cat-item');
+        function setupScrollEffects() {
+            const scrollTop = document.getElementById('scrollTop');
+            const navItems = document.querySelectorAll('.category-pill');
             const sections = document.querySelectorAll('.menu-section');
-            const navContainer = document.getElementById('categoryNav');
 
+            // Scroll top button visibility
+            window.addEventListener('scroll', () => {
+                if (window.scrollY > 300) {
+                    scrollTop.classList.add('visible');
+                } else {
+                    scrollTop.classList.remove('visible');
+                }
+            });
+
+            // Scroll spy for navigation
             const observer = new IntersectionObserver((entries) => {
                 entries.forEach(entry => {
                     if (entry.isIntersecting) {
-                        // Aktif menüyü güncelle
                         navItems.forEach(nav => {
                             nav.classList.toggle('active', nav.dataset.target === entry.target.id);
                             
-                            // Aktif olan menü butonunu görünür alana kaydır
                             if(nav.dataset.target === entry.target.id) {
-                                navContainer.scrollTo({
+                                document.getElementById('categoryNav').scrollTo({
                                     left: nav.offsetLeft - 20,
                                     behavior: 'smooth'
                                 });
@@ -1230,20 +1624,18 @@
                     }
                 });
             }, {
-                rootMargin: "-20% 0px -60% 0px" // Ekranın ortasını baz al
+                rootMargin: "-20% 0px -60% 0px"
             });
 
             sections.forEach(section => observer.observe(section));
 
-            // Back to top button visibility
-            window.addEventListener('scroll', () => {
-                const btn = document.querySelector('.scroll-top-btn');
-                if (window.scrollY > 300) btn.classList.add('visible');
-                else btn.classList.remove('visible');
-            });
+            // Scroll to top
+            scrollTop.onclick = () => {
+                window.scrollTo({ top: 0, behavior: 'smooth' });
+            };
         }
 
-        // --- Search Logic ---
+        // Search
         document.getElementById('searchInput').addEventListener('input', (e) => {
             const val = e.target.value.toLowerCase().trim();
             const sections = document.querySelectorAll('.menu-section');
@@ -1264,25 +1656,21 @@
                     }
                 });
 
-                // Bölümde ürün yoksa bölümü gizle
                 sec.style.display = secHasMatch ? 'block' : 'none';
             });
 
             document.getElementById('emptyState').classList.toggle('d-none', hasResult);
         });
 
-        // --- Socket & Stock Logic ---
+        // Socket & Stock Logic
         socket.on('stockStatus', (status) => {
             stockStatus = status;
-            // Menü render edilmişse UI güncelleştir, yoksa render et
             const menuContainer = document.getElementById('menuContainer');
             if (menuContainer.innerHTML === '') {
-                // Menü henüz render edilmemişse, render et
                 if (isReadyToRender()) {
                     renderMenu();
                 }
             } else {
-                // Menü zaten render edildiyse, sadece stok UI'ını güncelle
                 updateStockUI();
             }
         });
@@ -1292,29 +1680,24 @@
             updateStockUI();
         });
 
-        // Cumartesi menüsü durumunu al
         socket.on('saturdayMenuStatus', (data) => {
             saturdayMenuItems = data.items || [];
             isSaturdayEvening = data.isSaturdayEvening || false;
             console.log('Cumartesi durumu:', isSaturdayEvening ? 'Cumartesi akşamı' : 'Normal menü');
             console.log('Cumartesi menüsü:', saturdayMenuItems.length, 'ürün');
             
-            // Eğer stok bilgisi varsa menüyü render et
             const menuContainer = document.getElementById('menuContainer');
             if (menuContainer.innerHTML === '' && isReadyToRender()) {
                 renderMenu();
             } else if (menuContainer.innerHTML !== '') {
-                // Menü zaten render edildiyse, sadece güncelle
                 renderMenu();
             }
         });
 
-        // Cumartesi menüsü güncellendiğinde
         socket.on('saturdayMenuUpdated', (items) => {
             saturdayMenuItems = items;
             console.log('Cumartesi menüsü güncellendi:', items.length, 'ürün');
             
-            // Eğer şu an cumartesi akşamıysa menüyü yeniden render et
             if (isSaturdayEvening) {
                 renderMenu();
             }
@@ -1325,48 +1708,61 @@
                 const name = card.dataset.itemName;
                 const isAvailable = stockStatus[name] !== false;
                 
-                const overlay = card.querySelector('.out-stock-overlay');
                 const btn = card.querySelector('.btn-add');
 
                 if (!isAvailable) {
-                    overlay.classList.remove('d-none');
+                    card.classList.add('out-of-stock');
                     btn.disabled = true;
                     btn.innerHTML = 'Tükendi';
-                    card.style.opacity = '0.7';
                 } else {
-                    overlay.classList.add('d-none');
+                    card.classList.remove('out-of-stock');
                     btn.disabled = false;
-                    btn.innerHTML = '<i class="bi bi-plus-lg"></i> EKLE';
-                    card.style.opacity = '1';
+                    btn.innerHTML = '<i class="bi bi-plus-lg"></i> Ekle';
                 }
             });
         }
 
-        // --- Cihaz ID Oluştur/Al ---
+        // Device ID
         function getDeviceId() {
             let deviceId = localStorage.getItem('deviceId');
             if (!deviceId) {
-                // Benzersiz cihaz ID'si oluştur
                 deviceId = 'device_' + Date.now() + '_' + Math.random().toString(36).substr(2, 9);
                 localStorage.setItem('deviceId', deviceId);
             }
             return deviceId;
         }
 
-        // --- Modal & Order ---
-        const modalEl = new bootstrap.Modal(document.getElementById('orderModal'));
+        // Modal Handlers
+        function setupModalHandlers() {
+            const backdrop = document.getElementById('modalBackdrop');
+            const modal = document.getElementById('orderModal');
+            const closeBtn = document.getElementById('closeModalBtn');
+
+            closeBtn.onclick = closeModal;
+            backdrop.onclick = closeModal;
+
+            function closeModal() {
+                backdrop.classList.remove('show');
+                modal.classList.remove('show');
+                document.body.style.overflow = 'auto';
+            }
+        }
 
         function openModal(name) {
             selectedItemName = name;
             document.getElementById('modalItemName').textContent = name;
             
-            // Oto doldurma (varsa)
             const savedName = localStorage.getItem('guestName');
             const savedPhone = localStorage.getItem('guestPhone');
             if(savedName) document.getElementById('guestName').value = savedName;
             if(savedPhone) document.getElementById('guestPhone').value = savedPhone;
 
-            modalEl.show();
+            const backdrop = document.getElementById('modalBackdrop');
+            const modal = document.getElementById('orderModal');
+            
+            backdrop.classList.add('show');
+            modal.classList.add('show');
+            document.body.style.overflow = 'hidden';
         }
 
         function submitOrder() {
@@ -1378,96 +1774,129 @@
                 return;
             }
 
-            // Save info
             localStorage.setItem('guestName', guest);
             localStorage.setItem('guestPhone', phone);
 
-            // Cihaz ID'sini al
             const deviceId = getDeviceId();
-
-            // Get FCM token from localStorage or current session
             const currentFcmToken = fcmToken || localStorage.getItem('fcmToken');
 
-            // Emit - BAŞARILI OLURSA event listener gösterecek
             socket.emit('placeOrder', {
                 guestName: guest,
                 phone: phone,
                 deviceId: deviceId,
                 item: selectedItemName,
                 orderTime: new Date().toLocaleTimeString('tr-TR', {hour:'2-digit', minute:'2-digit'}),
-                fcmToken: currentFcmToken // Include FCM token for push notifications
+                fcmToken: currentFcmToken
             });
 
-            // Modal'ı kapat (sipariş gönderildi)
-            modalEl.hide();
+            // Close modal
+            document.getElementById('modalBackdrop').classList.remove('show');
+            document.getElementById('orderModal').classList.remove('show');
+            document.body.style.overflow = 'auto';
         }
 
-        // Sipariş başarılı olduğunda
         socket.on('orderSuccess', (data) => {
-            // Show Success
             const successOverlay = document.getElementById('successScreen');
-            // Sipariş numarasını göster ve localStorage'a kaydet
             if (data && data.orderNumber) {
                 document.getElementById('orderNumberDisplay').textContent = data.orderNumber;
-                // Bu sipariş numarasını localStorage'a kaydet
                 localStorage.setItem('lastOrderNumber', data.orderNumber);
             }
-            successOverlay.classList.remove('d-none');
+            successOverlay.classList.add('show');
             setTimeout(() => {
-                successOverlay.classList.add('d-none');
-            }, 2000);
+                successOverlay.classList.remove('show');
+            }, 3000);
         });
 
-        // --- Cafe Closed Logic ---
+        // Cafe Closed Logic
         socket.on('cafeStatus', (status) => {
             const alert = document.getElementById('cafeClosedAlert');
+            if (!alert) return;
+
+            const titleEl = document.getElementById('closedTitle');
+            const messageEl = document.getElementById('closedMessage');
+            const countdownEl = document.getElementById('closedCountdown');
+            const reasonEl = document.getElementById('closedReason');
+            let countdownInterval = null;
+            const clearCountdown = () => { if (countdownInterval) { clearInterval(countdownInterval); countdownInterval = null; } };
+
             if (status.isClosed) {
-                alert.classList.remove('hidden');
+                alert.classList.add('show');
                 document.body.style.overflow = 'hidden';
-                if(status.closedReason === 'prayer') {
-                    document.getElementById('closedTitle').textContent = "Namaz Vakti";
-                    document.getElementById('closedReason').textContent = "Kısa bir ara.";
+
+                const isPrayer = status.closedReason === 'prayer';
+                const prayerLine = (status.prayerName || status.prayerTime)
+                    ? `${status.prayerName || ''}${(status.prayerName && status.prayerTime) ? ' - ' : ''}${status.prayerTime || ''}`
+                    : '';
+
+                const titleText = status.customNote || (isPrayer ? 'Namaz Vakti' : 'Kafe Kapalı');
+                let messageText = status.customDetail || (isPrayer ? 'Hizmetimize kısa bir ara veriyoruz' : 'Şu an hizmet veremiyoruz.');
+                let detailText = status.customDetail || prayerLine || 'Kısa bir ara.';
+
+                if (titleEl) titleEl.textContent = titleText;
+                if (messageEl) messageEl.textContent = messageText;
+                
+                clearCountdown();
+                const endTs = status.countdownEnd ? Number(status.countdownEnd) : null;
+                if (endTs && countdownEl) {
+                    const update = () => {
+                        const remaining = endTs - Date.now();
+                        if (remaining <= 0) {
+                            countdownEl.textContent = '00:00';
+                            countdownEl.style.display = 'block';
+                            clearCountdown();
+                            return;
+                        }
+                        const totalSeconds = Math.floor(remaining / 1000);
+                        const m = Math.floor(totalSeconds / 60).toString().padStart(2,'0');
+                        const s = (totalSeconds % 60).toString().padStart(2,'0');
+                        countdownEl.textContent = `${m}:${s}`;
+                        countdownEl.style.display = 'block';
+                    };
+                    update();
+                    countdownInterval = setInterval(update, 1000);
+                } else if (countdownEl) {
+                    countdownEl.style.display = 'none';
+                }
+                
+                if (reasonEl) {
+                    reasonEl.textContent = detailText;
+                    reasonEl.style.display = detailText ? 'block' : 'none';
                 }
             } else {
-                alert.classList.add('hidden');
+                alert.classList.remove('show');
                 document.body.style.overflow = 'auto';
+                clearCountdown();
             }
         });
 
-        // --- Order Limit Exceeded ---
         socket.on('orderLimitExceeded', (data) => {
-            // Basit alert göster
             alert(`❌ ${data.message}\n\nKalan hakkınız: ${data.remaining}`);
             
-            // Sipariş butonunu devre dışı bırak
-            const orderBtn = document.querySelector('.btn-primary-custom');
+            const orderBtn = document.querySelector('.btn-submit');
             if (orderBtn) {
                 orderBtn.disabled = true;
                 orderBtn.textContent = 'Günlük Hak Doldu';
-                orderBtn.style.background = '#666';
+                orderBtn.style.background = '#ccc';
             }
         });
 
-        // --- Phone Name Mismatch ---
         socket.on('phoneNameMismatch', (data) => {
             alert(`⚠️ ${data.message}`);
         });
 
-        // --- Device Limit Exceeded ---
         socket.on('deviceLimitExceeded', (data) => {
             alert(`🚫 ${data.message}`);
             
-            // Sipariş butonunu devre dışı bırak
-            const orderBtn = document.querySelector('.btn-primary-custom');
+            const orderBtn = document.querySelector('.btn-submit');
             if (orderBtn) {
                 orderBtn.disabled = true;
                 orderBtn.textContent = 'Günlük Hak Doldu';
-                orderBtn.style.background = '#666';
+                orderBtn.style.background = '#ccc';
             }
         });
         
         function checkCafeStatus() {
-            // İlk açılışta socket'e durum sorulabilir veya beklenebilir
+            // Socket will handle status
         }
     </script>
 </body>

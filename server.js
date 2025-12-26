@@ -449,7 +449,11 @@ function getCurrentTimeSlot() {
 let cafeStatus = {
   isClosed: false,
   closedReason: null, // 'prayer' veya 'manual'
-  prayerName: null // Hangi namaz vakti
+  prayerName: null,   // Hangi namaz vakti
+  prayerTime: null,   // Vakit saati
+  customNote: null,   // Özel durum başlığı (örn. Sohbet Hazırlığı)
+  customDetail: null,  // Alt bilgi (örn. Akşam - 19:45)
+  countdownEnd: null   // Kapanış geri sayım bitiş timestamp (ms)
 };
 
 // Ezan vakti bilgileri
@@ -786,10 +790,23 @@ function getCurrentPrayerInfo() {
 
     // Eğer şu an kapatma ve açılma zamanı arasındaysak
     if (currentTime >= closingTime && currentTime <= openingTime) {
+      // Açılma zamanını hesapla (Date objesi olarak)
+      const openingDate = new Date();
+      const openingMinutes = minutes + 40;
+      const openingHours = hours + Math.floor(openingMinutes / 60);
+      const finalMinutes = openingMinutes % 60;
+      openingDate.setHours(openingHours, finalMinutes, 0, 0);
+      
+      // Eğer açılma zamanı geçmişteyse (gece yarısını geçtiyse), yarın olarak ayarla
+      if (openingDate < now) {
+        openingDate.setDate(openingDate.getDate() + 1);
+      }
+      
       return {
         name: prayer.name,
         time: prayer.time,
-        isClosed: true
+        isClosed: true,
+        countdownEnd: openingDate.getTime() // Açılma zamanı timestamp olarak
       };
     }
   }
@@ -822,6 +839,8 @@ function schedulePrayerClosures() {
     cafeStatus.isClosed = true;
     cafeStatus.closedReason = 'prayer';
     cafeStatus.prayerName = currentPrayer.name;
+    cafeStatus.prayerTime = currentPrayer.time || null;
+    cafeStatus.countdownEnd = currentPrayer.countdownEnd || null; // Açılma zamanı
   }
   
   prayers.forEach(prayer => {
@@ -829,11 +848,27 @@ function schedulePrayerClosures() {
     
     // Ezan vaktinden 15 dakika önce kapatma zamanı
     const closingTime = new Date();
-    closingTime.setHours(hours, minutes - 15, 0, 0);
+    const closingMinutes = minutes - 15;
+    const closingHours = hours + Math.floor(closingMinutes / 60);
+    const finalClosingMinutes = closingMinutes < 0 ? 60 + closingMinutes : closingMinutes % 60;
+    if (closingMinutes < 0) {
+      closingTime.setHours(hours - 1, finalClosingMinutes, 0, 0);
+    } else {
+      closingTime.setHours(hours, finalClosingMinutes, 0, 0);
+    }
     
     // Ezan vaktinden 40 dakika sonra açılma zamanı
     const openingTime = new Date();
-    openingTime.setHours(hours, minutes + 40, 0, 0);
+    const openingMinutes = minutes + 40;
+    const openingHours = hours + Math.floor(openingMinutes / 60);
+    const finalOpeningMinutes = openingMinutes % 60;
+    openingTime.setHours(openingHours, finalOpeningMinutes, 0, 0);
+    
+    // Eğer açılma zamanı gece yarısını geçiyorsa, bir sonraki güne geç
+    if (openingHours >= 24) {
+      openingTime.setDate(openingTime.getDate() + 1);
+      openingTime.setHours(openingHours % 24, finalOpeningMinutes, 0, 0);
+    }
 
     // Eğer kapatma zamanı geçmemişse timer kur
     if (closingTime > now) {
@@ -843,6 +878,8 @@ function schedulePrayerClosures() {
         cafeStatus.isClosed = true;
         cafeStatus.closedReason = 'prayer';
         cafeStatus.prayerName = prayer.name;
+        cafeStatus.prayerTime = prayer.time || null;
+        cafeStatus.countdownEnd = openingTime.getTime(); // Açılma zamanı timestamp olarak
         io.emit('cafeStatus', cafeStatus);
       }, timeUntilClosing);
       prayerTimers.push(timer);
@@ -860,6 +897,10 @@ function schedulePrayerClosures() {
           cafeStatus.isClosed = false;
           cafeStatus.closedReason = null;
           cafeStatus.prayerName = null;
+          cafeStatus.prayerTime = null;
+          cafeStatus.customNote = null;
+          cafeStatus.customDetail = null;
+          cafeStatus.countdownEnd = null;
           io.emit('cafeStatus', cafeStatus);
         }
       }, timeUntilOpening);
@@ -908,6 +949,8 @@ io.on('connection', (socket) => {
 
   // Send current cafe status to newly connected client
   socket.emit('cafeStatus', cafeStatus);
+  // Send current prayer info (for admin UI to prefill)
+  socket.emit('prayerInfo', getCurrentPrayerInfo());
 
   // Listen for 'placeOrder' event from customer
   socket.on('placeOrder', async (orderData) => {
@@ -996,20 +1039,101 @@ io.on('connection', (socket) => {
   });
 
   // Handle cafe closed/open toggle from admin
-  socket.on('toggleCafeStatus', (data) => {
-    cafeStatus.isClosed = data.isClosed;
-    // Manuel olarak açıp kapattığında reason'ı temizle
-    if (!data.isClosed) {
+  socket.on('toggleCafeStatus', (data = {}) => {
+    const {
+      isClosed,
+      closedReason,
+      customNote,
+      customDetail,
+      prayerName,
+      prayerTime,
+      countdownEnd
+    } = data;
+
+    cafeStatus.isClosed = !!isClosed;
+
+    if (!cafeStatus.isClosed) {
+      // Açıldıysa tüm ek alanları temizle
       cafeStatus.closedReason = null;
       cafeStatus.prayerName = null;
-    } else if (cafeStatus.closedReason !== 'prayer') {
-      cafeStatus.closedReason = 'manual';
+      cafeStatus.prayerTime = null;
+      cafeStatus.customNote = null;
+      cafeStatus.customDetail = null;
+      cafeStatus.countdownEnd = null;
+    } else {
+      // Kapatıldı
+      if (closedReason) {
+        cafeStatus.closedReason = closedReason;
+      } else if (cafeStatus.closedReason !== 'prayer') {
+        cafeStatus.closedReason = 'manual';
+      }
+
+      // Namaz için gelen ek bilgiler
+      if (cafeStatus.closedReason === 'prayer') {
+        cafeStatus.prayerName = prayerName || cafeStatus.prayerName;
+        cafeStatus.prayerTime = prayerTime || cafeStatus.prayerTime;
+        
+        // Eğer countdownEnd yoksa ve prayerName varsa, açılma zamanını hesapla
+        if (!countdownEnd && cafeStatus.prayerName) {
+          const prayerTimes = getTodayPrayerTimes();
+          if (prayerTimes) {
+            // prayerName'den namaz adını çıkar (örn: "Öğle Namazı Vakti" -> "Öğle")
+            const prayerNameMap = {
+              'Öğle': prayerTimes.ogle,
+              'İkindi': prayerTimes.ikindi,
+              'Akşam': prayerTimes.aksam,
+              'Yatsı': prayerTimes.yatsi
+            };
+            
+            // prayerName'de hangi namaz geçiyor?
+            let matchedPrayer = null;
+            for (const [name, time] of Object.entries(prayerNameMap)) {
+              if (cafeStatus.prayerName.includes(name)) {
+                matchedPrayer = { name, time };
+                break;
+              }
+            }
+            
+            if (matchedPrayer) {
+              const [hours, minutes] = matchedPrayer.time.split(':').map(Number);
+              const openingTime = new Date();
+              const openingMinutes = minutes + 40;
+              const openingHours = hours + Math.floor(openingMinutes / 60);
+              const finalMinutes = openingMinutes % 60;
+              openingTime.setHours(openingHours, finalMinutes, 0, 0);
+              
+              // Eğer açılma zamanı gece yarısını geçiyorsa, bir sonraki güne geç
+              if (openingHours >= 24) {
+                openingTime.setDate(openingTime.getDate() + 1);
+                openingTime.setHours(openingHours % 24, finalMinutes, 0, 0);
+              }
+              
+              cafeStatus.countdownEnd = openingTime.getTime();
+              console.log(`[${getTimestamp()}] ⏰ ${matchedPrayer.name} namazı için açılma zamanı hesaplandı: ${openingTime.toLocaleTimeString('tr-TR')}`);
+            }
+          }
+        } else {
+          cafeStatus.countdownEnd = countdownEnd ? Number(countdownEnd) : null;
+        }
+      } else {
+        cafeStatus.prayerName = null;
+        cafeStatus.prayerTime = null;
+        // Geri sayım bitiş zamanı (ms) - namaz dışı durumlar için
+        cafeStatus.countdownEnd = countdownEnd ? Number(countdownEnd) : null;
+      }
+
+      // Özel metinler (Sohbet Hazırlığı vb.)
+      cafeStatus.customNote = customNote || null;
+      cafeStatus.customDetail = customDetail || null;
     }
     
     const status = cafeStatus.isClosed ? 'KAPALI' : 'AÇIK';
     console.log(`[${getTimestamp()}] 🏪 Cafe status changed:`);
     console.log(`   Status: ${status}`);
     console.log(`   Reason: ${cafeStatus.closedReason || 'none'}`);
+    if (cafeStatus.customNote) console.log(`   Note: ${cafeStatus.customNote}`);
+    if (cafeStatus.customDetail) console.log(`   Detail: ${cafeStatus.customDetail}`);
+    if (cafeStatus.prayerName) console.log(`   Prayer: ${cafeStatus.prayerName} ${cafeStatus.prayerTime || ''}`.trim());
     
     // Broadcast cafe status to all clients
     io.emit('cafeStatus', cafeStatus);
@@ -1044,6 +1168,11 @@ io.on('connection', (socket) => {
   // Send current cafe status to newly connected client
   socket.on('getCafeStatus', () => {
     socket.emit('cafeStatus', cafeStatus);
+  });
+
+  // Send current prayer info (name + time window)
+  socket.on('getPrayerInfo', () => {
+    socket.emit('prayerInfo', getCurrentPrayerInfo());
   });
 
   // Cumartesi menü durumunu gönder

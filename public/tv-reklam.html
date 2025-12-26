@@ -3,398 +3,422 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Atmosfer Kafe - TV Reklam</title>
-    <link href="https://fonts.googleapis.com/css2?family=Outfit:wght@300;500;700;900&display=swap" rel="stylesheet">
+    <title>Atmosfer Kafe | TV Display</title>
+    
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;600;800&family=Oswald:wght@500;700&display=swap" rel="stylesheet">
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css" rel="stylesheet">
+    
     <style>
-        * {
-            margin: 0;
-            padding: 0;
-            box-sizing: border-box;
+        :root {
+            /* ÇINARALTI YEŞİL TEMA */
+            --bg-deep: #050a07; 
+            --brand-green: #00dc82; 
+            --brand-green-glow: rgba(0, 220, 130, 0.4);
+            --brand-green-dim: rgba(0, 220, 130, 0.05);
+            
+            --glass-border: rgba(0, 220, 130, 0.3);
+            --text-main: #FFFFFF;
+            
+            --sidebar-width: 25vw;
         }
 
+        * { margin: 0; padding: 0; box-sizing: border-box; }
+
         body {
-            font-family: 'Outfit', sans-serif;
-            background-color: #000000;
-            color: #ffffff;
+            background-color: var(--bg-deep);
+            color: var(--text-main);
+            font-family: 'Inter', sans-serif;
             height: 100vh;
             width: 100vw;
             overflow: hidden;
             display: flex;
         }
 
-        /* --- VIDEO BÖLÜMÜ (SOL) --- */
-        .video-section {
+        .ambient-bg {
+            position: fixed;
+            inset: 0;
+            z-index: 0;
+            background: 
+                radial-gradient(circle at 0% 0%, var(--brand-green-dim) 0%, transparent 60%),
+                radial-gradient(circle at 100% 100%, var(--brand-green-dim) 0%, transparent 60%);
+            pointer-events: none;
+        }
+
+        .layout-container {
+            display: flex;
+            width: 100%;
+            height: 100%;
+            position: relative;
+            z-index: 1;
+            padding: 1vh; /* Kenar boşluğunu azalttım */
+            gap: 1vh;
+        }
+
+        /* --- 1. VIDEO ALANI (SOL) --- */
+        .video-zone {
             flex: 1;
+            position: relative;
+            background: #000;
+            border-radius: 12px;
+            overflow: hidden;
+            border: 2px solid var(--glass-border);
+            box-shadow: 0 0 30px rgba(0, 220, 130, 0.1); 
             display: flex;
             align-items: center;
             justify-content: center;
-            background: linear-gradient(135deg, #1a1a1a 0%, #000000 100%);
-            position: relative;
         }
 
-        .video-container {
-            width: 95%;
-            height: 95%;
-            max-width: 90vw;
-            max-height: 90vh;
-            background: #000000;
-            border-radius: 20px;
-            overflow: hidden;
-            box-shadow: 0 20px 60px rgba(0, 0, 0, 0.8);
-        }
-
+        /* GÜNCELLEME: object-fit: cover 
+           Bu ayar videoyu çerçeveye yayarak siyah boşlukları yok eder. 
+        */
         video {
             width: 100%;
             height: 100%;
-            object-fit: contain;
-            background: #000000;
+            object-fit: cover; /* SİYAH BOŞLUKLARI YOK EDEN KOD */
         }
-
-        .no-video {
+        
+        iframe {
             width: 100%;
             height: 100%;
+            border: none;
+            pointer-events: none;
+            /* YouTube için de cover efekti vermeye çalışıyoruz */
+            object-fit: cover; 
+        }
+
+        .placeholder-screen {
+            position: absolute;
+            inset: 0;
             display: flex;
+            flex-direction: column;
             align-items: center;
             justify-content: center;
-            background: linear-gradient(135deg, #222222 0%, #111111 100%);
-            color: #666666;
-            font-size: 2rem;
-            text-align: center;
-            padding: 40px;
+            background: radial-gradient(circle, #0f1f15 0%, #000000 100%);
+            transition: opacity 0.5s ease;
         }
 
-        /* --- ORDERS COLUMN (SAĞ) --- */
-        .orders-section {
-            width: 380px;
-            background: linear-gradient(135deg, #000000 0%, #1e88e5 100%);
-            border-left: 5px solid #1e88e5;
-            padding: 30px 25px;
-            display: flex;
-            flex-direction: column;
-            gap: 15px;
-            overflow-y: auto;
-            scrollbar-width: thin;
-            scrollbar-color: #1e88e5 #f8f9fa;
-            box-shadow: -10px 0 30px rgba(0, 0, 0, 0.3);
-        }
-
-        .orders-section::-webkit-scrollbar {
-            width: 10px;
-        }
-
-        .orders-section::-webkit-scrollbar-track {
-            background: #f0f0f0;
-        }
-
-        .orders-section::-webkit-scrollbar-thumb {
-            background: #1e88e5;
-            border-radius: 5px;
-        }
-
-        .orders-header {
-            font-size: 1.8rem;
-            font-weight: 900;
-            text-align: center;
-            color: #1e88e5;
-            padding: 15px 0;
-            border-bottom: 3px solid #1e88e5;
-            text-transform: uppercase;
-            letter-spacing: 3px;
-        }
-
-        .orders-list {
-            display: flex;
-            flex-direction: column;
-            gap: 16px;
-            flex: 1;
-            overflow-y: auto;
-        }
-
-        .order-badge {
-            padding: 20px;
-            background: linear-gradient(135deg, #e3f2fd 0%, #f5f5f5 100%);
-            border: 3px solid #1e88e5;
-            border-radius: 15px;
-            text-align: center;
-            font-weight: 700;
-            font-size: 1.3rem;
-            color: #1565c0;
-            transition: all 0.3s ease;
-            animation: pulse 2s ease-in-out infinite;
-            box-shadow: 0 8px 20px rgba(30, 136, 229, 0.15);
-        }
-
-        .order-badge.highlight {
-            background: linear-gradient(135deg, #1e88e5 0%, #1565c0 100%);
-            color: #ffffff;
-            transform: scale(1.08);
-            box-shadow: 0 12px 35px rgba(30, 136, 229, 0.4);
-        }
-
-        @keyframes pulse {
-            0%, 100% {
-                box-shadow: 0 8px 20px rgba(30, 136, 229, 0.15);
-            }
-            50% {
-                box-shadow: 0 8px 35px rgba(30, 136, 229, 0.3);
-            }
-        }
-
-        .order-number {
-            font-size: 2rem;
-            letter-spacing: 5px;
-            color: #1e88e5;
-        }
-
-        .order-badge.highlight .order-number {
-            color: #ffffff;
-        }
-
-        .order-customer {
-            font-size: 1rem;
-            color: #424242;
-            margin-top: 8px;
-            word-break: break-word;
-            font-weight: 600;
-        }
-
-        .order-badge.highlight .order-customer {
-            color: #ffffff;
+        .logo-animation {
+            width: 15vw;
             opacity: 0.9;
+            filter: drop-shadow(0 0 25px var(--brand-green-glow));
+            animation: pulseLogo 3s ease-in-out infinite;
         }
 
-        .empty-orders {
+        .brand-name {
+            font-family: 'Oswald', sans-serif;
+            font-size: 3vw;
+            letter-spacing: 0.3vw;
+            text-transform: uppercase;
+            margin-top: 2vh;
+            color: var(--brand-green);
+            text-shadow: 0 0 20px var(--brand-green-glow);
+        }
+
+        @keyframes pulseLogo {
+            0%, 100% { transform: scale(1); opacity: 0.8; }
+            50% { transform: scale(1.05); opacity: 1; }
+        }
+
+        /* --- 2. SİPARİŞ LİSTESİ (SAĞ) --- */
+        .sidebar {
+            width: var(--sidebar-width);
+            background: rgba(10, 20, 15, 0.85); /* Biraz daha koyu okunaklı */
+            backdrop-filter: blur(20px);
+            border: 1px solid var(--glass-border);
+            border-radius: 12px;
+            display: flex;
+            flex-direction: column;
+            padding: 2vh 1.5vw;
+        }
+
+        .sidebar-header {
+            text-align: center;
+            margin-bottom: 2vh;
+            padding-bottom: 2vh;
+            border-bottom: 1px solid var(--glass-border);
+        }
+
+        .sidebar-title {
+            font-family: 'Oswald', sans-serif;
+            font-size: 3.5vh;
+            color: var(--text-main);
+            text-transform: uppercase;
+            letter-spacing: 2px;
             display: flex;
             align-items: center;
             justify-content: center;
-            height: 120px;
-            color: #999999;
-            font-size: 1.1rem;
-            text-align: center;
+            gap: 15px;
+        }
+
+        .sidebar-title i { 
+            color: var(--brand-green);
+            filter: drop-shadow(0 0 10px var(--brand-green));
+        }
+
+        .subtitle {
+            font-size: 1.2vh;
+            color: var(--brand-green);
+            letter-spacing: 1px;
+            margin-top: 5px;
+            text-transform: uppercase;
+            font-weight: 600;
+            opacity: 0.8;
+        }
+
+        .orders-grid {
+            display: flex;
+            flex-direction: column;
+            gap: 1.5vh;
+            overflow-y: auto;
+            padding-right: 5px;
+            flex: 1;
+        }
+
+        .orders-grid::-webkit-scrollbar { width: 4px; }
+        .orders-grid::-webkit-scrollbar-thumb { background: var(--brand-green); border-radius: 4px; }
+
+        .order-card {
+            background: linear-gradient(90deg, rgba(0, 220, 130, 0.05) 0%, transparent 100%);
+            border-left: 4px solid var(--brand-green);
+            border-radius: 8px;
+            padding: 2vh 1.5vw;
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            position: relative;
+            overflow: hidden;
+            transition: all 0.5s ease;
+            animation: slideIn 0.5s cubic-bezier(0.175, 0.885, 0.32, 1.275);
+        }
+
+        @keyframes slideIn {
+            from { opacity: 0; transform: translateX(30px); }
+            to { opacity: 1; transform: translateX(0); }
+        }
+
+        .order-info { display: flex; flex-direction: column; }
+
+        .order-id {
+            font-family: 'Oswald', sans-serif;
+            font-size: 4vh;
+            font-weight: 700;
+            color: #fff;
+            line-height: 1;
+        }
+
+        .order-id span {
+            font-size: 1.5vh;
+            color: var(--brand-green);
+            font-weight: 600;
+            margin-right: 5px;
+            vertical-align: middle;
+        }
+
+        .customer-name {
+            font-size: 1.8vh;
+            color: #ccc;
+            margin-top: 0.5vh;
             font-weight: 500;
+            white-space: nowrap;
+            overflow: hidden;
+            text-overflow: ellipsis;
+            max-width: 14vw;
         }
 
-        /* Scrollbar özelleştirmesi */
-        .orders-list::-webkit-scrollbar {
-            width: 8px;
-        }
-
-        .orders-list::-webkit-scrollbar-track {
-            background: transparent;
-        }
-
-        .orders-list::-webkit-scrollbar-thumb {
-            background: #1e88e5;
+        .status-badge {
+            background: var(--brand-green);
+            color: #000;
+            font-weight: 800;
+            padding: 0.5vh 1vh;
             border-radius: 4px;
+            font-size: 1.2vh;
+            text-transform: uppercase;
+            box-shadow: 0 0 15px var(--brand-green-glow);
         }
 
-        /* --- RESPONSIVE --- */
-        @media (max-width: 1024px) {
-            .orders-section {
-                width: 320px;
-                padding: 20px;
-            }
-
-            .orders-header {
-                font-size: 1.5rem;
-            }
-
-            .order-badge {
-                padding: 16px;
-                font-size: 1.1rem;
-            }
-
-            .order-number {
-                font-size: 1.6rem;
-            }
+        .order-card.new-item {
+            background: linear-gradient(90deg, rgba(0, 220, 130, 0.2) 0%, transparent 100%);
+            border-left-width: 6px;
+            box-shadow: 0 0 20px rgba(0, 220, 130, 0.15);
         }
 
-        @media (max-width: 768px) {
-            body {
-                flex-direction: column;
-            }
-
-            .video-section {
-                flex: 1;
-            }
-
-            .orders-section {
-                width: 100%;
-                border-left: none;
-                border-top: 5px solid #1e88e5;
-                max-height: 200px;
-                padding: 15px;
-            }
-
-            .orders-list {
-                flex-direction: row;
-                gap: 12px;
-                overflow-x: auto;
-            }
-
-            .order-badge {
-                min-width: 120px;
-                padding: 12px;
-                font-size: 1rem;
-            }
-
-            .order-number {
-                font-size: 1.3rem;
-            }
+        .empty-state {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            height: 100%;
+            opacity: 0.4;
+            gap: 2vh;
+            color: var(--brand-green);
         }
+        .empty-state i { font-size: 6vh; }
+        .empty-state p { font-size: 2vh; letter-spacing: 2px; text-transform: uppercase; color: #fff; }
+
     </style>
 </head>
 <body>
-    <div class="video-section">
-        <div class="video-container">
-            <video id="adVideo" controls playsinline></video>
-            <iframe id="youtubeFrame" style="display: none; width: 100%; height: 100%; border: none;" allow="autoplay"></iframe>
-            <div class="no-video" id="noVideoPlaceholder">
-                Reklam Bekleniyor...
+
+    <div class="ambient-bg"></div>
+
+    <div class="layout-container">
+        <div class="video-zone">
+            <video id="adVideo" playsinline loop muted style="display: none;"></video>
+            <iframe id="youtubeFrame" style="display: none;" allow="autoplay; encrypted-media"></iframe>
+            
+            <div id="noVideoPlaceholder" class="placeholder-screen">
+                <img src="cinarlogo3.png" class="logo-animation" alt="Logo"> 
+                <div class="brand-name">Atmosfer Kafe</div>
+            </div>
+        </div>
+
+        <div class="sidebar">
+            <div class="sidebar-header">
+                <div class="sidebar-title">
+                    <i class="fa-solid fa-circle-check"></i>
+                    Hazır
+                </div>
+                <div class="subtitle">Siparişiniz Teslime Hazır</div>
+            </div>
+
+            <div class="orders-grid" id="ordersList">
+                <div class="empty-state">
+                    <i class="fa-solid fa-mug-hot"></i>
+                    <p>Afiyet Olsun</p>
+                </div>
             </div>
         </div>
     </div>
 
-    <div class="orders-section">
-        <div class="orders-header">📋 SİPARİŞLER</div>
-        <div class="orders-list" id="ordersList">
-            <div class="empty-orders">Hazır sipariş yok</div>
-        </div>
-    </div>
+    <audio id="notificationSound" src="https://assets.mixkit.co/active_storage/sfx/2869/2869-preview.mp3" preload="auto"></audio>
 
     <script src="https://cdn.socket.io/4.5.4/socket.io.min.js"></script>
     <script>
         const socket = io();
+        
         const videoElement = document.getElementById('adVideo');
         const youtubeFrame = document.getElementById('youtubeFrame');
         const noVideoPlaceholder = document.getElementById('noVideoPlaceholder');
         const ordersList = document.getElementById('ordersList');
+        const notificationSound = document.getElementById('notificationSound');
 
         let readyOrders = [];
 
-        // Video stream'ini dinle
+        // --- VIDEO YÖNETİMİ ---
         socket.on('playVideo', (data) => {
-            if (data && data.videoUrl) {
-                console.log('Video URL alındı:', data.videoUrl);
+            if (!data || !data.videoUrl) return;
+            
+            noVideoPlaceholder.style.opacity = '0';
+            setTimeout(() => { noVideoPlaceholder.style.display = 'none'; }, 500);
+
+            if (data.isYouTube) {
+                videoElement.style.display = 'none';
+                videoElement.pause();
+                youtubeFrame.style.display = 'block';
                 
-                if (data.isYouTube) {
-                    // YouTube iframe'ini göster
-                    videoElement.style.display = 'none';
-                    youtubeFrame.style.display = 'block';
-                    noVideoPlaceholder.style.display = 'none';
-                    
-                    youtubeFrame.src = `${data.videoUrl}?autoplay=1&controls=1`;
-                } else {
-                    // Normal video'yu göster
-                    youtubeFrame.style.display = 'none';
-                    videoElement.style.display = 'block';
-                    noVideoPlaceholder.style.display = 'none';
-                    
-                    videoElement.src = data.videoUrl;
-                    videoElement.autoplay = true;
-                    videoElement.play().catch(e => console.log('Video oynatma hatası:', e));
+                const videoId = extractVideoID(data.videoUrl);
+                // YouTube Embed Parametreleri
+                youtubeFrame.src = `https://www.youtube.com/embed/${videoId}?autoplay=1&mute=1&controls=0&loop=1&playlist=${videoId}&showinfo=0&modestbranding=1`;
+                
+            } else {
+                youtubeFrame.style.display = 'none';
+                youtubeFrame.src = '';
+                videoElement.style.display = 'block';
+                
+                videoElement.src = data.videoUrl;
+                videoElement.loop = true;
+                videoElement.muted = true; // Otomatik Başlatma Şartı
+                
+                const playPromise = videoElement.play();
+                if (playPromise !== undefined) {
+                    playPromise.catch(error => {
+                        console.log("Autoplay hatası (Sessiz mod deneniyor):", error);
+                        videoElement.muted = true;
+                        videoElement.play();
+                    });
                 }
             }
         });
 
-        // Videoyu durdur
         socket.on('stopVideo', () => {
             videoElement.pause();
-            videoElement.src = '';
-            youtubeFrame.src = '';
             videoElement.style.display = 'none';
             youtubeFrame.style.display = 'none';
+            youtubeFrame.src = '';
+            
             noVideoPlaceholder.style.display = 'flex';
+            setTimeout(() => { noVideoPlaceholder.style.opacity = '1'; }, 100);
         });
 
-        // Yeni hazır sipariş
+        function extractVideoID(url) {
+            const regExp = /^.*(youtu.be\/|v\/|u\/\w\/|embed\/|watch\?v=|&v=)([^#&?]*).*/;
+            const match = url.match(regExp);
+            return (match && match[2].length === 11) ? match[2] : null;
+        }
+
+        // --- SİPARİŞ YÖNETİMİ ---
         socket.on('orderReady', (orderData) => {
-            console.log('Hazır sipariş:', orderData);
-            addReadyOrder(orderData);
+            if (readyOrders.some(o => o.id === orderData.id)) return;
+
+            readyOrders.push(orderData);
+            renderOrders();
+            
+            // Ses çal (Tarayıcı izin verirse)
+            notificationSound.currentTime = 0;
+            notificationSound.play().catch(() => {}); 
         });
 
-        // Siparişi tamamlandı olarak işaretle
-        socket.on('orderCompleted', (orderId) => {
-            console.log('Sipariş tamamlandı:', orderId);
-            removeReadyOrder(orderId);
-        });
+        socket.on('orderCompleted', (orderId) => removeOrder(orderId));
+        socket.on('orderCompletedOnTv', (orderId) => removeOrder(orderId));
 
-        // TV'den sipariş tamamlanması (barista tamamladığında)
-        socket.on('orderCompletedOnTv', (orderId) => {
-            console.log('TV siparişi tamamlandı:', orderId);
-            removeReadyOrder(orderId);
-        });
-
-        // Tüm hazır siparişleri yükle (sayfa yüklendiğinde)
         socket.on('readyOrders', (orders) => {
-            console.log('Hazır siparişler yüklendi:', orders);
             readyOrders = orders || [];
             renderOrders();
         });
 
-        function addReadyOrder(order) {
-            // Zaten var mı kontrol et
-            if (readyOrders.some(o => o.id === order.id)) {
-                console.log('Sipariş zaten listede var, skip:', order.id);
-                return;
-            }
-
-            readyOrders.push(order);
-            renderOrders();
-
-            // Animasyon efekti
-            setTimeout(() => {
-                const badge = document.querySelector(`[data-order-id="${order.id}"]`);
-                if (badge) {
-                    badge.classList.add('highlight');
-                    setTimeout(() => {
-                        badge.classList.remove('highlight');
-                    }, 2000);
-                }
-            }, 100);
-        }
-
-        function removeReadyOrder(orderId) {
-            const before = readyOrders.length;
-            readyOrders = readyOrders.filter(o => o.id !== orderId);
-            if (readyOrders.length < before) {
-                console.log('Sipariş kaldırıldı:', orderId);
-                renderOrders();
+        function removeOrder(id) {
+            const el = document.querySelector(`[data-id="${id}"]`);
+            if(el) {
+                el.style.transform = 'translateX(100%)';
+                el.style.opacity = '0';
+                setTimeout(() => {
+                    readyOrders = readyOrders.filter(o => o.id !== id);
+                    renderOrders();
+                }, 500);
             }
         }
 
         function renderOrders() {
-            // Duplicate kontrol - aynı ID'den yalnızca bir tane olmalı
-            const seenIds = new Set();
-            readyOrders = readyOrders.filter(order => {
-                if (seenIds.has(order.id)) {
-                    console.warn('Duplicate sipariş filtrelendi:', order.id);
-                    return false;
-                }
-                seenIds.add(order.id);
-                return true;
-            });
-
             ordersList.innerHTML = '';
 
             if (readyOrders.length === 0) {
-                ordersList.innerHTML = '<div class="empty-orders">Hazır sipariş yok</div>';
+                ordersList.innerHTML = `
+                    <div class="empty-state">
+                        <i class="fa-solid fa-mug-hot"></i>
+                        <p>Afiyet Olsun</p>
+                    </div>`;
                 return;
             }
 
-            readyOrders.forEach(order => {
-                const badge = document.createElement('div');
-                badge.className = 'order-badge';
-                badge.setAttribute('data-order-id', order.id);
-                badge.innerHTML = `
-                    <div class="order-number">#${order.orderNumber}</div>
-                    <div class="order-customer">${order.guestName}</div>
+            [...readyOrders].reverse().forEach((order, index) => {
+                const isNew = index === 0;
+                
+                const card = document.createElement('div');
+                card.className = `order-card ${isNew ? 'new-item' : ''}`;
+                card.setAttribute('data-id', order.id);
+                
+                card.innerHTML = `
+                    <div class="order-info">
+                        <div class="order-id"><span>NO</span> ${order.orderNumber}</div>
+                        <div class="customer-name">${order.guestName}</div>
+                    </div>
+                    <div class="status-badge">HAZIR</div>
                 `;
-                ordersList.appendChild(badge);
+                
+                ordersList.appendChild(card);
             });
         }
 
-        // İlk yüklenmede hazır siparişleri iste
         socket.emit('getReadyOrders');
     </script>
 </body>

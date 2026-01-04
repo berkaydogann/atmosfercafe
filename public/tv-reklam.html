@@ -1,28 +1,35 @@
 <!DOCTYPE html>
 <html lang="tr">
+
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Atmosfer Kafe | TV Display</title>
-    
-    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;600;800&family=Oswald:wght@500;700&display=swap" rel="stylesheet">
+
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;600;800&family=Oswald:wght@500;700&display=swap"
+        rel="stylesheet">
     <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css" rel="stylesheet">
-    
+
     <style>
         :root {
             /* ÇINARALTI YEŞİL TEMA */
-            --bg-deep: #050a07; 
-            --brand-green: #00dc82; 
+            --bg-deep: #050a07;
+            --brand-green: #00dc82;
             --brand-green-glow: rgba(0, 220, 130, 0.4);
             --brand-green-dim: rgba(0, 220, 130, 0.05);
-            
+
             --glass-border: rgba(0, 220, 130, 0.3);
             --text-main: #FFFFFF;
-            
-            --sidebar-width: 25vw;
+
+            --sidebar-width: 20vw;
+            /* Reduced slightly to fit 3 cols */
         }
 
-        * { margin: 0; padding: 0; box-sizing: border-box; }
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
 
         body {
             background-color: var(--bg-deep);
@@ -38,7 +45,7 @@
             position: fixed;
             inset: 0;
             z-index: 0;
-            background: 
+            background:
                 radial-gradient(circle at 0% 0%, var(--brand-green-dim) 0%, transparent 60%),
                 radial-gradient(circle at 100% 100%, var(--brand-green-dim) 0%, transparent 60%);
             pointer-events: none;
@@ -50,11 +57,96 @@
             height: 100%;
             position: relative;
             z-index: 1;
-            padding: 1vh; /* Kenar boşluğunu azalttım */
+            padding: 1vh;
             gap: 1vh;
         }
 
-        /* --- 1. VIDEO ALANI (SOL) --- */
+        /* --- ORTAK SIDEBAR STİLİ --- */
+        .sidebar {
+            width: var(--sidebar-width);
+            background: rgba(10, 20, 15, 0.85);
+            backdrop-filter: blur(20px);
+            border: 1px solid var(--glass-border);
+            border-radius: 12px;
+            display: flex;
+            flex-direction: column;
+            padding: 2vh 1vw;
+        }
+
+        .sidebar-header {
+            text-align: center;
+            margin-bottom: 2vh;
+            padding-bottom: 1.5vh;
+            border-bottom: 1px solid var(--glass-border);
+        }
+
+        .sidebar-title {
+            font-family: 'Oswald', sans-serif;
+            font-size: 3vh;
+            color: var(--text-main);
+            text-transform: uppercase;
+            letter-spacing: 2px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 10px;
+        }
+
+        .sidebar-title i {
+            color: var(--brand-green);
+        }
+
+        .subtitle {
+            font-size: 1.1vh;
+            color: var(--brand-green);
+            letter-spacing: 1px;
+            margin-top: 5px;
+            text-transform: uppercase;
+            font-weight: 600;
+            opacity: 0.8;
+        }
+
+        .orders-grid {
+            display: flex;
+            flex-direction: column;
+            gap: 1.5vh;
+            overflow-y: auto;
+            align-items: stretch;
+            flex: 1;
+        }
+
+        /* Scrollbar Gizleme/İnceltme */
+        .orders-grid::-webkit-scrollbar {
+            width: 4px;
+        }
+
+        .orders-grid::-webkit-scrollbar-thumb {
+            background: var(--brand-green);
+            border-radius: 4px;
+        }
+
+
+        /* --- 1. HAZIRLANIYOR ALANI (SOL) --- */
+        .preparing-sidebar {
+            border-right: 1px solid var(--glass-border);
+        }
+
+        .preparing-sidebar .sidebar-title i {
+            color: #fca5a5;
+            /* Soluk kırmızı/turuncu */
+            filter: drop-shadow(0 0 5px rgba(252, 165, 165, 0.5));
+        }
+
+        .preparing-sidebar .sidebar-title {
+            font-size: 4vh;
+        }
+
+        .preparing-sidebar .subtitle {
+            color: #fca5a5;
+        }
+
+
+        /* --- 2. VIDEO ALANI (ORTA) --- */
         .video-zone {
             flex: 1;
             position: relative;
@@ -62,28 +154,22 @@
             border-radius: 12px;
             overflow: hidden;
             border: 2px solid var(--glass-border);
-            box-shadow: 0 0 30px rgba(0, 220, 130, 0.1); 
+            box-shadow: 0 0 30px rgba(0, 220, 130, 0.1);
             display: flex;
             align-items: center;
             justify-content: center;
         }
 
-        /* GÜNCELLEME: object-fit: cover 
-           Bu ayar videoyu çerçeveye yayarak siyah boşlukları yok eder. 
-        */
-        video {
-            width: 100%;
-            height: 100%;
-            object-fit: cover; /* SİYAH BOŞLUKLARI YOK EDEN KOD */
-        }
-        
+        video,
         iframe {
             width: 100%;
             height: 100%;
+            object-fit: cover;
             border: none;
+        }
+
+        iframe {
             pointer-events: none;
-            /* YouTube için de cover efekti vermeye çalışıyoruz */
-            object-fit: cover; 
         }
 
         .placeholder-screen {
@@ -115,132 +201,137 @@
         }
 
         @keyframes pulseLogo {
-            0%, 100% { transform: scale(1); opacity: 0.8; }
-            50% { transform: scale(1.05); opacity: 1; }
+
+            0%,
+            100% {
+                transform: scale(1);
+                opacity: 0.8;
+            }
+
+            50% {
+                transform: scale(1.05);
+                opacity: 1;
+            }
         }
 
-        /* --- 2. SİPARİŞ LİSTESİ (SAĞ) --- */
-        .sidebar {
-            width: var(--sidebar-width);
-            background: rgba(10, 20, 15, 0.85); /* Biraz daha koyu okunaklı */
-            backdrop-filter: blur(20px);
-            border: 1px solid var(--glass-border);
-            border-radius: 12px;
-            display: flex;
-            flex-direction: column;
-            padding: 2vh 1.5vw;
+        /* --- 3. HAZIR ALANI (SAĞ) --- */
+        .ready-sidebar {
+            width: 25vw;
+            /* SAĞ TARAF DAHA GENİŞ */
+            border-left: 1px solid var(--glass-border);
         }
 
-        .sidebar-header {
-            text-align: center;
-            margin-bottom: 2vh;
-            padding-bottom: 2vh;
-            border-bottom: 1px solid var(--glass-border);
+        .ready-sidebar .sidebar-title {
+            font-size: 4vh;
+            /* BAŞLIK DAHA BÜYÜK */
         }
 
-        .sidebar-title {
-            font-family: 'Oswald', sans-serif;
-            font-size: 3.5vh;
-            color: var(--text-main);
-            text-transform: uppercase;
-            letter-spacing: 2px;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            gap: 15px;
-        }
-
-        .sidebar-title i { 
-            color: var(--brand-green);
+        .ready-sidebar .sidebar-title i {
             filter: drop-shadow(0 0 10px var(--brand-green));
         }
 
-        .subtitle {
-            font-size: 1.2vh;
-            color: var(--brand-green);
-            letter-spacing: 1px;
-            margin-top: 5px;
-            text-transform: uppercase;
-            font-weight: 600;
-            opacity: 0.8;
-        }
 
-        .orders-grid {
+        /* --- SİPARİŞ KARTLARI --- */
+        .order-card {
+            background: linear-gradient(90deg, rgba(255, 255, 255, 0.05) 0%, transparent 100%);
+            border-left: 3px solid #888;
+            border-radius: 6px;
+            padding: 1.5vh 1vw;
             display: flex;
             flex-direction: column;
-            gap: 1.5vh;
-            overflow-y: auto;
-            padding-right: 5px;
-            flex: 1;
-        }
-
-        .orders-grid::-webkit-scrollbar { width: 4px; }
-        .orders-grid::-webkit-scrollbar-thumb { background: var(--brand-green); border-radius: 4px; }
-
-        .order-card {
-            background: linear-gradient(90deg, rgba(0, 220, 130, 0.05) 0%, transparent 100%);
-            border-left: 4px solid var(--brand-green);
-            border-radius: 8px;
-            padding: 2vh 1.5vw;
-            display: flex;
-            align-items: center;
-            justify-content: space-between;
             position: relative;
-            overflow: hidden;
             transition: all 0.5s ease;
-            animation: slideIn 0.5s cubic-bezier(0.175, 0.885, 0.32, 1.275);
+            animation: slideInLeft 0.5s cubic-bezier(0.175, 0.885, 0.32, 1.275);
         }
 
-        @keyframes slideIn {
-            from { opacity: 0; transform: translateX(30px); }
-            to { opacity: 1; transform: translateX(0); }
+        .preparing-card {
+            border-left-color: #fca5a5;
+            /* Match Ready Card spacing */
+            border-left-width: 6px;
+            padding: 2.2vh 1.5vw;
         }
-
-        .order-info { display: flex; flex-direction: column; }
 
         .order-id {
             font-family: 'Oswald', sans-serif;
-            font-size: 4vh;
+            font-size: 2.5vh;
             font-weight: 700;
             color: #fff;
             line-height: 1;
+            margin-bottom: 0.5vh;
+        }
+
+        .preparing-card .order-id {
+            font-size: 5.5vh;
         }
 
         .order-id span {
-            font-size: 1.5vh;
-            color: var(--brand-green);
-            font-weight: 600;
+            font-size: 1.2vh;
+            color: #aaa;
             margin-right: 5px;
             vertical-align: middle;
         }
 
-        .customer-name {
+        .preparing-card .order-id span {
             font-size: 1.8vh;
+        }
+
+        .customer-name {
+            font-size: 1.4vh;
             color: #ccc;
-            margin-top: 0.5vh;
-            font-weight: 500;
             white-space: nowrap;
             overflow: hidden;
             text-overflow: ellipsis;
-            max-width: 14vw;
+        }
+
+        .preparing-card .customer-name {
+            font-size: 2.2vh;
+            color: #fff;
+            font-weight: 600;
+        }
+
+        /* HAZIR KARTLARI (SAĞ) - DAHA BÜYÜK */
+        .ready-card {
+            background: linear-gradient(90deg, rgba(0, 220, 130, 0.08) 0%, transparent 100%);
+            border-left: 6px solid var(--brand-green);
+            padding: 2.2vh 1.5vw;
+        }
+
+        .ready-card .order-id {
+            font-size: 5.5vh;
+            /* DAHA BÜYÜK NO */
+        }
+
+        .ready-card .order-id span {
+            font-size: 1.8vh;
+            color: var(--brand-green);
+        }
+
+        .ready-card .customer-name {
+            font-size: 2.2vh;
+            /* DAHA BÜYÜK İSİM */
+            color: #fff;
+            font-weight: 600;
         }
 
         .status-badge {
+            position: absolute;
+            top: 1vh;
+            right: 1vh;
             background: var(--brand-green);
             color: #000;
             font-weight: 800;
-            padding: 0.5vh 1vh;
+            padding: 0.4vh 0.8vh;
             border-radius: 4px;
-            font-size: 1.2vh;
+            font-size: 1.1vh;
             text-transform: uppercase;
-            box-shadow: 0 0 15px var(--brand-green-glow);
+            box-shadow: 0 0 10px var(--brand-green-glow);
         }
 
-        .order-card.new-item {
-            background: linear-gradient(90deg, rgba(0, 220, 130, 0.2) 0%, transparent 100%);
-            border-left-width: 6px;
-            box-shadow: 0 0 20px rgba(0, 220, 130, 0.15);
+        .ready-card .status-badge {
+            font-size: 1.5vh;
+            padding: 0.6vh 1.2vh;
         }
+
 
         .empty-state {
             display: flex;
@@ -248,31 +339,90 @@
             align-items: center;
             justify-content: center;
             height: 100%;
-            opacity: 0.4;
-            gap: 2vh;
-            color: var(--brand-green);
+            opacity: 0.3;
+            gap: 1vh;
+            color: #fff;
+            min-height: 200px;
         }
-        .empty-state i { font-size: 6vh; }
-        .empty-state p { font-size: 2vh; letter-spacing: 2px; text-transform: uppercase; color: #fff; }
 
+        .empty-state i {
+            font-size: 4vh;
+        }
+
+        .empty-state p {
+            font-size: 1.5vh;
+            letter-spacing: 2px;
+            text-transform: uppercase;
+        }
+
+
+        @keyframes slideInLeft {
+            from {
+                opacity: 0;
+                transform: translateX(-30px);
+            }
+
+            to {
+                opacity: 1;
+                transform: translateX(0);
+            }
+        }
+
+        @keyframes slideInRight {
+            from {
+                opacity: 0;
+                transform: translateX(30px);
+            }
+
+            to {
+                opacity: 1;
+                transform: translateX(0);
+            }
+        }
+
+        .ready-card {
+            animation-name: slideInRight;
+        }
     </style>
 </head>
+
 <body>
 
     <div class="ambient-bg"></div>
 
     <div class="layout-container">
+        <!-- SOL: HAZIRLANIYOR -->
+        <div class="sidebar preparing-sidebar">
+            <div class="sidebar-header">
+                <div class="sidebar-title">
+                    <i class="fa-solid fa-fire-burner"></i>
+                    Hazırlanıyor
+                </div>
+                <div class="subtitle">Siparişiniz Hazırlanıyor</div>
+            </div>
+
+            <div class="orders-grid" id="preparingList">
+                <!-- Javascript ile doldurulacak -->
+                <div class="empty-state">
+                    <i class="fa-solid fa-hourglass-half"></i>
+                    <p>Sıra Bekleniyor</p>
+                </div>
+            </div>
+        </div>
+
+        <!-- ORTA: VIDEO -->
         <div class="video-zone">
             <video id="adVideo" playsinline loop muted style="display: none;"></video>
             <iframe id="youtubeFrame" style="display: none;" allow="autoplay; encrypted-media"></iframe>
-            
+
             <div id="noVideoPlaceholder" class="placeholder-screen">
-                <img src="cinarlogo3.png" class="logo-animation" alt="Logo"> 
+                <img src="cinarlogo3.png" class="logo-animation" alt="Logo">
                 <div class="brand-name">Atmosfer Kafe</div>
             </div>
         </div>
 
-        <div class="sidebar">
+        <!-- SAĞ: HAZIR -->
+        <div class="sidebar ready-sidebar">
             <div class="sidebar-header">
                 <div class="sidebar-title">
                     <i class="fa-solid fa-circle-check"></i>
@@ -281,7 +431,8 @@
                 <div class="subtitle">Siparişiniz Teslime Hazır</div>
             </div>
 
-            <div class="orders-grid" id="ordersList">
+            <div class="orders-grid" id="readyList">
+                <!-- Javascript ile doldurulacak -->
                 <div class="empty-state">
                     <i class="fa-solid fa-mug-hot"></i>
                     <p>Afiyet Olsun</p>
@@ -290,24 +441,27 @@
         </div>
     </div>
 
-    <audio id="notificationSound" src="https://assets.mixkit.co/active_storage/sfx/2869/2869-preview.mp3" preload="auto"></audio>
+    <audio id="notificationSound" src="https://assets.mixkit.co/active_storage/sfx/2869/2869-preview.mp3"
+        preload="auto"></audio>
 
     <script src="https://cdn.socket.io/4.5.4/socket.io.min.js"></script>
     <script>
         const socket = io();
-        
+
         const videoElement = document.getElementById('adVideo');
         const youtubeFrame = document.getElementById('youtubeFrame');
         const noVideoPlaceholder = document.getElementById('noVideoPlaceholder');
-        const ordersList = document.getElementById('ordersList');
+        const preparingList = document.getElementById('preparingList');
+        const readyList = document.getElementById('readyList');
         const notificationSound = document.getElementById('notificationSound');
 
+        let preparingOrders = [];
         let readyOrders = [];
 
         // --- VIDEO YÖNETİMİ ---
         socket.on('playVideo', (data) => {
             if (!data || !data.videoUrl) return;
-            
+
             noVideoPlaceholder.style.opacity = '0';
             setTimeout(() => { noVideoPlaceholder.style.display = 'none'; }, 500);
 
@@ -315,20 +469,19 @@
                 videoElement.style.display = 'none';
                 videoElement.pause();
                 youtubeFrame.style.display = 'block';
-                
+
                 const videoId = extractVideoID(data.videoUrl);
-                // YouTube Embed Parametreleri
                 youtubeFrame.src = `https://www.youtube.com/embed/${videoId}?autoplay=1&mute=1&controls=0&loop=1&playlist=${videoId}&showinfo=0&modestbranding=1`;
-                
+
             } else {
                 youtubeFrame.style.display = 'none';
                 youtubeFrame.src = '';
                 videoElement.style.display = 'block';
-                
+
                 videoElement.src = data.videoUrl;
                 videoElement.loop = true;
-                videoElement.muted = true; // Otomatik Başlatma Şartı
-                
+                videoElement.muted = true;
+
                 const playPromise = videoElement.play();
                 if (playPromise !== undefined) {
                     playPromise.catch(error => {
@@ -345,7 +498,7 @@
             videoElement.style.display = 'none';
             youtubeFrame.style.display = 'none';
             youtubeFrame.src = '';
-            
+
             noVideoPlaceholder.style.display = 'flex';
             setTimeout(() => { noVideoPlaceholder.style.opacity = '1'; }, 100);
         });
@@ -357,42 +510,104 @@
         }
 
         // --- SİPARİŞ YÖNETİMİ ---
-        socket.on('orderReady', (orderData) => {
-            if (readyOrders.some(o => o.id === orderData.id)) return;
 
-            readyOrders.push(orderData);
-            renderOrders();
-            
-            // Ses çal (Tarayıcı izin verirse)
-            notificationSound.currentTime = 0;
-            notificationSound.play().catch(() => {}); 
+        // 1. New Order (Preparing)
+        socket.on('newOrder', (order) => {
+            // Avoid duplicates
+            if (!preparingOrders.some(o => o.id === order.id)) {
+                preparingOrders.push(order);
+                renderPreparing();
+            }
         });
 
-        socket.on('orderCompleted', (orderId) => removeOrder(orderId));
-        socket.on('orderCompletedOnTv', (orderId) => removeOrder(orderId));
+        // 2. Active Orders Sync (Initial Load)
+        socket.on('activeOrders', (orders) => {
+            // "Active" on server means preparing. 
+            // NOTE: Server returns all active orders.
+            preparingOrders = orders || [];
+            renderPreparing();
+        });
 
+        // 3. Order Ready (Move from Preparing -> Ready)
+        socket.on('orderReady', (orderData) => {
+            // Remove from preparing
+            preparingOrders = preparingOrders.filter(o => o.id !== orderData.id);
+            renderPreparing();
+
+            // Add to ready
+            if (!readyOrders.some(o => o.id === orderData.id)) {
+                readyOrders.push(orderData);
+                renderReady();
+
+                // Play Sound
+                notificationSound.currentTime = 0;
+                notificationSound.play().catch(() => { });
+            }
+        });
+
+        // Sync ready orders
         socket.on('readyOrders', (orders) => {
             readyOrders = orders || [];
-            renderOrders();
+            renderReady();
+
+            // Also remove these from preparing just in case
+            const readyIds = readyOrders.map(o => o.id);
+            preparingOrders = preparingOrders.filter(o => !readyIds.includes(o.id));
+            renderPreparing();
         });
 
+
+        // 4. Order Completed/Picked Up (Remove from Ready)
+        socket.on('orderCompleted', (orderId) => removeOrder(orderId));
+        socket.on('orderCompletedOnTv', (orderId) => removeOrder(orderId));
+        socket.on('orderPickedUp', (orderId) => removeOrder(orderId));
+
+
         function removeOrder(id) {
+            // Check ready list
             const el = document.querySelector(`[data-id="${id}"]`);
-            if(el) {
+            if (el) {
                 el.style.transform = 'translateX(100%)';
                 el.style.opacity = '0';
                 setTimeout(() => {
                     readyOrders = readyOrders.filter(o => o.id !== id);
-                    renderOrders();
+                    renderReady();
                 }, 500);
             }
+            // Check preparing list (just in case)
+            preparingOrders = preparingOrders.filter(o => o.id !== id);
+            renderPreparing();
         }
 
-        function renderOrders() {
-            ordersList.innerHTML = '';
+        // RENDER PREPARING
+        function renderPreparing() {
+            preparingList.innerHTML = '';
+            if (preparingOrders.length === 0) {
+                preparingList.innerHTML = `
+                    <div class="empty-state">
+                        <i class="fa-solid fa-hourglass-half"></i>
+                        <p>Sıra Bekleniyor</p>
+                    </div>`;
+                return;
+            }
 
+            [...preparingOrders].reverse().forEach(order => {
+                const card = document.createElement('div');
+                card.className = 'order-card preparing-card';
+                card.setAttribute('data-id', order.id);
+                card.innerHTML = `
+                    <div class="order-id"><span>NO</span> ${order.orderNumber}</div>
+                    <div class="customer-name">${order.guestName}</div>
+                `;
+                preparingList.appendChild(card);
+            });
+        }
+
+        // RENDER READY
+        function renderReady() {
+            readyList.innerHTML = '';
             if (readyOrders.length === 0) {
-                ordersList.innerHTML = `
+                readyList.innerHTML = `
                     <div class="empty-state">
                         <i class="fa-solid fa-mug-hot"></i>
                         <p>Afiyet Olsun</p>
@@ -400,26 +615,24 @@
                 return;
             }
 
-            [...readyOrders].reverse().forEach((order, index) => {
-                const isNew = index === 0;
-                
+            [...readyOrders].reverse().forEach(order => {
                 const card = document.createElement('div');
-                card.className = `order-card ${isNew ? 'new-item' : ''}`;
+                card.className = 'order-card ready-card';
                 card.setAttribute('data-id', order.id);
-                
                 card.innerHTML = `
-                    <div class="order-info">
-                        <div class="order-id"><span>NO</span> ${order.orderNumber}</div>
-                        <div class="customer-name">${order.guestName}</div>
-                    </div>
+                    <div class="order-id"><span>NO</span> ${order.orderNumber}</div>
+                    <div class="customer-name">${order.guestName}</div>
                     <div class="status-badge">HAZIR</div>
                 `;
-                
-                ordersList.appendChild(card);
+                readyList.appendChild(card);
             });
         }
 
-        socket.emit('getReadyOrders');
+        // Initial Fetch
+        socket.emit('getActiveOrders'); // To populate preparing
+        socket.emit('getReadyOrders');  // To populate ready
+
     </script>
 </body>
+
 </html>

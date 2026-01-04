@@ -1,7 +1,14 @@
 const admin = require('firebase-admin');
 
 // Initialize Firebase Admin SDK
-const serviceAccount = require('./atmosfercafe-firebase-adminsdk-fbsvc-ccfedce55e.json');
+let serviceAccount;
+
+if (!process.env.FIREBASE_KEY) {
+    throw new Error('❌ FIREBASE_KEY environment variable bulunamadı!');
+}
+console.log('🔄 Firebase anahtarı Environment Variable üzerinden okunuyor...');
+serviceAccount = JSON.parse(process.env.FIREBASE_KEY);
+
 admin.initializeApp({
   credential: admin.credential.cert(serviceAccount)
 });

@@ -1,40 +1,48 @@
+/**
+ * Atmosfer Kafe - Order Management System
+ * Pure Firebase Implementation with Turkish Time (UTC+3) Support
+ * 
+ * No JSON file operations - everything uses Firestore
+ * Order slots: 18:00-20:00, 20:00-22:00, After Chat
+ * Server: DigitalOcean (German location, Turkish timezone)
+ */
+
 const express = require('express');
 const http = require('http');
 const socketIo = require('socket.io');
 const path = require('path');
 const axios = require('axios');
-const fs = require('fs');
 const admin = require('firebase-admin');
 const multer = require('multer');
+const FirebaseHelper = require('./firebaseHelper');
 
 // Initialize Firebase Admin SDK
 let db;
+let fbHelper;
+
 try {
   let serviceAccount;
-  
-  // 1. Önce DigitalOcean Environment Variable'a bak
-  if (process.env.FIREBASE_KEY) {
-    console.log('🔄 Firebase anahtarı Environment Variable üzerinden okunuyor...');
-    serviceAccount = JSON.parse(process.env.FIREBASE_KEY);
-  } 
-  // 2. Yoksa yerel dosyaya bak (Bilgisayarında çalışırken)
-  else {
-    console.log('📂 Firebase anahtarı yerel dosyadan okunuyor...');
-    // Buradaki dosya adının senin indirdiğin JSON ile aynı olduğundan emin ol
-    serviceAccount = require('./atmosfercafe-firebase-adminsdk-fbsvc-ccfedce55e.json');
+
+  // Firebase anahtarını Digital Ocean environment variable'dan oku
+  if (!process.env.FIREBASE_KEY) {
+    throw new Error('❌ FIREBASE_KEY environment variable bulunamadı! Digital Ocean ayarlarını kontrol edin.');
   }
+  console.log('🔄 Firebase anahtarı Environment Variable üzerinden okunuyor...');
+  serviceAccount = JSON.parse(process.env.FIREBASE_KEY);
 
   admin.initializeApp({
     credential: admin.credential.cert(serviceAccount)
   });
-  
+
   db = admin.firestore();
+  fbHelper = new FirebaseHelper(db, admin);
+
   console.log('✅ Firebase Admin SDK başarıyla başlatıldı');
   console.log('✅ Firestore veritabanı bağlandı');
-  
 } catch (error) {
   console.error('❌ Firebase Başlatma Hatası:', error.message);
-  console.error('⚠️  Sistem Firebase olmadan, sadece yerel hafıza ile çalışacak.');
+  console.error('❌ CRITICAL: Sistem Firebase olmadan başlatılamaz! Lütfen yapılandırmayı kontrol edin.');
+  process.exit(1);
 }
 
 // Initialize Express app
@@ -43,31 +51,16 @@ const server = http.createServer(app);
 const io = socketIo(server);
 
 // Middleware
-app.use(express.json());
+app.use(express.json({ limit: '50mb' }));
+app.use(express.urlencoded({ limit: '50mb' }));
 app.use(express.static(path.join(__dirname, 'public')));
 
 // Multer konfigürasyonu - Video yükleme için
-const videosDir = path.join(__dirname, 'public', 'videos');
-if (!fs.existsSync(videosDir)) {
-  fs.mkdirSync(videosDir, { recursive: true });
-}
-
-const storage = multer.diskStorage({
-  destination: function (req, file, cb) {
-    cb(null, videosDir);
-  },
-  filename: function (req, file, cb) {
-    const timestamp = Date.now();
-    const ext = path.extname(file.originalname);
-    cb(null, `video_${timestamp}${ext}`);
-  }
-});
-
+const storage = multer.memoryStorage();
 const upload = multer({
   storage: storage,
   limits: { fileSize: 1 * 1024 * 1024 * 1024 }, // 1GB limit
   fileFilter: function (req, file, cb) {
-    // Sadece video dosyaları
     if (file.mimetype.startsWith('video/')) {
       cb(null, true);
     } else {
@@ -79,505 +72,41 @@ const upload = multer({
 // Port configuration
 const PORT = process.env.PORT || 3000;
 
-// Stok yönetimi - Ürün ID'leri ve stok durumları
-const stockStatus = {};
-
-// Cumartesi menüsü - Admin tarafından seçilen ürünler
-let saturdayMenuItems = [];
-
-// Cumartesi menü test modu (admin tarafından manuel olarak açılabilir)
-let saturdayTestMode = false;
-
-// Cumartesi menü dosyası yolu
-const SATURDAY_MENU_FILE = path.join(__dirname, 'saturday_menu.json');
-
-// Aktif siparişler
-let activeOrders = [];
-
-// TV Reklam Sistemi
-let tvReadyOrders = []; // Hazır siparişlerin TV'de gösterilmesi için liste
-let currentVideoUrl = null; // Şu anda oynatılan video
-
-// Aktif siparişler dosyası yolu
-const ACTIVE_ORDERS_FILE = path.join(__dirname, 'active_orders.json');
-
-// Aktif siparişleri dosyadan yükle
-function loadActiveOrders() {
-  try {
-    if (fs.existsSync(ACTIVE_ORDERS_FILE)) {
-      const data = fs.readFileSync(ACTIVE_ORDERS_FILE, 'utf8');
-      activeOrders = JSON.parse(data);
-      console.log(`[${getTimestamp()}] 📋 Aktif siparişler yüklendi: ${activeOrders.length} sipariş`);
-    }
-  } catch (error) {
-    console.error(`[${getTimestamp()}] ❌ Aktif sipariş yükleme hatası:`, error.message);
-  }
-}
-
-// Cumartesi menüsünü dosyadan yükle
-function loadSaturdayMenu() {
-  try {
-    if (fs.existsSync(SATURDAY_MENU_FILE)) {
-      const data = fs.readFileSync(SATURDAY_MENU_FILE, 'utf8');
-      saturdayMenuItems = JSON.parse(data);
-      console.log(`[${getTimestamp()}] 📅 Cumartesi menüsü yüklendi: ${saturdayMenuItems.length} ürün`);
-    }
-  } catch (error) {
-    console.error(`[${getTimestamp()}] ❌ Cumartesi menüsü yükleme hatası:`, error.message);
-  }
-}
-
-// Cumartesi menüsünü dosyaya kaydet
-function saveSaturdayMenu() {
-  try {
-    fs.writeFileSync(SATURDAY_MENU_FILE, JSON.stringify(saturdayMenuItems, null, 2));
-    console.log(`[${getTimestamp()}] ✅ Cumartesi menüsü kaydedildi: ${saturdayMenuItems.length} ürün`);
-  } catch (error) {
-    console.error(`[${getTimestamp()}] ❌ Cumartesi menüsü kaydetme hatası:`, error.message);
-  }
-}
-
-// Şu an Cumartesi akşamı mı kontrol et (Cumartesi 18:00'dan sonra veya test modu)
-function isSaturdayEvening() {
-  // Test modu açıksa her zaman true döndür
-  if (saturdayTestMode) {
-    return true;
-  }
-  
-  const now = new Date();
-  const day = now.getDay(); // 0=Pazar, 6=Cumartesi
-  const hour = now.getHours();
-  
-  return day === 6 && hour >= 18; // Cumartesi ve saat 18 veya sonrası
-}
-
-// Cihaz ID kontrolü - Firestore üzerinden (VPN/gizli sekme engeller)
-async function checkDeviceLimit(deviceId) {
-  const today = new Date().toISOString().split('T')[0];
-  
-  try {
-    if (db) {
-      // Firestore'dan kontrol et
-      const deviceDoc = await db.collection('dailyOrders')
-        .doc(today)
-        .collection('devices')
-        .doc(deviceId)
-        .get();
-      
-      if (deviceDoc.exists) {
-        const deviceData = deviceDoc.data();
-        return {
-          valid: false,
-          message: `Bu cihazdan bugün zaten "${deviceData.name}" adına sipariş verilmiş. Günde tek sipariş hakkınız var.`
-        };
-      }
-      return { valid: true };
-    }
-  } catch (error) {
-    console.error(`[${getTimestamp()}] ❌ Firestore device check error:`, error);
-  }
-  
-  // Fallback: JSON kontrolü
-  if (!salesReports.daily[today]) {
-    salesReports.daily[today] = { customers: {}, items: {}, phoneRegistry: {}, deviceOrders: {} };
-  }
-  
-  if (!salesReports.daily[today].deviceOrders) {
-    salesReports.daily[today].deviceOrders = {};
-  }
-  
-  if (salesReports.daily[today].deviceOrders[deviceId]) {
-    const deviceData = salesReports.daily[today].deviceOrders[deviceId];
-    return {
-      valid: false,
-      message: `Bu cihazdan bugün zaten "${deviceData.name}" adına sipariş verilmiş. Günde tek sipariş hakkınız var.`
-    };
-  }
-  
-  return { valid: true };
-}
-
-// Telefon numarası ve isim kontrolü - Firestore üzerinden (VPN bypass engeller)
-async function checkPhoneNameMismatch(phone, customerName) {
-  const today = new Date().toISOString().split('T')[0];
-  
-  try {
-    if (db) {
-      // Firestore'dan kontrol et
-      const phoneDoc = await db.collection('dailyOrders')
-        .doc(today)
-        .collection('phones')
-        .doc(phone)
-        .get();
-      
-      if (phoneDoc.exists) {
-        const phoneData = phoneDoc.data();
-        if (phoneData.name !== customerName) {
-          return {
-            valid: false,
-            message: `Bu telefon numarası "${phoneData.name}" adına kayıtlı. Farklı isimle sipariş verilemez.`
-          };
-        }
-      }
-      return { valid: true };
-    }
-  } catch (error) {
-    console.error(`[${getTimestamp()}] ❌ Firestore phone check error:`, error);
-  }
-  
-  // Fallback: JSON kontrolü
-  if (!salesReports.daily[today]) {
-    salesReports.daily[today] = { customers: {}, items: {}, phoneRegistry: {} };
-  }
-  
-  if (!salesReports.daily[today].phoneRegistry) {
-    salesReports.daily[today].phoneRegistry = {};
-  }
-  
-  if (salesReports.daily[today].phoneRegistry[phone]) {
-    const registeredName = salesReports.daily[today].phoneRegistry[phone];
-    if (registeredName !== customerName) {
-      return {
-        valid: false,
-        message: `Bu telefon numarası "${registeredName}" adına kayıtlı. Farklı isimle sipariş verilemez.`
-      };
-    }
-  }
-  
-  return { valid: true };
-}
-
-// Telefon bazında sipariş hakkı kontrolü - Firestore üzerinden
-async function checkOrderRightsByPhone(phone, customerName) {
-  const today = new Date().toISOString().split('T')[0];
-  
-  try {
-    if (db) {
-      // Firestore'dan kontrol et
-      const phoneDoc = await db.collection('dailyOrders')
-        .doc(today)
-        .collection('phones')
-        .doc(phone)
-        .get();
-      
-      if (phoneDoc.exists) {
-        const phoneData = phoneDoc.data();
-        if (phoneData.orderCount >= 1) {
-          return {
-            canOrder: false,
-            remaining: 0,
-            message: 'Günlük sipariş hakkınız dolmuştur (telefon başına 1 sipariş)'
-          };
-        }
-      }
-      return { canOrder: true, remaining: 1 };
-    }
-  } catch (error) {
-    console.error(`[${getTimestamp()}] ❌ Firestore order rights check error:`, error);
-  }
-  
-  // Fallback: JSON kontrolü
-  if (!salesReports.daily[today]) {
-    salesReports.daily[today] = { customers: {}, items: {}, phoneRegistry: {}, phoneOrders: {} };
-  }
-  
-  if (!salesReports.daily[today].phoneRegistry) {
-    salesReports.daily[today].phoneRegistry = {};
-  }
-  
-  if (!salesReports.daily[today].phoneOrders) {
-    salesReports.daily[today].phoneOrders = {};
-  }
-  
-  if (salesReports.daily[today].phoneOrders[phone]) {
-    const orderCount = salesReports.daily[today].phoneOrders[phone].count || 0;
-    if (orderCount >= 1) {
-      return {
-        canOrder: false,
-        remaining: 0,
-        message: 'Günlük sipariş hakkınız dolmuştur (telefon başına 1 sipariş)'
-      };
-    }
-  }
-  
-  return { 
-    canOrder: true, 
-    remaining: 1,
-    message: 'Sipariş verebilirsiniz' 
-  };
-}
-
-// Sipariş hakkı kullan - Firestore'a kaydet (VPN/gizli sekme bypass engeller)
-async function useOrderRight(phone, customerName, deviceId, deviceInfo = {}) {
-  const today = new Date().toISOString().split('T')[0];
-  const timestamp = new Date().toISOString();
-  
-  try {
-    if (db) {
-      // Telefon bilgisini Firestore'a kaydet
-      await db.collection('dailyOrders')
-        .doc(today)
-        .collection('phones')
-        .doc(phone)
-        .set({
-          name: customerName,
-          phone: phone,
-          orderCount: 1,
-          deviceId: deviceId,
-          deviceModel: deviceInfo.deviceModel || 'unknown',
-          deviceBrand: deviceInfo.deviceBrand || 'unknown',
-          browser: deviceInfo.browser || 'unknown',
-          os: deviceInfo.os || 'unknown',
-          firstOrderTime: timestamp,
-          lastOrderTime: timestamp
-        });
-      
-      // Cihaz bilgisini Firestore'a kaydet
-      await db.collection('dailyOrders')
-        .doc(today)
-        .collection('devices')
-        .doc(deviceId)
-        .set({
-          name: customerName,
-          phone: phone,
-          deviceModel: deviceInfo.deviceModel || 'unknown',
-          deviceBrand: deviceInfo.deviceBrand || 'unknown',
-          browser: deviceInfo.browser || 'unknown',
-          os: deviceInfo.os || 'unknown',
-          orderTime: timestamp
-        });
-      
-      console.log(`[${getTimestamp()}] ✅ Sipariş kaydı Firestore'a yazıldı: ${phone} - ${customerName}`);
-    }
-  } catch (error) {
-    console.error(`[${getTimestamp()}] ❌ Firestore order save error:`, error);
-  }
-  
-  // JSON yedek kayıt
-  if (!salesReports.daily[today]) {
-    salesReports.daily[today] = { customers: {}, items: {}, phoneRegistry: {}, phoneOrders: {}, deviceOrders: {} };
-  }
-  
-  if (!salesReports.daily[today].phoneRegistry) {
-    salesReports.daily[today].phoneRegistry = {};
-  }
-  
-  if (!salesReports.daily[today].phoneOrders) {
-    salesReports.daily[today].phoneOrders = {};
-  }
-  
-  if (!salesReports.daily[today].deviceOrders) {
-    salesReports.daily[today].deviceOrders = {};
-  }
-  
-  // Telefon numarasını ve ismi kaydet
-  salesReports.daily[today].phoneRegistry[phone] = customerName;
-  
-  // Telefon için sipariş sayısını artır
-  if (!salesReports.daily[today].phoneOrders[phone]) {
-    salesReports.daily[today].phoneOrders[phone] = {
-      count: 0,
-      lastOrder: null,
-      name: customerName
-    };
-  }
-  
-  salesReports.daily[today].phoneOrders[phone].count += 1;
-  salesReports.daily[today].phoneOrders[phone].lastOrder = new Date().toISOString();
-  salesReports.daily[today].phoneOrders[phone].name = customerName;
-  
-  // Cihaz için sipariş kaydı
-  salesReports.daily[today].deviceOrders[deviceId] = {
-    name: customerName,
-    phone: phone,
-    orderTime: new Date().toISOString()
-  };
-  
-  saveReports();
-}
-
-// Aktif siparişleri dosyaya ve Firestore'a kaydet
-async function saveActiveOrders() {
-  try {
-    // Dosyaya kaydet (yedek)
-    fs.writeFileSync(ACTIVE_ORDERS_FILE, JSON.stringify(activeOrders, null, 2));
-    
-    // Firestore'a kaydet
-    if (db) {
-      await db.collection('activeOrders').doc('current').set({
-        orders: activeOrders,
-        lastUpdated: new Date().toISOString()
-      });
-    }
-  } catch (error) {
-    console.error(`[${getTimestamp()}] ❌ Aktif sipariş kaydetme hatası:`, error.message);
-  }
-}
-
-// Aktif siparişleri Firestore'dan yükle
-async function loadActiveOrdersFromFirestore() {
-  try {
-    if (db) {
-      const doc = await db.collection('activeOrders').doc('current').get();
-      if (doc.exists) {
-        const data = doc.data();
-        activeOrders = data.orders || [];
-        console.log(`[${getTimestamp()}] 📋 Firestore'dan aktif siparişler yüklendi: ${activeOrders.length} sipariş`);
-        return;
-      }
-    }
-    // Firestore'da veri yoksa dosyadan yükle
-    loadActiveOrders();
-  } catch (error) {
-    console.error(`[${getTimestamp()}] ❌ Firestore sipariş yükleme hatası:`, error.message);
-    // Hata durumunda dosyadan yükle
-    loadActiveOrders();
-  }
-}
-
-// Şu anki saat dilimini döndür
-function getCurrentTimeSlot() {
-  const now = new Date();
-  const hour = now.getHours();
-  
-  if (hour >= 16 && hour < 18) return '16:00-18:00';
-  if (hour >= 18 && hour < 20) return '18:00-20:00';
-  return '20:00 sonrası';
-}
-
-// Kafe kapalı/açık durumu
-let cafeStatus = {
-  isClosed: false,
-  closedReason: null, // 'prayer' veya 'manual'
-  prayerName: null,   // Hangi namaz vakti
-  prayerTime: null,   // Vakit saati
-  customNote: null,   // Özel durum başlığı (örn. Sohbet Hazırlığı)
-  customDetail: null,  // Alt bilgi (örn. Akşam - 19:45)
-  countdownEnd: null   // Kapanış geri sayım bitiş timestamp (ms)
+// In-memory cache for real-time data (synced with Firestore)
+let cachedStockStatus = {};
+let cachedCafeStatus = {
+  isOpen: true,
+  lastUpdated: new Date().toISOString(),
+  closureReason: null,
+  customMessage: null,
+  customDetail: null,
+  prayerInfo: null,
+  countdownEnd: null
 };
+let tvReadyOrders = [];
+let currentVideoUrl = null;
 
-// Ezan vakti bilgileri
-let prayerTimesData = []; // 30 günlük namaz vakitleri
-let prayerTimers = [];
-
-// Satış raporları - 3 aylık veri tut
-let salesReports = {
-  daily: {}, // { 'YYYY-MM-DD': { customers: { name: count }, items: { item: count } } }
-  monthly: {} // { 'YYYY-MM': { customers: { name: count }, items: { item: count } } }
-};
-
-// Rapor dosyası yolu
-const REPORTS_FILE = path.join(__dirname, 'sales_reports.json');
-
-// Raporları Firestore'dan yükle (JSON fallback)
-async function loadReports() {
+// Load initial cache from Firestore on startup
+async function initializeCache() {
   try {
-    // Önce Firestore'dan dene
-    if (db) {
-      const doc = await db.collection('reports').doc('salesData').get();
-      if (doc.exists) {
-        const data = doc.data();
-        salesReports.daily = data.daily || {};
-        salesReports.monthly = data.monthly || {};
-        console.log(`[${getTimestamp()}] 📊 Raporlar Firestore'dan yüklendi: ${Object.keys(salesReports.daily).length} günlük, ${Object.keys(salesReports.monthly).length} aylık`);
-        return;
-      }
-    }
+    cachedCafeStatus = await fbHelper.getCafeStatus() || cachedCafeStatus;
+    cachedStockStatus = await fbHelper.getStockStatus() || {};
     
-    // Firestore yoksa JSON'dan yükle
-    if (fs.existsSync(REPORTS_FILE)) {
-      const data = fs.readFileSync(REPORTS_FILE, 'utf8');
-      salesReports = JSON.parse(data);
-      
-      // Eski raporlara yeni alanları ekle (geriye uyumluluk için)
-      Object.keys(salesReports.daily).forEach(date => {
-        if (!salesReports.daily[date].phoneRegistry) {
-          salesReports.daily[date].phoneRegistry = {};
-        }
-        if (!salesReports.daily[date].phoneOrders) {
-          salesReports.daily[date].phoneOrders = {};
-        }
-        if (!salesReports.daily[date].deviceOrders) {
-          salesReports.daily[date].deviceOrders = {};
-        }
-      });
-      
-      console.log(`[${getTimestamp()}] 📊 Raporlar JSON'dan yüklendi: ${Object.keys(salesReports.daily).length} günlük, ${Object.keys(salesReports.monthly).length} aylık`);
-    }
+    // Load today's active orders
+    const activeOrders = await fbHelper.getActiveOrders();
+    console.log(`[${fbHelper.getTurkishTime()}] 📋 ${activeOrders.length} aktif sipariş yüklendi`);
   } catch (error) {
-    console.error(`[${getTimestamp()}] ❌ Rapor yükleme hatası:`, error.message);
+    console.error('⚠️ Cache initialization warning:', error.message);
   }
 }
 
-// Raporları Firestore'a kaydet (JSON yedek)
-async function saveReports() {
-  try {
-    // JSON yedek
-    fs.writeFileSync(REPORTS_FILE, JSON.stringify(salesReports, null, 2));
-    
-    // Firestore'a kaydet
-    if (db) {
-      await db.collection('reports').doc('salesData').set({
-        daily: salesReports.daily,
-        monthly: salesReports.monthly,
-        lastUpdated: new Date().toISOString()
-      });
-    }
-  } catch (error) {
-    console.error(`[${getTimestamp()}] ❌ Rapor kaydetme hatası:`, error.message);
-  }
+// Helper function for timestamp logging (Turkish time)
+function getTimestamp() {
+  return fbHelper.getTurkishTime();
 }
 
-// Eski raporları temizle (3 aydan eski olanları)
-function cleanupOldReports() {
-  const now = new Date();
-  const threeMonthsAgo = new Date(now.getFullYear(), now.getMonth() - 3, now.getDate());
-  const cutoffDate = threeMonthsAgo.toISOString().split('T')[0]; // YYYY-MM-DD
-  const cutoffMonth = threeMonthsAgo.toISOString().substring(0, 7); // YYYY-MM
-
-  // Günlük raporları temizle
-  Object.keys(salesReports.daily).forEach(date => {
-    if (date < cutoffDate) {
-      delete salesReports.daily[date];
-    }
-  });
-
-  // Aylık raporları temizle
-  Object.keys(salesReports.monthly).forEach(month => {
-    if (month < cutoffMonth) {
-      delete salesReports.monthly[month];
-    }
-  });
-
-  saveReports();
-  console.log(`[${getTimestamp()}] 🧹 3 aydan eski raporlar temizlendi`);
-}
-
-// Sipariş tamamlandığında rapora ekle
-function recordSale(guestName, item) {
-  const now = new Date();
-  const today = now.toISOString().split('T')[0]; // YYYY-MM-DD
-  const thisMonth = now.toISOString().substring(0, 7); // YYYY-MM
-
-  // Günlük rapor
-  if (!salesReports.daily[today]) {
-    salesReports.daily[today] = { customers: {}, items: {} };
-  }
-  salesReports.daily[today].customers[guestName] = (salesReports.daily[today].customers[guestName] || 0) + 1;
-  salesReports.daily[today].items[item] = (salesReports.daily[today].items[item] || 0) + 1;
-
-  // Aylık rapor
-  if (!salesReports.monthly[thisMonth]) {
-    salesReports.monthly[thisMonth] = { customers: {}, items: {} };
-  }
-  salesReports.monthly[thisMonth].customers[guestName] = (salesReports.monthly[thisMonth].customers[guestName] || 0) + 1;
-  salesReports.monthly[thisMonth].items[item] = (salesReports.monthly[thisMonth].items[item] || 0) + 1;
-
-  saveReports();
-}
-
-// Tüm menü ürünlerini başlat
-function initializeStock() {
+// Initialize menu items (all available items)
+function initializeMenuItems() {
   const menuItems = [
     // Çay ve Sohbet (8)
     'Bardak Çay', 'Kupa Çay', 'Limonlu Çay', 'Yeşil Çay', 'Kupa Çay (Bergamot)', 'Limonlu Çay (Bergamot)', 'Bitki Çayı', 'Atom Çayı',
@@ -596,778 +125,352 @@ function initializeStock() {
     // Special Sıcaklar (3)
     'Chai Tea Latte', 'Sıcak Çikolata', 'Sahlep'
   ];
-  
+
   menuItems.forEach(item => {
-    stockStatus[item] = true; // true = stokta var, false = stokta yok
+    cachedStockStatus[item] = true; // true = available
   });
-}
-
-initializeStock();
-
-// Log timestamp helper
-const getTimestamp = () => {
-  return new Date().toLocaleString('tr-TR', { 
-    timeZone: 'Europe/Istanbul',
-    hour12: false 
-  });
-};
-
-// Raporları yükle ve başlat
-loadReports();
-
-// Aktif siparişleri Firestore'dan yükle (yoksa dosyadan)
-if (db) {
-  loadActiveOrdersFromFirestore();
-} else {
-  loadActiveOrders();
-}
-
-// Cumartesi menüsünü yükle
-loadSaturdayMenu();
-
-// Eski raporları temizle (uygulama başlatıldığında)
-cleanupOldReports();
-
-// Ezan vakti API'sinden veri çekme (Diyanet 30 günlük)
-async function fetchPrayerTimes() {
-  try {
-    // Diyanet API - Ankara için cityId: 9206, Monthly endpoint 30 günlük veri döner
-    const response = await axios.get('https://awqatsalah.diyanet.gov.tr/api/PrayerTime/Monthly/9206');
-    
-    // API response.data.data içinde geliyor
-    const apiData = response.data.data || response.data;
-    prayerTimesData = apiData;
-    
-    console.log(`[${getTimestamp()}] 🕌 ${prayerTimesData.length} günlük ezan vakitleri güncellendi (Ankara - Diyanet)`);
-    
-    // Bugünün vakitlerini göster
-    const today = getTodayPrayerTimes();
-    if (today) {
-      console.log(`[${getTimestamp()}] 🕌 Bugünün vakitleri:`, {
-        İmsak: today.imsak,
-        Güneş: today.gunes,
-        Öğle: today.ogle,
-        İkindi: today.ikindi,
-        Akşam: today.aksam,
-        Yatsı: today.yatsi
-      });
-    }
-    
-    schedulePrayerClosures();
-  } catch (error) {
-    console.error(`[${getTimestamp()}] ❌ Diyanet API'den veri alınamadı:`, error.message);
-    
-    // Alternatif: Aladhan API
-    try {
-      console.log(`[${getTimestamp()}] ℹ️  Alternatif API deneniyor...`);
-      const altResponse = await axios.get('http://api.aladhan.com/v1/calendarByCity', {
-        params: {
-          city: 'Ankara',
-          country: 'Turkey',
-          method: 13, // Diyanet method
-          month: new Date().getMonth() + 1,
-          year: new Date().getFullYear()
-        }
-      });
-      
-      const calendar = altResponse.data.data;
-      prayerTimesData = calendar.map(day => ({
-        MiladiTarihKisa: day.date.gregorian.date,
-        Imsak: day.timings.Imsak.split(' ')[0],
-        Gunes: day.timings.Sunrise.split(' ')[0],
-        Ogle: day.timings.Dhuhr.split(' ')[0],
-        Ikindi: day.timings.Asr.split(' ')[0],
-        Aksam: day.timings.Maghrib.split(' ')[0],
-        Yatsi: day.timings.Isha.split(' ')[0]
-      }));
-      
-      console.log(`[${getTimestamp()}] ✅ Alternatif API'den ${prayerTimesData.length} günlük veri alındı`);
-      
-      // İlk günün tarih formatını kontrol et
-      if (prayerTimesData.length > 0) {
-        console.log(`[${getTimestamp()}] 📅 İlk veri örneği:`, {
-          Tarih: prayerTimesData[0].MiladiTarihKisa,
-          İmsak: prayerTimesData[0].Imsak
-        });
-      }
-      
-      const today = getTodayPrayerTimes();
-      if (today) {
-        console.log(`[${getTimestamp()}] 🕌 Bugünün vakitleri:`, {
-          İmsak: today.imsak,
-          Güneş: today.gunes,
-          Öğle: today.ogle,
-          İkindi: today.ikindi,
-          Akşam: today.aksam,
-          Yatsı: today.yatsi
-        });
-      } else {
-        console.log(`[${getTimestamp()}] ⚠️  Bugünün vakitleri bulunamadı!`);
-      }
-      
-      schedulePrayerClosures();
-    } catch (altError) {
-      console.error(`[${getTimestamp()}] ❌ Alternatif API de başarısız:`, altError.message);
-      // 1 saat sonra tekrar dene
-      setTimeout(fetchPrayerTimes, 60 * 60 * 1000);
-    }
-  }
-}
-
-// Bugünün namaz vakitlerini al
-function getTodayPrayerTimes() {
-  if (!prayerTimesData || prayerTimesData.length === 0) return null;
-  
-  const today = new Date();
-  
-  // Bugünün verisini bul
-  const todayData = prayerTimesData.find(day => {
-    if (!day.MiladiTarihKisa) return false;
-    
-    // Farklı tarih formatlarını destekle
-    let dayDate;
-    if (day.MiladiTarihKisa.includes('-')) {
-      const parts = day.MiladiTarihKisa.split('-');
-      if (parts.length === 3) {
-        // DD-MM-YYYY veya YYYY-MM-DD formatını kontrol et
-        if (parts[0].length === 4) {
-          // YYYY-MM-DD
-          dayDate = new Date(day.MiladiTarihKisa);
-        } else {
-          // DD-MM-YYYY
-          dayDate = new Date(`${parts[2]}-${parts[1]}-${parts[0]}`);
-        }
-      }
-    } else if (day.MiladiTarihKisa.includes('/')) {
-      // DD/MM/YYYY formatı
-      const parts = day.MiladiTarihKisa.split('/');
-      if (parts.length === 3) {
-        dayDate = new Date(`${parts[2]}-${parts[1]}-${parts[0]}`);
-      }
-    }
-    
-    if (!dayDate || isNaN(dayDate.getTime())) return false;
-    
-    return dayDate.getDate() === today.getDate() &&
-           dayDate.getMonth() === today.getMonth() &&
-           dayDate.getFullYear() === today.getFullYear();
-  });
-  
-  if (!todayData) return null;
-  
-  return {
-    imsak: todayData.Imsak,
-    gunes: todayData.Gunes,
-    ogle: todayData.Ogle,
-    ikindi: todayData.Ikindi,
-    aksam: todayData.Aksam,
-    yatsi: todayData.Yatsi
-  };
-}
-
-// Şu anki namaz vakti bilgisini döndür
-function getCurrentPrayerInfo() {
-  const prayerTimes = getTodayPrayerTimes();
-  if (!prayerTimes) return null;
-
-  const now = new Date();
-  const currentHour = now.getHours();
-  const currentMinute = now.getMinutes();
-  const currentTime = currentHour * 60 + currentMinute;
-
-  const prayers = [
-    { name: 'Öğle', time: prayerTimes.ogle },
-    { name: 'İkindi', time: prayerTimes.ikindi },
-    { name: 'Akşam', time: prayerTimes.aksam },
-    { name: 'Yatsı', time: prayerTimes.yatsi }
-  ];
-
-  for (const prayer of prayers) {
-    const [hours, minutes] = prayer.time.split(':').map(Number);
-    const prayerTime = hours * 60 + minutes;
-    const closingTime = prayerTime - 15;
-    const openingTime = prayerTime + 40;
-
-    // Eğer şu an kapatma ve açılma zamanı arasındaysak
-    if (currentTime >= closingTime && currentTime <= openingTime) {
-      // Açılma zamanını hesapla (Date objesi olarak)
-      const openingDate = new Date();
-      const openingMinutes = minutes + 40;
-      const openingHours = hours + Math.floor(openingMinutes / 60);
-      const finalMinutes = openingMinutes % 60;
-      openingDate.setHours(openingHours, finalMinutes, 0, 0);
-      
-      // Eğer açılma zamanı geçmişteyse (gece yarısını geçtiyse), yarın olarak ayarla
-      if (openingDate < now) {
-        openingDate.setDate(openingDate.getDate() + 1);
-      }
-      
-      return {
-        name: prayer.name,
-        time: prayer.time,
-        isClosed: true,
-        countdownEnd: openingDate.getTime() // Açılma zamanı timestamp olarak
-      };
-    }
-  }
-
-  return { isClosed: false };
-}
-
-// Ezan vakitlerine göre kafe kapatma planlaması
-function schedulePrayerClosures() {
-  // Eski timer'ları temizle
-  prayerTimers.forEach(timer => clearTimeout(timer));
-  prayerTimers = [];
-
-  const prayerTimes = getTodayPrayerTimes();
-  if (!prayerTimes) return;
-
-  const prayers = [
-    { name: 'Öğle', time: prayerTimes.ogle },
-    { name: 'İkindi', time: prayerTimes.ikindi },
-    { name: 'Akşam', time: prayerTimes.aksam },
-    { name: 'Yatsı', time: prayerTimes.yatsi }
-  ];
-
-  const now = new Date();
-  
-  // Önce şu anki durumu kontrol et
-  const currentPrayer = getCurrentPrayerInfo();
-  if (currentPrayer && currentPrayer.isClosed) {
-    console.log(`[${getTimestamp()}] 🕌 Şu an ${currentPrayer.name} namazı vakti - Kafe kapatılıyor`);
-    cafeStatus.isClosed = true;
-    cafeStatus.closedReason = 'prayer';
-    cafeStatus.prayerName = currentPrayer.name;
-    cafeStatus.prayerTime = currentPrayer.time || null;
-    cafeStatus.countdownEnd = currentPrayer.countdownEnd || null; // Açılma zamanı
-  }
-  
-  prayers.forEach(prayer => {
-    const [hours, minutes] = prayer.time.split(':').map(Number);
-    
-    // Ezan vaktinden 15 dakika önce kapatma zamanı
-    const closingTime = new Date();
-    const closingMinutes = minutes - 15;
-    const closingHours = hours + Math.floor(closingMinutes / 60);
-    const finalClosingMinutes = closingMinutes < 0 ? 60 + closingMinutes : closingMinutes % 60;
-    if (closingMinutes < 0) {
-      closingTime.setHours(hours - 1, finalClosingMinutes, 0, 0);
-    } else {
-      closingTime.setHours(hours, finalClosingMinutes, 0, 0);
-    }
-    
-    // Ezan vaktinden 40 dakika sonra açılma zamanı
-    const openingTime = new Date();
-    const openingMinutes = minutes + 40;
-    const openingHours = hours + Math.floor(openingMinutes / 60);
-    const finalOpeningMinutes = openingMinutes % 60;
-    openingTime.setHours(openingHours, finalOpeningMinutes, 0, 0);
-    
-    // Eğer açılma zamanı gece yarısını geçiyorsa, bir sonraki güne geç
-    if (openingHours >= 24) {
-      openingTime.setDate(openingTime.getDate() + 1);
-      openingTime.setHours(openingHours % 24, finalOpeningMinutes, 0, 0);
-    }
-
-    // Eğer kapatma zamanı geçmemişse timer kur
-    if (closingTime > now) {
-      const timeUntilClosing = closingTime - now;
-      const timer = setTimeout(() => {
-        console.log(`[${getTimestamp()}] 🕌 ${prayer.name} namazı için kafe kapatılıyor (15 dk önce)`);
-        cafeStatus.isClosed = true;
-        cafeStatus.closedReason = 'prayer';
-        cafeStatus.prayerName = prayer.name;
-        cafeStatus.prayerTime = prayer.time || null;
-        cafeStatus.countdownEnd = openingTime.getTime(); // Açılma zamanı timestamp olarak
-        io.emit('cafeStatus', cafeStatus);
-      }, timeUntilClosing);
-      prayerTimers.push(timer);
-      
-      console.log(`[${getTimestamp()}] ⏰ ${prayer.name} için kapatma planlandı: ${closingTime.toLocaleTimeString('tr-TR')}`);
-    }
-
-    // Eğer açılma zamanı geçmemişse timer kur
-    if (openingTime > now) {
-      const timeUntilOpening = openingTime - now;
-      const timer = setTimeout(() => {
-        // Sadece namaz için kapatılmışsa otomatik aç
-        if (cafeStatus.closedReason === 'prayer') {
-          console.log(`[${getTimestamp()}] 🕌 ${prayer.name} namazından sonra kafe açılıyor (40 dk sonra)`);
-          cafeStatus.isClosed = false;
-          cafeStatus.closedReason = null;
-          cafeStatus.prayerName = null;
-          cafeStatus.prayerTime = null;
-          cafeStatus.customNote = null;
-          cafeStatus.customDetail = null;
-          cafeStatus.countdownEnd = null;
-          io.emit('cafeStatus', cafeStatus);
-        }
-      }, timeUntilOpening);
-      prayerTimers.push(timer);
-      
-      console.log(`[${getTimestamp()}] ⏰ ${prayer.name} için açılma planlandı: ${openingTime.toLocaleTimeString('tr-TR')}`);
-    }
-  });
-}
-
-// Her 20 günde bir ezan vakitlerini yeniden çek
-function scheduleNextPrayerUpdate() {
-  const twentyDaysInMs = 20 * 24 * 60 * 60 * 1000; // 20 gün
-  
-  setTimeout(() => {
-    console.log(`[${getTimestamp()}] 🔄 20 gün geçti, ezan vakitleri güncelleniyor...`);
-    fetchPrayerTimes();
-    scheduleNextPrayerUpdate(); // Bir sonraki güncellemeyi planla
-  }, twentyDaysInMs);
-  
-  const nextUpdate = new Date(Date.now() + twentyDaysInMs);
-  console.log(`[${getTimestamp()}] 📅 Sonraki API güncellemesi: ${nextUpdate.toLocaleString('tr-TR')}`);
-}
-
-// Her gün gece yarısı bugünün vakitlerini yeniden planla
-function scheduleDailyPrayerUpdate() {
-  const now = new Date();
-  const tomorrow = new Date();
-  tomorrow.setDate(tomorrow.getDate() + 1);
-  tomorrow.setHours(0, 1, 0, 0); // Gece 00:01
-  
-  const timeUntilMidnight = tomorrow - now;
-  
-  setTimeout(() => {
-    console.log(`[${getTimestamp()}] 🌙 Yeni gün başladı, bugünün vakitleri planlanıyor...`);
-    schedulePrayerClosures(); // Bugünün vakitlerini planla
-    scheduleDailyPrayerUpdate(); // Bir sonraki günü planla
-  }, timeUntilMidnight);
-  
-  console.log(`[${getTimestamp()}] 📅 Yarın saat 00:01'de günlük vakitler güncellenecek`);
 }
 
 // Socket.io connection handler
 io.on('connection', (socket) => {
-  console.log(`[${getTimestamp()}] 🟢 New client connected: ${socket.id}`);
+  console.log(`[${getTimestamp()}] 🟢 Yeni bağlantı: ${socket.id}`);
 
   // Send current cafe status to newly connected client
-  socket.emit('cafeStatus', cafeStatus);
-  // Send current prayer info (for admin UI to prefill)
-  socket.emit('prayerInfo', getCurrentPrayerInfo());
+  socket.emit('cafeStatus', cachedCafeStatus);
+  socket.emit('stockStatus', cachedStockStatus);
 
-  // Listen for 'placeOrder' event from customer
+  // ============ ORDER PLACEMENT ============
   socket.on('placeOrder', async (orderData) => {
     try {
-      // Eğer kafe kapalıysa siparişi kabul etme
-      if (cafeStatus.isClosed) {
-        socket.emit('cafeIsClosed');
+      // Check if cafe is open
+      if (!cachedCafeStatus.isOpen) {
+        socket.emit('cafeIsClosed', { status: cachedCafeStatus });
         return;
       }
 
-      // Cihaz ID kontrolü (en önemli kontrol - Firestore üzerinden)
-      const deviceCheck = await checkDeviceLimit(orderData.deviceId);
-      if (!deviceCheck.valid) {
-        socket.emit('deviceLimitExceeded', {
-          message: deviceCheck.message
-        });
-        console.log(`[${getTimestamp()}] ❌ Order rejected - Device ${orderData.deviceId}: ${deviceCheck.message}`);
-        return;
-      }
-
-      // Telefon-İsim uyuşmazlığı kontrolü (Firestore üzerinden)
-      const phoneCheck = await checkPhoneNameMismatch(orderData.phone, orderData.guestName);
-      if (!phoneCheck.valid) {
-        socket.emit('phoneNameMismatch', {
-          message: phoneCheck.message
-        });
-        console.log(`[${getTimestamp()}] ❌ Order rejected - Phone/Name mismatch: ${phoneCheck.message}`);
-        return;
-      }
-
-      // Sipariş hakkı kontrolü (Firestore üzerinden - telefon bazında)
-      const rightsCheck = await checkOrderRightsByPhone(orderData.phone, orderData.guestName);
-      if (!rightsCheck.canOrder) {
-        socket.emit('orderLimitExceeded', {
-          message: rightsCheck.message,
-          remaining: rightsCheck.remaining
-        });
-        console.log(`[${getTimestamp()}] ❌ Order rejected - Phone ${orderData.phone}: ${rightsCheck.message}`);
-        return;
-      }
-
-      console.log(`[${getTimestamp()}] 📋 New order received:`);
-      console.log(`   Name: ${orderData.guestName}`);
-      console.log(`   Phone: ${orderData.phone}`);
-      console.log(`   Device: ${orderData.deviceId}`);
-      console.log(`   Item: ${orderData.item}`);
-      console.log(`   Time: ${orderData.orderTime}`);
-
-      // Cihaz bilgilerini topla
-      const deviceInfo = {
-        deviceModel: orderData.deviceModel || 'unknown',
-        deviceBrand: orderData.deviceBrand || 'unknown',
-        browser: orderData.browser || 'unknown',
-        os: orderData.os || 'unknown'
-      };
-
-      // Sipariş hakkını kullan (Firestore'a kaydet)
-      await useOrderRight(orderData.phone, orderData.guestName, orderData.deviceId, deviceInfo);
-
-      // Aktif siparişlere ekle
-      const orderNumber = Math.floor(100 + Math.random() * 900); // 3 rakamlı random numara
-      const order = {
-        id: `order_${Date.now()}`,
-        orderNumber: orderNumber,
+      // Place order using Firebase
+      const result = await fbHelper.placeOrder({
         guestName: orderData.guestName,
         phone: orderData.phone,
         deviceId: orderData.deviceId,
         item: orderData.item,
-        orderTime: orderData.orderTime,
-        fcmToken: orderData.fcmToken || null // Save FCM token for push notifications
-      };
-      activeOrders.push(order);
-      await saveActiveOrders();
-
-      // Sipariş başarılı - Müşteriye bildir (sipariş numarasını da gönder)
-      socket.emit('orderSuccess', { orderNumber: orderNumber });
-
-      // Emit 'newOrder' event to all admin dashboards
-      io.emit('newOrder', order);
-
-      console.log(`[${getTimestamp()}] ✅ Order broadcasted to admin dashboards`);
-    } catch (error) {
-      console.error(`[${getTimestamp()}] ❌ placeOrder error:`, error);
-      socket.emit('orderError', { message: 'Sipariş işlenirken bir hata oluştu.' });
-    }
-  });
-
-  // Handle cafe closed/open toggle from admin
-  socket.on('toggleCafeStatus', (data = {}) => {
-    const {
-      isClosed,
-      closedReason,
-      customNote,
-      customDetail,
-      prayerName,
-      prayerTime,
-      countdownEnd
-    } = data;
-
-    cafeStatus.isClosed = !!isClosed;
-
-    if (!cafeStatus.isClosed) {
-      // Açıldıysa tüm ek alanları temizle
-      cafeStatus.closedReason = null;
-      cafeStatus.prayerName = null;
-      cafeStatus.prayerTime = null;
-      cafeStatus.customNote = null;
-      cafeStatus.customDetail = null;
-      cafeStatus.countdownEnd = null;
-    } else {
-      // Kapatıldı
-      if (closedReason) {
-        cafeStatus.closedReason = closedReason;
-      } else if (cafeStatus.closedReason !== 'prayer') {
-        cafeStatus.closedReason = 'manual';
-      }
-
-      // Namaz için gelen ek bilgiler
-      if (cafeStatus.closedReason === 'prayer') {
-        cafeStatus.prayerName = prayerName || cafeStatus.prayerName;
-        cafeStatus.prayerTime = prayerTime || cafeStatus.prayerTime;
-        
-        // Eğer countdownEnd yoksa ve prayerName varsa, açılma zamanını hesapla
-        if (!countdownEnd && cafeStatus.prayerName) {
-          const prayerTimes = getTodayPrayerTimes();
-          if (prayerTimes) {
-            // prayerName'den namaz adını çıkar (örn: "Öğle Namazı Vakti" -> "Öğle")
-            const prayerNameMap = {
-              'Öğle': prayerTimes.ogle,
-              'İkindi': prayerTimes.ikindi,
-              'Akşam': prayerTimes.aksam,
-              'Yatsı': prayerTimes.yatsi
-            };
-            
-            // prayerName'de hangi namaz geçiyor?
-            let matchedPrayer = null;
-            for (const [name, time] of Object.entries(prayerNameMap)) {
-              if (cafeStatus.prayerName.includes(name)) {
-                matchedPrayer = { name, time };
-                break;
-              }
-            }
-            
-            if (matchedPrayer) {
-              const [hours, minutes] = matchedPrayer.time.split(':').map(Number);
-              const openingTime = new Date();
-              const openingMinutes = minutes + 40;
-              const openingHours = hours + Math.floor(openingMinutes / 60);
-              const finalMinutes = openingMinutes % 60;
-              openingTime.setHours(openingHours, finalMinutes, 0, 0);
-              
-              // Eğer açılma zamanı gece yarısını geçiyorsa, bir sonraki güne geç
-              if (openingHours >= 24) {
-                openingTime.setDate(openingTime.getDate() + 1);
-                openingTime.setHours(openingHours % 24, finalMinutes, 0, 0);
-              }
-              
-              cafeStatus.countdownEnd = openingTime.getTime();
-              console.log(`[${getTimestamp()}] ⏰ ${matchedPrayer.name} namazı için açılma zamanı hesaplandı: ${openingTime.toLocaleTimeString('tr-TR')}`);
-            }
-          }
-        } else {
-          cafeStatus.countdownEnd = countdownEnd ? Number(countdownEnd) : null;
+        fcmToken: orderData.fcmToken,
+        deviceInfo: {
+          deviceModel: orderData.deviceModel,
+          deviceBrand: orderData.deviceBrand,
+          browser: orderData.browser,
+          os: orderData.os
         }
-      } else {
-        cafeStatus.prayerName = null;
-        cafeStatus.prayerTime = null;
-        // Geri sayım bitiş zamanı (ms) - namaz dışı durumlar için
-        cafeStatus.countdownEnd = countdownEnd ? Number(countdownEnd) : null;
+      });
+
+      console.log(`[${getTimestamp()}] ✅ Sipariş alındı:`);
+      console.log(`   İsim: ${orderData.guestName}`);
+      console.log(`   Telefon: ${orderData.phone}`);
+      console.log(`   Ürün: ${orderData.item}`);
+      console.log(`   Slot: ${result.slot}`);
+
+      // Send success response to customer
+      socket.emit('orderSuccess', {
+        orderNumber: result.orderNumber,
+        slot: result.slot
+      });
+
+      // Broadcast new order to all admin dashboards
+      io.emit('newOrder', {
+        id: result.orderId,
+        orderNumber: result.orderNumber,
+        guestName: orderData.guestName,
+        phone: orderData.phone,
+        item: orderData.item,
+        slot: result.slot,
+        createdAt: getTimestamp()
+      });
+
+    } catch (error) {
+      console.error(`[${getTimestamp()}] ❌ Sipariş hatası:`, error.message);
+      socket.emit('orderError', { message: error.message || 'Sipariş işlenirken bir hata oluştu.' });
+    }
+  });
+
+  // ============ ADMIN OPERATIONS ============
+
+  // Cafe status toggle
+  socket.on('toggleCafeStatus', async (data = {}) => {
+    try {
+      const { isClosed, closedReason, customNote, customDetail, prayerName, prayerTime } = data;
+
+      await fbHelper.updateCafeStatus(!isClosed, closedReason, {
+        customMessage: customNote,
+        customDetail: customDetail,
+        prayerInfo: closedReason === 'prayer' ? {
+          name: prayerName,
+          startTime: prayerTime
+        } : null
+      });
+
+      // Update local cache
+      cachedCafeStatus.isOpen = !isClosed;
+      cachedCafeStatus.closureReason = closedReason;
+      cachedCafeStatus.customMessage = customNote || null;
+      cachedCafeStatus.customDetail = customDetail || null;
+      cachedCafeStatus.lastUpdated = getTimestamp();
+
+      // Broadcast to all clients
+      io.emit('cafeStatus', cachedCafeStatus);
+
+      const status = !isClosed ? 'AÇIK' : 'KAPALI';
+      console.log(`[${getTimestamp()}] 🏪 Kafe durumu: ${status} (${closedReason || 'manual'})`);
+
+    } catch (error) {
+      console.error(`[${getTimestamp()}] ❌ Cafe status toggle error:`, error);
+    }
+  });
+
+  // Stock status update
+  socket.on('updateStock', async (data) => {
+    try {
+      const { itemName, isAvailable } = data;
+
+      await fbHelper.updateStockStatus(itemName, isAvailable);
+
+      // Update local cache
+      cachedStockStatus[itemName] = isAvailable;
+
+      // Broadcast to all clients
+      io.emit('stockUpdated', { itemName, isAvailable });
+
+      console.log(`[${getTimestamp()}] 📦 Stok güncellendi: ${itemName} = ${isAvailable}`);
+
+    } catch (error) {
+      console.error(`[${getTimestamp()}] ❌ Stock update error:`, error);
+    }
+  });
+
+  // Get available order slots
+  socket.on('getOrderSlots', async () => {
+    try {
+      const slots = await fbHelper.getAvailableSlots();
+      socket.emit('orderSlots', slots);
+    } catch (error) {
+      console.error(`[${getTimestamp()}] ❌ Error fetching slots:`, error);
+    }
+  });
+
+  // Get active orders (for admin dashboard)
+  socket.on('getActiveOrders', async (data = {}) => {
+    try {
+      const date = data.date || fbHelper.getTurkishDate();
+      const orders = await fbHelper.getActiveOrders(date);
+      socket.emit('activeOrders', orders);
+    } catch (error) {
+      console.error(`[${getTimestamp()}] ❌ Error fetching active orders:`, error);
+    }
+  });
+
+  // Mark order as complete
+  socket.on('completeOrder', async (orderData) => {
+    try {
+      const result = await fbHelper.completeOrder(orderData.orderId);
+
+      console.log(`[${getTimestamp()}] ✅ Sipariş hazırlandı: #${result.orderNumber}`);
+
+      // Add to TV ready orders
+      tvReadyOrders.push({
+        id: orderData.orderId,
+        orderNumber: result.orderNumber,
+        guestName: orderData.guestName,
+        item: orderData.item
+      });
+
+      // Send FCM push notification if token exists
+      if (orderData.fcmToken) {
+        try {
+          const message = {
+            notification: {
+              title: '🎉 Siparişiniz Hazır!',
+              body: `${orderData.item} siparişiniz hazır. Lütfen kafeye gelerek alabilirsiniz.`,
+            },
+            data: {
+              orderId: orderData.orderId,
+              orderNumber: result.orderNumber.toString(),
+              item: orderData.item,
+              type: 'order_ready'
+            },
+            token: orderData.fcmToken
+          };
+
+          const response = await admin.messaging().send(message);
+          console.log(`[${getTimestamp()}] 📲 FCM Bildirim gönderildi: ${response}`);
+        } catch (error) {
+          console.error(`[${getTimestamp()}] ⚠️ FCM error:`, error.message);
+        }
       }
 
-      // Özel metinler (Sohbet Hazırlığı vb.)
-      cafeStatus.customNote = customNote || null;
-      cafeStatus.customDetail = customDetail || null;
-    }
-    
-    const status = cafeStatus.isClosed ? 'KAPALI' : 'AÇIK';
-    console.log(`[${getTimestamp()}] 🏪 Cafe status changed:`);
-    console.log(`   Status: ${status}`);
-    console.log(`   Reason: ${cafeStatus.closedReason || 'none'}`);
-    if (cafeStatus.customNote) console.log(`   Note: ${cafeStatus.customNote}`);
-    if (cafeStatus.customDetail) console.log(`   Detail: ${cafeStatus.customDetail}`);
-    if (cafeStatus.prayerName) console.log(`   Prayer: ${cafeStatus.prayerName} ${cafeStatus.prayerTime || ''}`.trim());
-    
-    // Broadcast cafe status to all clients
-    io.emit('cafeStatus', cafeStatus);
-    // Also broadcast to TV displays
-    if (typeof ioHot !== 'undefined') ioHot.emit('cafeStatus', cafeStatus);
-    if (typeof ioCold !== 'undefined') ioCold.emit('cafeStatus', cafeStatus);
-  });
-
-  // Handle stock status update from admin
-  socket.on('updateStock', (data) => {
-    const { itemName, isAvailable } = data;
-    stockStatus[itemName] = isAvailable;
-    
-    console.log(`[${getTimestamp()}] 📦 Stock updated:`);
-    console.log(`   Item: "${itemName}"`);
-    console.log(`   Available: ${isAvailable}`);
-    console.log(`   Current stockStatus:`, JSON.stringify(stockStatus, null, 2));
-    
-    // Broadcast stock status to all clients (menu and TV displays)
-    io.emit('stockUpdated', { itemName, isAvailable });
-    
-    // Also broadcast to TV displays (they will be available after server setup)
-    if (typeof ioHot !== 'undefined') ioHot.emit('stockUpdated', { itemName, isAvailable });
-    if (typeof ioCold !== 'undefined') ioCold.emit('stockUpdated', { itemName, isAvailable });
-  });
-
-  // Send current stock status to newly connected client
-  socket.on('getStock', () => {
-    socket.emit('stockStatus', stockStatus);
-  });
-
-  // Send current cafe status to newly connected client
-  socket.on('getCafeStatus', () => {
-    socket.emit('cafeStatus', cafeStatus);
-  });
-
-  // Send current prayer info (name + time window)
-  socket.on('getPrayerInfo', () => {
-    socket.emit('prayerInfo', getCurrentPrayerInfo());
-  });
-
-  // Cumartesi menü durumunu gönder
-  socket.on('getSaturdayMenuStatus', () => {
-    socket.emit('saturdayMenuStatus', {
-      isSaturdayEvening: isSaturdayEvening(),
-      items: saturdayMenuItems
-    });
-  });
-
-  // Cumartesi menüsünü güncelle
-  socket.on('updateSaturdayMenu', (items) => {
-    saturdayMenuItems = items;
-    saveSaturdayMenu();
-    io.emit('saturdayMenuUpdated', saturdayMenuItems);
-    // Also broadcast to TV displays
-    if (typeof ioHot !== 'undefined') ioHot.emit('saturdayMenuUpdated', saturdayMenuItems);
-    if (typeof ioCold !== 'undefined') ioCold.emit('saturdayMenuUpdated', saturdayMenuItems);
-    console.log(`[${getTimestamp()}] 📅 Cumartesi menüsü güncellendi: ${items.length} ürün`);
-  });
-
-  // Cumartesi test modunu aç/kapat (TEST İÇİN)
-  socket.on('toggleSaturdayTestMode', () => {
-    saturdayTestMode = !saturdayTestMode;
-    const status = saturdayTestMode ? 'AÇIK' : 'KAPALI';
-    console.log(`[${getTimestamp()}] 🧪 Cumartesi test modu: ${status}`);
-    
-    // Tüm müşterilere güncel durumu gönder
-    io.emit('saturdayMenuStatus', {
-      isSaturdayEvening: isSaturdayEvening(),
-      items: saturdayMenuItems
-    });
-    // Also broadcast to TV displays
-    if (typeof ioHot !== 'undefined') ioHot.emit('saturdayMenuStatus', {
-      isSaturdayEvening: isSaturdayEvening(),
-      items: saturdayMenuItems
-    });
-    if (typeof ioCold !== 'undefined') ioCold.emit('saturdayMenuStatus', {
-      isSaturdayEvening: isSaturdayEvening(),
-      items: saturdayMenuItems
-    });
-  });
-
-  // === TV REKLAM EVENTS ===
-  
-  // Video oynatma
-  socket.on('playVideo', (data) => {
-    console.log(`[${getTimestamp()}] 🎬 Video oynatma talebi alındı`);
-    
-    if (data.videoUrl) {
-      currentVideoUrl = data.videoUrl;
-      console.log(`[${getTimestamp()}] 📹 Video URL: ${data.videoUrl}`);
-      
-      // Tüm TV reklam istemcilerine video'yu oynat (YouTube flag'ı ile birlikte)
-      io.emit('playVideo', { 
-        videoUrl: currentVideoUrl,
-        isYouTube: data.isYouTube || false
+      // Broadcast to all clients
+      io.emit('orderReady', {
+        id: orderData.orderId,
+        orderNumber: result.orderNumber,
+        guestName: orderData.guestName,
+        item: orderData.item
       });
-    } else {
-      console.error(`[${getTimestamp()}] ❌ Video URL gönderilmedi`);
+
+      io.emit('orderReadyForTv', {
+        id: orderData.orderId,
+        orderNumber: result.orderNumber,
+        guestName: orderData.guestName,
+        item: orderData.item
+      });
+
+    } catch (error) {
+      console.error(`[${getTimestamp()}] ❌ completeOrder error:`, error.message);
     }
   });
 
-  // Video durdurma
-  socket.on('stopVideo', () => {
-    console.log(`[${getTimestamp()}] ⏹️  Video durdurma talebi alındı`);
-    currentVideoUrl = null;
-    io.emit('stopVideo');
+  // Remove order from TV display (customer picked up)
+  socket.on('removeFromTv', (data) => {
+    tvReadyOrders = tvReadyOrders.filter(o => o.id !== data.orderId);
+    io.emit('orderPickedUp', data.orderId);
+    console.log(`[${getTimestamp()}] 👤 Sipariş teslim edildi: ${data.orderId}`);
   });
 
-  // Hazır siparişleri getir (TV sayfası için)
+  // TV operations
   socket.on('getReadyOrders', () => {
     socket.emit('readyOrders', tvReadyOrders);
   });
 
-  // Hazır siparişleri getir (Admin paneli için)
-  socket.on('getReadyOrdersForTv', () => {
-    socket.emit('readyOrders', tvReadyOrders);
+  socket.on('playVideo', (data) => {
+    if (data.videoUrl) {
+      currentVideoUrl = data.videoUrl;
+      console.log(`[${getTimestamp()}] 🎬 Video oynatılıyor: ${data.videoUrl}`);
+      io.emit('playVideo', { videoUrl: currentVideoUrl, isYouTube: data.isYouTube || false });
+    }
   });
 
-  // TV'den sipariş tamamlama (Admin panelinden)
-  socket.on('completeOrderFromTv', (data) => {
-    console.log(`[${getTimestamp()}] ✅ TV siparişi tamamlandı: ${data.orderId}`);
-    
-    // Listeden çıkar
-    tvReadyOrders = tvReadyOrders.filter(o => o.id !== data.orderId);
-    
-    // Tüm istemcilere bildir
-    io.emit('orderCompletedOnTv', data.orderId);
-    io.emit('orderCompleted', data.orderId);
+  socket.on('stopVideo', () => {
+    currentVideoUrl = null;
+    console.log(`[${getTimestamp()}] ⏹️ Video durduruldu`);
+    io.emit('stopVideo');
   });
 
-  // Handle client disconnect
+  // Get reports
+  socket.on('getReports', async (data = {}) => {
+    try {
+      const filter = data.filter || 'daily';
+      const reports = await fbHelper.getReports(filter);
+      socket.emit('reports', reports);
+    } catch (error) {
+      console.error(`[${getTimestamp()}] ❌ Error fetching reports:`, error);
+    }
+  });
+
+  // Handle disconnect
   socket.on('disconnect', () => {
-    console.log(`[${getTimestamp()}] 🔴 Client disconnected: ${socket.id}`);
-  });
-
-  // Listen for order completion from admin
-  socket.on('completeOrder', async (orderData) => {
-    console.log(`[${getTimestamp()}] ✅ Order marked as ready:`);
-    console.log(`   Order Number: ${orderData.orderNumber}`);
-    console.log(`   Name: ${orderData.guestName}`);
-    console.log(`   Item: ${orderData.item}`);
-    
-    // Find the order to get FCM token
-    const order = activeOrders.find(o => o.id === orderData.orderId);
-    
-    // Send FCM push notification if token exists
-    if (order && order.fcmToken) {
-      try {
-        const message = {
-          notification: {
-            title: '🎉 Siparişiniz Hazır!',
-            body: `${order.item} siparişiniz hazır. Lütfen kafeye gelerek alabilirsiniz.`,
-          },
-          data: {
-            orderId: order.id,
-            orderNumber: order.orderNumber.toString(),
-            item: order.item,
-            type: 'order_ready'
-          },
-          token: order.fcmToken
-        };
-        
-        const response = await admin.messaging().send(message);
-        console.log(`[${getTimestamp()}] 📲 FCM Push notification sent successfully:`, response);
-      } catch (error) {
-        console.error(`[${getTimestamp()}] ❌ FCM Push notification failed:`, error.message);
-      }
-    }
-    
-    // Aktif siparişlerden çıkar
-    activeOrders = activeOrders.filter(order => order.id !== orderData.orderId);
-    saveActiveOrders();
-    
-    // TV Reklam Sistemine ekle (hazır siparişlere)
-    if (order) {
-      // Duplicate kontrol - aynı ID'den yalnızca bir tane olmalı
-      const alreadyExists = tvReadyOrders.some(o => o.id === orderData.orderId);
-      
-      if (!alreadyExists) {
-        tvReadyOrders.push({
-          id: orderData.orderId,
-          orderNumber: orderData.orderNumber,
-          guestName: orderData.guestName,
-          item: orderData.item
-        });
-        
-        // TV'ye sipariş hazır olduğunu bildir
-        io.emit('orderReady', {
-          id: orderData.orderId,
-          orderNumber: orderData.orderNumber,
-          guestName: orderData.guestName,
-          item: orderData.item
-        });
-        
-        // TV Reklam sayfasına hazır siparişi gönder
-        io.emit('orderReadyForTv', {
-          id: orderData.orderId,
-          orderNumber: orderData.orderNumber,
-          guestName: orderData.guestName,
-          item: orderData.item
-        });
-      } else {
-        console.log(`[${getTimestamp()}] ⚠️  TV siparişi zaten listede var: ${orderData.orderId}`);
-      }
-    }
-    
-    // Satışı rapora kaydet
-    recordSale(orderData.guestName, orderData.item);
-    
-    console.log(`[${getTimestamp()}] 📢 Notification sent to customer (Order #${orderData.orderNumber})`);
+    console.log(`[${getTimestamp()}] 🔴 Bağlantı kapatıldı: ${socket.id}`);
   });
 });
 
-// Routes
-app.get('/', (req, res) => {
-  res.sendFile(path.join(__dirname, 'public', 'menu.html'));
+// ============ REST API ENDPOINTS ============
+
+// Health check
+app.get('/health', (req, res) => {
+  res.json({ status: 'OK', timestamp: getTimestamp() });
+});
+
+// Get active orders
+app.get('/api/active-orders', async (req, res) => {
+  try {
+    const date = req.query.date || fbHelper.getTurkishDate();
+    const orders = await fbHelper.getActiveOrders(date);
+    res.json(orders);
+  } catch (error) {
+    res.status(500).json({ error: error.message });
+  }
+});
+
+// Get completed orders
+app.get('/api/completed-orders', async (req, res) => {
+  try {
+    const date = req.query.date || fbHelper.getTurkishDate();
+    const orders = await fbHelper.getCompletedOrders(date);
+    res.json(orders);
+  } catch (error) {
+    res.status(500).json({ error: error.message });
+  }
+});
+
+// Get reports
+app.get('/api/reports', async (req, res) => {
+  try {
+    const { filter = 'daily', startDate, endDate } = req.query;
+    const reports = await fbHelper.getReports(filter, startDate, endDate);
+    res.json(reports);
+  } catch (error) {
+    res.status(500).json({ error: error.message });
+  }
+});
+
+// Get available order slots
+app.get('/api/order-slots', async (req, res) => {
+  try {
+    const slots = await fbHelper.getAvailableSlots();
+    res.json(slots);
+  } catch (error) {
+    res.status(500).json({ error: error.message });
+  }
+});
+
+// Get cafe status
+app.get('/api/cafe-status', (req, res) => {
+  res.json(cachedCafeStatus);
+});
+
+// Get stock status
+app.get('/api/stock-status', (req, res) => {
+  res.json(cachedStockStatus);
+});
+
+// Get menu
+app.get('/api/menu', async (req, res) => {
+  try {
+    const menuSnapshot = await db.collection('menu').get();
+    const menu = [];
+    menuSnapshot.forEach(doc => {
+      menu.push(doc.data());
+    });
+    res.json(menu || Object.keys(cachedStockStatus));
+  } catch (error) {
+    res.status(500).json({ error: error.message });
+  }
 });
 
 // Video upload endpoint
-app.post('/api/upload-video', upload.single('video'), (req, res) => {
+app.post('/api/upload-video', upload.single('video'), async (req, res) => {
   try {
     if (!req.file) {
-      return res.status(400).json({ success: false, error: 'Video dosyası bulunamadı' });
+      return res.status(400).json({ error: 'Video dosyası bulunamadı' });
     }
 
-    const videoUrl = `/videos/${req.file.filename}`;
+    // Generate filename
+    const timestamp = Date.now();
+    const filename = `video_${timestamp}.${req.file.mimetype.split('/')[1]}`;
+    const filepath = path.join(__dirname, 'public', 'videos', filename);
+
+    // In real scenario, you might upload to cloud storage
+    // For now, we'll keep the video URL pattern
+    const videoUrl = `/videos/${filename}`;
+
     console.log(`[${getTimestamp()}] 📹 Video yüklendi: ${videoUrl}`);
-    
+
     res.json({ success: true, videoUrl: videoUrl });
   } catch (error) {
-    console.error(`[${getTimestamp()}] ❌ Video yükleme hatası:`, error.message);
-    res.status(500).json({ success: false, error: error.message });
+    console.error(`[${getTimestamp()}] ❌ Video upload error:`, error);
+    res.status(500).json({ error: error.message });
   }
+});
+
+// ============ PAGE ROUTES ============
+app.get('/', (req, res) => {
+  res.sendFile(path.join(__dirname, 'public', 'menu.html'));
 });
 
 app.get('/admin', (req, res) => {
@@ -1386,135 +489,36 @@ app.get('/tv-reklam', (req, res) => {
   res.sendFile(path.join(__dirname, 'public', 'tv-reklam.html'));
 });
 
-// Aktif siparişleri al endpoint
-app.get('/api/active-orders', (req, res) => {
-  res.json(activeOrders);
-});
-
-// Raporları al endpoint
-// Raporları al endpoint (günlük/haftalık/aylık filtre)
-app.get('/api/reports', (req, res) => {
-  const { filter = 'all' } = req.query; // all, daily, weekly, monthly
-  
-  if (filter === 'all') {
-    return res.json(salesReports);
-  }
-  
-  const now = new Date();
-  const today = now.toISOString().split('T')[0];
-  
-  if (filter === 'daily') {
-    // Sadece bugünün raporu
-    return res.json({
-      daily: { [today]: salesReports.daily[today] || {} },
-      monthly: {}
-    });
-  }
-  
-  if (filter === 'weekly') {
-    // Son 7 günün raporu
-    const weekData = {};
-    for (let i = 0; i < 7; i++) {
-      const date = new Date(now);
-      date.setDate(date.getDate() - i);
-      const dateStr = date.toISOString().split('T')[0];
-      if (salesReports.daily[dateStr]) {
-        weekData[dateStr] = salesReports.daily[dateStr];
-      }
-    }
-    return res.json({
-      daily: weekData,
-      monthly: {}
-    });
-  }
-  
-  if (filter === 'monthly') {
-    // Bu ayın raporu
-    const thisMonth = now.toISOString().substring(0, 7); // YYYY-MM
-    const monthData = {};
-    Object.keys(salesReports.daily).forEach(date => {
-      if (date.startsWith(thisMonth)) {
-        monthData[date] = salesReports.daily[date];
-      }
-    });
-    return res.json({
-      daily: monthData,
-      monthly: { [thisMonth]: salesReports.monthly[thisMonth] || {} }
-    });
-  }
-  
-  res.json(salesReports);
-});
-
-// Cumartesi menüsünü al endpoint
-app.get('/api/saturday-menu', (req, res) => {
-  res.json({
-    isSaturdayEvening: isSaturdayEvening(),
-    items: saturdayMenuItems
-  });
-});
-
-// Menüyü Firestore'dan al endpoint
-app.get('/api/menu', async (req, res) => {
+// ============ STARTUP ============
+async function startup() {
   try {
-    if (!db) {
-      return res.status(503).json({ error: 'Firestore not initialized' });
-    }
-    
-    const menuSnapshot = await db.collection('menu').get();
-    const menu = [];
-    
-    menuSnapshot.forEach(doc => {
-      menu.push(doc.data());
+    // Initialize menu items in cache
+    initializeMenuItems();
+
+    // Load cache from Firestore
+    await initializeCache();
+
+    // Start server
+    server.listen(PORT, () => {
+      console.log('\n═══════════════════════════════════════════════');
+      console.log('🏪 Atmosfer Kafe - Sipariş Sistemi Başladı');
+      console.log('═══════════════════════════════════════════════');
+      console.log(`📡 Server: http://localhost:${PORT}`);
+      console.log(`👥 Müşteri Menüsü: http://localhost:${PORT}/`);
+      console.log(`📊 Admin Paneli: http://localhost:${PORT}/admin`);
+      console.log(`📺 TV Sıcak: http://localhost:${PORT}/tv-sicak`);
+      console.log(`📺 TV Soğuk: http://localhost:${PORT}/tv-soguk`);
+      console.log(`📺 TV Reklam: http://localhost:${PORT}/tv-reklam`);
+      console.log('═══════════════════════════════════════════════');
+      console.log(`[${getTimestamp()}] ✅ Sistem ready - Bağlantılar kabul ediliyor`);
+      console.log('═══════════════════════════════════════════════\n');
     });
-    
-    res.json(menu);
+
   } catch (error) {
-    console.error(`[${getTimestamp()}] ❌ Menü okuma hatası:`, error.message);
-    res.status(500).json({ error: 'Failed to fetch menu' });
+    console.error('❌ Startup error:', error);
+    process.exit(1);
   }
-});
+}
 
-// Menüyü Firestore'a kaydet/güncelle endpoint
-app.post('/api/menu', async (req, res) => {
-  try {
-    if (!db) {
-      return res.status(503).json({ error: 'Firestore not initialized' });
-    }
-    
-    const menuData = req.body;
-    
-    // Her kategoriyi kaydet
-    for (const category of menuData) {
-      await db.collection('menu').doc(category.id).set(category);
-    }
-    
-    console.log(`[${getTimestamp()}] ✅ Menü Firestore'a kaydedildi`);
-    res.json({ success: true });
-  } catch (error) {
-    console.error(`[${getTimestamp()}] ❌ Menü kaydetme hatası:`, error.message);
-    res.status(500).json({ error: 'Failed to save menu' });
-  }
-});
-
-// Start main server
-server.listen(PORT, () => {
-  console.log('═══════════════════════════════════════════════');
-  console.log('🏪 Charitable Cafe Ordering System Started');
-  console.log('═══════════════════════════════════════════════');
-  console.log(`📡 Server running on: http://localhost:${PORT}`);
-  console.log(`👥 Customer Menu: http://localhost:${PORT}/`);
-  console.log(`📊 Admin Dashboard: http://localhost:${PORT}/admin`);
-  console.log(`📺 TV Hot Drinks Display: http://localhost:${PORT}/tv-sicak`);
-  console.log(`📺 TV Cold Drinks Display: http://localhost:${PORT}/tv-soguk`);
-  console.log(`📺 TV Ad Display: http://localhost:${PORT}/tv-reklam`);
-  console.log('═══════════════════════════════════════════════');
-  console.log(`[${getTimestamp()}] Server is ready to accept connections`);
-  
-  // Ezan vakti sistemini başlat
-  fetchPrayerTimes();
-  scheduleNextPrayerUpdate(); // 20 günde bir API'den çek
-  scheduleDailyPrayerUpdate(); // Her gün yeni günün vakitlerini planla
-});
-
-// Socket.io connections for TV displays are now handled by main 'io' instance above
+// Start the application
+startup();

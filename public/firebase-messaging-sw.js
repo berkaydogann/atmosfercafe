@@ -6,12 +6,12 @@ importScripts('https://www.gstatic.com/firebasejs/10.7.1/firebase-messaging-comp
 
 // Firebase Configuration
 const firebaseConfig = {
-    apiKey: "AIzaSyAmOb4_OzMIKo4jjueeTd4iE9gp9Kyi7QE",
-    authDomain: "atmosfercafe.firebaseapp.com",
-    projectId: "atmosfercafe",
-    storageBucket: "atmosfercafe.firebasestorage.app",
-    messagingSenderId: "156933987584",
-    appId: "1:156933987584:web:6e87f2907dfb1dcf68e7e5"
+    apiKey: "AIzaSyABP3jm8MxEPh804FJnfsIgZZDEs53SrR4",
+    authDomain: "cinaralticafe-73b9e.firebaseapp.com",
+    projectId: "cinaralticafe-73b9e",
+    storageBucket: "cinaralticafe-73b9e.firebasestorage.app",
+    messagingSenderId: "99646761458",
+    appId: "1:99646761458:web:3b4fb7e7d1c7b3ce48e36b"
 };
 
 // Initialize Firebase in service worker

@@ -1,17 +1,19 @@
 <!DOCTYPE html>
 <html lang="tr">
+
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Barista Flow - Hayır Kafe</title>
     <link href="https://fonts.googleapis.com/css2?family=Outfit:wght@300;500;700;900&display=swap" rel="stylesheet">
     <link href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.1/font/bootstrap-icons.css" rel="stylesheet">
-    
+
     <style>
         :root {
             --bg-dark: #1e1e1e;
             --card-dark: #2d2d2d;
-            --starbucks-green: #00704A; /* Starbucks Yeşili */
+            --starbucks-green: #00704A;
+            /* Starbucks Yeşili */
             --latte-accent: #d4e9e2;
             --text-white: #ffffff;
             --text-gray: #a0a0a0;
@@ -47,6 +49,7 @@
             font-weight: 900;
             letter-spacing: -1px;
             background: linear-gradient(90deg, #fff, #a0a0a0);
+            background-clip: text;
             -webkit-background-clip: text;
             -webkit-text-fill-color: transparent;
         }
@@ -105,12 +108,57 @@
         }
 
         @keyframes pulse {
-            0% { opacity: 1; }
-            50% { opacity: 0.5; }
-            100% { opacity: 1; }
+            0% {
+                opacity: 1;
+            }
+
+            50% {
+                opacity: 0.5;
+            }
+
+            100% {
+                opacity: 1;
+            }
         }
 
         /* İstatistikler (Stories Tarzı) */
+        .top-stats-group {
+            display: flex;
+            flex-direction: row;
+            /* Horizontal */
+            gap: 12px;
+            margin-left: auto;
+            padding-left: 20px;
+            border-left: 1px solid rgba(255, 255, 255, 0.1);
+        }
+
+        /* Adjust stats within top bar */
+        .top-stats-group .stat-pill {
+            background: rgba(0, 0, 0, 0.2);
+            border: 1px solid rgba(255, 255, 255, 0.05);
+            padding: 4px 12px;
+            flex-direction: row;
+            /* Horizontal content inside pill */
+            align-items: center;
+            gap: 8px;
+            min-width: auto;
+            /* Remove min-width for compactness */
+        }
+
+        .top-stats-group .stat-label {
+            font-size: 0.75rem;
+            opacity: 0.7;
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
+            margin-right: 4px;
+            /* Space between label and value */
+        }
+
+        .top-stats-group .stat-value {
+            font-size: 1rem;
+            font-weight: 700;
+        }
+
         .stats-container {
             display: flex;
             gap: 15px;
@@ -126,7 +174,7 @@
             border-radius: 20px;
             display: flex;
             flex-direction: column;
-            border: 1px solid rgba(255,255,255,0.05);
+            border: 1px solid rgba(255, 255, 255, 0.05);
         }
 
         .stat-label {
@@ -155,20 +203,23 @@
             position: relative;
             overflow: hidden;
             transition: all 0.3s cubic-bezier(0.175, 0.885, 0.32, 1.275);
-            border: 1px solid rgba(255,255,255,0.05);
+            border: 1px solid rgba(255, 255, 255, 0.05);
             animation: slideIn 0.5s ease-out forwards;
             opacity: 0;
             transform: translateY(20px);
         }
 
         @keyframes slideIn {
-            to { opacity: 1; transform: translateY(0); }
+            to {
+                opacity: 1;
+                transform: translateY(0);
+            }
         }
 
         .order-card:hover {
             transform: translateY(-5px);
-            box-shadow: 0 10px 30px rgba(0,0,0,0.3);
-            border-color: rgba(255,255,255,0.1);
+            box-shadow: 0 10px 30px rgba(0, 0, 0, 0.3);
+            border-color: rgba(255, 255, 255, 0.1);
         }
 
         .order-card::before {
@@ -214,7 +265,8 @@
 
         .order-item {
             font-size: 1.6rem;
-            font-weight: 900; /* Extra Bold */
+            font-weight: 900;
+            /* Extra Bold */
             color: var(--latte-accent);
             line-height: 1.2;
             margin-bottom: 25px;
@@ -297,7 +349,7 @@
             gap: 10px;
             margin-top: 15px;
             padding-top: 15px;
-            border-top: 1px solid rgba(255,255,255,0.1);
+            border-top: 1px solid rgba(255, 255, 255, 0.1);
         }
 
         .empty-state {
@@ -307,7 +359,7 @@
             color: var(--text-gray);
             background: var(--card-dark);
             border-radius: 24px;
-            border: 2px dashed rgba(255,255,255,0.05);
+            border: 2px dashed rgba(255, 255, 255, 0.05);
         }
 
         .empty-icon {
@@ -321,7 +373,7 @@
             display: flex;
             gap: 10px;
             margin-bottom: 30px;
-            border-bottom: 1px solid rgba(255,255,255,0.05);
+            border-bottom: 1px solid rgba(255, 255, 255, 0.05);
             padding-bottom: 15px;
         }
 
@@ -362,10 +414,10 @@
             flex-direction: column;
             gap: 30px;
         }
-        
+
         .report-filter-btn {
             background: var(--card-dark);
-            border: 2px solid rgba(255,255,255,0.1);
+            border: 2px solid rgba(255, 255, 255, 0.1);
             color: var(--text-muted);
             padding: 12px 24px;
             border-radius: 12px;
@@ -373,12 +425,12 @@
             cursor: pointer;
             transition: all 0.3s ease;
         }
-        
+
         .report-filter-btn:hover {
             border-color: var(--starbucks-green);
             color: var(--text-white);
         }
-        
+
         .report-filter-btn.active {
             background: var(--starbucks-green);
             border-color: var(--starbucks-green);
@@ -402,7 +454,7 @@
             background: var(--card-dark);
             border-radius: 16px;
             padding: 20px;
-            border: 1px solid rgba(255,255,255,0.05);
+            border: 1px solid rgba(255, 255, 255, 0.05);
         }
 
         .report-card h4 {
@@ -417,7 +469,7 @@
             justify-content: space-between;
             align-items: center;
             padding: 8px 0;
-            border-bottom: 1px solid rgba(255,255,255,0.05);
+            border-bottom: 1px solid rgba(255, 255, 255, 0.05);
         }
 
         .report-item:last-child {
@@ -448,12 +500,12 @@
             background: var(--card-dark);
             border-radius: 16px;
             padding: 15px;
-            border: 1px solid rgba(255,255,255,0.05);
+            border: 1px solid rgba(255, 255, 255, 0.05);
             transition: all 0.3s;
         }
 
         .stock-item:hover {
-            border-color: rgba(255,255,255,0.1);
+            border-color: rgba(255, 255, 255, 0.1);
         }
 
         .stock-item-name {
@@ -611,104 +663,470 @@
             color: white;
         }
 
+        /* Top Control Bar */
+        .top-control-bar {
+            background: linear-gradient(135deg, var(--card-dark) 0%, rgba(0, 30, 20, 0.95) 100%);
+            border: 1px solid rgba(0, 112, 74, 0.3);
+            border-radius: 12px;
+            padding: 16px 24px;
+            margin-bottom: 20px;
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            gap: 20px;
+            box-shadow: 0 4px 12px rgba(0, 0, 0, 0.3);
+        }
+
+        .status-indicators {
+            display: flex;
+            gap: 12px;
+            align-items: center;
+        }
+
+        .status-badge {
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            padding: 8px 16px;
+            border-radius: 8px;
+            font-weight: 700;
+            font-size: 0.95rem;
+            background: rgba(255, 95, 87, 0.2);
+            border: 2px solid var(--danger);
+            color: var(--danger);
+        }
+
+        .status-badge.open {
+            background: rgba(0, 112, 74, 0.2);
+            border-color: var(--starbucks-green);
+            color: var(--starbucks-green);
+        }
+
+        .status-badge.live-badge {
+            background: rgba(0, 112, 74, 0.2);
+            border-color: var(--starbucks-green);
+            color: var(--starbucks-green);
+            animation: livePulse 2s infinite;
+        }
+
+        @keyframes livePulse {
+
+            0%,
+            100% {
+                opacity: 1;
+            }
+
+            50% {
+                opacity: 0.6;
+            }
+        }
+
+        @keyframes shake {
+
+            0%,
+            100% {
+                transform: translateX(0);
+            }
+
+            10%,
+            30%,
+            50%,
+            70%,
+            90% {
+                transform: translateX(-10px);
+            }
+
+            20%,
+            40%,
+            60%,
+            80% {
+                transform: translateX(10px);
+            }
+        }
+
+        .control-buttons-row {
+            display: flex;
+            gap: 10px;
+            align-items: center;
+            flex-wrap: wrap;
+        }
+
+        .ctrl-btn {
+            padding: 10px 18px;
+            border-radius: 8px;
+            border: 2px solid rgba(255, 255, 255, 0.1);
+            background: var(--card-dark);
+            color: var(--text-white);
+            font-weight: 600;
+            cursor: pointer;
+            transition: all 0.2s;
+            display: flex;
+            align-items: center;
+            gap: 6px;
+            font-size: 0.9rem;
+            white-space: nowrap;
+        }
+
+        .ctrl-btn:hover {
+            border-color: var(--starbucks-green);
+            background: rgba(0, 112, 74, 0.2);
+            transform: translateY(-1px);
+        }
+
+        .ctrl-btn.active {
+            background: var(--starbucks-green);
+            border-color: var(--starbucks-green);
+            color: white;
+            box-shadow: 0 0 15px rgba(0, 112, 74, 0.4);
+        }
+
+        .ctrl-btn.open-btn {
+            background: var(--starbucks-green);
+            border-color: var(--starbucks-green);
+            color: white;
+        }
+
+        .ctrl-btn.open-btn:hover {
+            background: #005c3c;
+            box-shadow: 0 0 15px rgba(0, 112, 74, 0.5);
+        }
+
+        /* Quick Actions Grid - Keep for compatibility but hide */
+        .quick-actions-grid {
+            display: none;
+        }
+
+        .quick-btn {
+            padding: 14px 18px;
+            border-radius: 10px;
+            border: 2px solid rgba(255, 255, 255, 0.1);
+            background: var(--card-dark);
+            color: var(--text-white);
+            font-weight: 700;
+            cursor: pointer;
+            transition: all 0.3s;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 8px;
+            font-size: 0.95rem;
+        }
+
+        .quick-btn:hover {
+            border-color: var(--starbucks-green);
+            background: rgba(0, 112, 74, 0.1);
+        }
+
+        .quick-btn.active {
+            background: var(--starbucks-green);
+            border-color: var(--starbucks-green);
+            color: white;
+            box-shadow: 0 0 15px rgba(0, 112, 74, 0.3);
+        }
+
+        .quick-btn.close-btn:hover {
+            background: rgba(255, 95, 87, 0.2);
+            border-color: var(--danger);
+            color: var(--danger);
+        }
+
+        .quick-btn.open-btn {
+            grid-column: span 2;
+            background: var(--starbucks-green);
+            border-color: var(--starbucks-green);
+            color: white;
+        }
+
+        .quick-btn.open-btn:hover {
+            background: #005c3c;
+            box-shadow: 0 0 20px rgba(0, 112, 74, 0.4);
+        }
+
+        /* Notification Permission Banner */
+        .notification-banner {
+            position: fixed;
+            top: 0;
+            left: 0;
+            right: 0;
+            background: linear-gradient(135deg, var(--starbucks-green) 0%, #005c3c 100%);
+            color: white;
+            padding: 16px 20px;
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            gap: 20px;
+            z-index: 10000;
+            box-shadow: 0 4px 12px rgba(0, 0, 0, 0.3);
+            animation: slideDown 0.3s ease-out;
+        }
+
+        @keyframes slideDown {
+            from {
+                transform: translateY(-100%);
+            }
+
+            to {
+                transform: translateY(0);
+            }
+        }
+
+        .notification-banner-content {
+            display: flex;
+            align-items: center;
+            gap: 12px;
+            flex: 1;
+        }
+
+        .notification-banner-icon {
+            font-size: 1.5rem;
+            animation: ring 2s infinite;
+        }
+
+        @keyframes ring {
+
+            0%,
+            100% {
+                transform: rotate(0deg);
+            }
+
+            10%,
+            30% {
+                transform: rotate(-10deg);
+            }
+
+            20%,
+            40% {
+                transform: rotate(10deg);
+            }
+        }
+
+        .notification-banner-text {
+            flex: 1;
+        }
+
+        .notification-banner-text strong {
+            display: block;
+            font-size: 1.1rem;
+            margin-bottom: 4px;
+        }
+
+        .notification-banner-text small {
+            opacity: 0.9;
+            font-size: 0.9rem;
+        }
+
+        .enable-sound-btn {
+            background: white;
+            color: var(--starbucks-green);
+            border: none;
+            padding: 12px 24px;
+            border-radius: 8px;
+            font-weight: 700;
+            font-size: 1rem;
+            cursor: pointer;
+            transition: all 0.2s;
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            white-space: nowrap;
+        }
+
+        .enable-sound-btn:hover {
+            background: #f0f0f0;
+            transform: scale(1.05);
+        }
+
+        .enable-sound-btn:active {
+            transform: scale(0.95);
+        }
+
+        /* Audio Status Indicator */
+        .audio-status-badge {
+            position: fixed;
+            bottom: 20px;
+            right: 20px;
+            background: var(--card-dark);
+            border: 2px solid rgba(255, 255, 255, 0.1);
+            padding: 12px 16px;
+            border-radius: 12px;
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            font-size: 0.9rem;
+            z-index: 9999;
+            box-shadow: 0 4px 12px rgba(0, 0, 0, 0.3);
+            transition: all 0.3s;
+        }
+
+        .audio-status-badge.enabled {
+            border-color: var(--starbucks-green);
+            background: rgba(0, 112, 74, 0.1);
+        }
+
+        .audio-status-badge.disabled {
+            border-color: var(--danger);
+            background: rgba(255, 95, 87, 0.1);
+        }
+
+        .audio-status-badge i {
+            font-size: 1.2rem;
+        }
+
+        .audio-status-badge.enabled i {
+            color: var(--starbucks-green);
+        }
+
+        .audio-status-badge.disabled i {
+            color: var(--danger);
+        }
+
+        /* Toast Notification */
+        .toast-notification {
+            position: fixed;
+            top: 80px;
+            right: 20px;
+            background: linear-gradient(135deg, var(--starbucks-green) 0%, #005c3c 100%);
+            color: white;
+            padding: 16px 20px;
+            border-radius: 12px;
+            box-shadow: 0 4px 16px rgba(0, 112, 74, 0.4);
+            z-index: 9998;
+            animation: slideInRight 0.3s ease-out, pulse 0.5s ease-in-out 3;
+            display: flex;
+            align-items: center;
+            gap: 12px;
+            min-width: 300px;
+        }
+
+        @keyframes slideInRight {
+            from {
+                transform: translateX(400px);
+                opacity: 0;
+            }
+
+            to {
+                transform: translateX(0);
+                opacity: 1;
+            }
+        }
+
+        .toast-notification.fade-out {
+            animation: fadeOut 0.3s ease-out forwards;
+        }
+
+        @keyframes fadeOut {
+            to {
+                opacity: 0;
+                transform: translateX(400px);
+            }
+        }
+
+        .toast-notification-icon {
+            font-size: 1.8rem;
+            animation: bounce 0.5s ease-in-out 3;
+        }
+
+
+        @keyframes bounce {
+
+            0%,
+            100% {
+                transform: translateY(0);
+            }
+
+            50% {
+                transform: translateY(-10px);
+            }
+        }
+
+        @keyframes shake {
+
+            0%,
+            100% {
+                transform: translateX(0);
+            }
+
+            10%,
+            30%,
+            50%,
+            70%,
+            90% {
+                transform: translateX(-10px);
+            }
+
+            20%,
+            40%,
+            60%,
+            80% {
+                transform: translateX(10px);
+            }
+        }
+
+        .toast-notification-content strong {
+            display: block;
+            font-size: 1.1rem;
+            margin-bottom: 4px;
+        }
+
+        .toast-notification-content small {
+            opacity: 0.9;
+        }
     </style>
 </head>
+
 <body>
+    <audio id="notificationSound" src="/notification.mp3" preload="auto"></audio>
 
-    <div class="header-bar">
-        <div class="brand-title">Barista Flow</div>
-        <div style="display: flex; gap: 15px; align-items: center;">
-            <img src="cinarlogo3.png" alt="Çınar Logo" class="header-logo">
-            <button id="saturdayTestBtn" class="cafe-status-btn" style="background: rgba(255, 193, 7, 0.2); color: #ffc107; border-color: #ffc107;" onclick="toggleSaturdayTest()">
-                <i class="bi bi-calendar-check"></i> <span id="saturdayTestText">Cumartesi Test: Kapalı</span>
-            </button>
-            <button id="cafeStatusBtn" class="cafe-status-btn cafe-open" onclick="toggleCafeStatus()">
-                <i class="bi bi-door-open"></i> <span id="cafeStatusText">Açık</span>
-            </button>
-            <div class="status-badge">
-                <div class="status-dot"></div>
-                <span id="connectionText">Canlı</span>
+    <!-- Top Control Bar -->
+    <div class="top-control-bar">
+        <div class="status-indicators">
+            <div class="status-badge open" id="cafeStatusBadge">
+                <i class="bi bi-shop"></i>
+                <span id="cafeStatusText">Açık</span>
+            </div>
+            <div class="status-badge live-badge">
+                <i class="bi bi-broadcast"></i>
+                <span>Canlı</span>
+            </div>
+            <div class="status-badge" id="notificationStatusBadge" onclick="requestNotificationPermission()"
+                style="cursor: pointer;" title="Bildirim izinlerini yönetmek için tıklayın">
+                <i class="bi bi-bell-slash"></i>
+                <span>Bildirimler Kapalı</span>
             </div>
         </div>
-    </div>
+        <div class="control-buttons-row">
+            <button class="ctrl-btn" id="btnSaturday" onclick="toggleSaturdayMenu()">
+                <i class="bi bi-calendar-week"></i> Cumartesi
+            </button>
+            <button class="ctrl-btn" onclick="closeCafeQuick('chat')">
+                <i class="bi bi-chat-dots"></i> Sohbet
+            </button>
+            <button class="ctrl-btn" onclick="closeCafeQuick('prayer')">
+                <i class="bi bi-moon-stars"></i> Namaz
+            </button>
+            <button class="ctrl-btn" onclick="closeCafeQuick('break')">
+                <i class="bi bi-cup-hot"></i> Mola
+            </button>
+            <button class="ctrl-btn open-btn" onclick="openCafe()">
+                <i class="bi bi-door-open"></i> Kafeyi Aç
+            </button>
+        </div>
 
-    <div class="stats-container">
-        <div class="stat-pill">
-            <span class="stat-label">Bekleyen</span>
-            <span class="stat-value" style="color: #ffbd2e;" id="pendingCount">0</span>
-        </div>
-        <div class="stat-pill">
-            <span class="stat-label">Tamamlanan</span>
-            <span class="stat-value" style="color: var(--starbucks-green);" id="completedCount">0</span>
-        </div>
-        <div class="stat-pill">
-            <span class="stat-label">Toplam</span>
-            <span class="stat-value" id="totalCount">0</span>
-        </div>
-    </div>
-
-    <div class="cafe-control-card">
-        <h4><i class="bi bi-megaphone"></i> Kafe Durumu / Ekran Mesajı</h4>
-        <div class="muted">15/30 dk kısayolları geri sayımı başlatır, ekrana kalan süre düşer.</div>
-        <div class="input-with-quick-select">
-            <label>Başlık / Not</label>
-            <input id="customNoteInput" type="text" placeholder="Özel başlık yazın veya hazır seçeneklerden seçin">
-            <div class="quick-select-buttons">
-                <button type="button" class="quick-select-btn" onclick="document.getElementById('customNoteInput').value='Sohbet Hazırlığı'">Sohbet Hazırlığı</button>
-                <button type="button" class="quick-select-btn" onclick="document.getElementById('customNoteInput').value='Namaz Vakti'">Namaz Vakti</button>
-                <button type="button" class="quick-select-btn" onclick="document.getElementById('customNoteInput').value='Mola'">Mola</button>
+        <!-- NEW: Stats in Top Bar -->
+        <div class="top-stats-group">
+            <div class="stat-pill">
+                <span class="stat-label">Bekleyen</span>
+                <span class="stat-value" style="color: #ffbd2e;" id="pendingCount">0</span>
+            </div>
+            <div class="stat-pill">
+                <span class="stat-label">Tamamlanan</span>
+                <span class="stat-value" style="color: var(--starbucks-green);" id="completedCount">0</span>
+            </div>
+            <div class="stat-pill">
+                <span class="stat-label">Toplam</span>
+                <span class="stat-value" id="totalCount">0</span>
             </div>
         </div>
-        <div>
-            <label>Alt Bilgi</label>
-            <input id="customDetailInput" type="text" placeholder="Akşam - 19:45, 20 dk ara vb.">
-        </div>
-        <div class="input-with-quick-select">
-            <label>Namaz Adı</label>
-            <input id="prayerNameInput" type="text" placeholder="Özel namaz adı yazın veya hazır seçeneklerden seçin">
-            <div class="quick-select-buttons">
-                <button type="button" class="quick-select-btn" onclick="document.getElementById('prayerNameInput').value='Sabah Namazı Vakti'">Sabah Namazı Vakti</button>
-                <button type="button" class="quick-select-btn" onclick="document.getElementById('prayerNameInput').value='Öğle Namazı Vakti'">Öğle Namazı Vakti</button>
-                <button type="button" class="quick-select-btn" onclick="document.getElementById('prayerNameInput').value='İkindi Namazı Vakti'">İkindi Namazı Vakti</button>
-                <button type="button" class="quick-select-btn" onclick="document.getElementById('prayerNameInput').value='Akşam Namazı Vakti'">Akşam Namazı Vakti</button>
-                <button type="button" class="quick-select-btn" onclick="document.getElementById('prayerNameInput').value='Yatsı Namazı Vakti'">Yatsı Namazı Vakti</button>
-            </div>
-        </div>
-        <div class="cafe-control-actions">
-            <button class="cafe-control-btn" id="btnSetCustom">
-                <i class="bi bi-chat-dots"></i> Sohbet Hazırlığı
-            </button>
-            <button class="cafe-control-btn secondary" id="btnSetPrayer">
-                <i class="bi bi-moon-stars"></i> Namaz Vakti
-            </button>
-            <button class="cafe-control-btn secondary" id="btnTimer15" style="display: none;">
-                <i class="bi bi-stopwatch"></i> 15 dk Geri Sayım
-            </button>
-            <button class="cafe-control-btn secondary" id="btnTimer30" style="display: none;">
-                <i class="bi bi-stopwatch"></i> 30 dk Geri Sayım
-            </button>
-            <button class="cafe-control-btn danger" id="btnOpenCafe">
-                <i class="bi bi-door-open"></i> Kafeyi Aç (Temizle)
-            </button>
-        </div>
-        <div id="prayerTimerOptions" style="display: none; margin-top: 10px; padding: 15px; background: rgba(0, 112, 74, 0.1); border-radius: 10px; border: 1px solid var(--starbucks-green);">
-            <div style="margin-bottom: 10px; font-weight: 600; color: var(--starbucks-green);">Geri sayım süresi seçin:</div>
-            <div style="display: flex; gap: 10px; flex-wrap: wrap;">
-                <button class="cafe-control-btn" id="btnPrayer15" style="min-width: 100px;">
-                    <i class="bi bi-stopwatch"></i> 15 dk
-                </button>
-                <button class="cafe-control-btn" id="btnPrayer30" style="min-width: 100px;">
-                    <i class="bi bi-stopwatch"></i> 30 dk
-                </button>
-                <button class="cafe-control-btn" id="btnPrayer45" style="min-width: 100px;">
-                    <i class="bi bi-stopwatch"></i> 45 dk
-                </button>
-                <button class="cafe-control-btn secondary" id="btnCancelPrayer" style="min-width: 100px;">
-                    <i class="bi bi-x"></i> İptal
-                </button>
-            </div>
-        </div>
-        <div class="muted" id="countdownInfo"></div>
     </div>
 
     <!-- Sekmeler -->
@@ -732,11 +1150,96 @@
 
     <!-- Siparişler Sekmesi -->
     <div id="ordersTab" class="tab-content active">
-        <div class="orders-grid" id="ordersContainer">
-            <div class="empty-state" id="emptyState">
-                <i class="bi bi-cup-hot empty-icon"></i>
-                <h3>Şu an sakin...</h3>
-                <p>Yeni siparişler buraya düşecek 🚀</p>
+        <style>
+            /* Split Orders Layout */
+            .orders-split-container {
+                display: grid;
+                grid-template-columns: 1fr 1fr;
+                gap: 20px;
+                height: calc(100vh - 180px);
+                /* Adjust height for scrolling */
+                overflow: hidden;
+            }
+
+            .orders-column {
+                background: rgba(0, 0, 0, 0.2);
+                border-radius: 12px;
+                padding: 15px;
+                border: 1px solid rgba(255, 255, 255, 0.05);
+                display: flex;
+                flex-direction: column;
+                height: 100%;
+            }
+
+            .column-header {
+                font-size: 1.1rem;
+                font-weight: 700;
+                margin-bottom: 15px;
+                padding-bottom: 10px;
+                border-bottom: 1px solid rgba(255, 255, 255, 0.1);
+                display: flex;
+                align-items: center;
+                gap: 10px;
+                flex-shrink: 0;
+            }
+
+            .header-hot {
+                color: #ff7e5f;
+            }
+
+            .header-cold {
+                color: #00dc82;
+            }
+
+            .column-scroll {
+                flex: 1;
+                overflow-y: auto;
+                padding-right: 5px;
+                display: flex;
+                flex-direction: column;
+                gap: 15px;
+            }
+
+            /* Custom Scrollbar for columns */
+            .column-scroll::-webkit-scrollbar {
+                width: 6px;
+            }
+
+            .column-scroll::-webkit-scrollbar-track {
+                background: rgba(0, 0, 0, 0.1);
+            }
+
+            .column-scroll::-webkit-scrollbar-thumb {
+                background: rgba(255, 255, 255, 0.2);
+                border-radius: 3px;
+            }
+        </style>
+
+        <div class="orders-split-container">
+            <!-- HOT ORDERS -->
+            <div class="orders-column">
+                <div class="column-header header-hot">
+                    <i class="bi bi-cup-hot-fill"></i> Sıcak Siparişler
+                </div>
+                <div id="hotOrdersContainer" class="column-scroll">
+                    <!-- Hot orders go here -->
+                    <div class="empty-state" style="padding: 20px 0;">
+                        <p>Bekleyen sıcak sipariş yok.</p>
+                    </div>
+                </div>
+            </div>
+
+            <!-- COLD ORDERS -->
+            <div class="orders-column">
+                <div class="column-header header-cold">
+                    <i class="bi bi-cup-straw"></i> Soğuk Siparişler
+                </div>
+                <div id="coldOrdersContainer" class="column-scroll">
+                    <!-- Cold orders go here -->
+                    <div class="empty-state" style="padding: 20px 0;">
+                        <p>Bekleyen soğuk sipariş yok.</p>
+                    </div>
+                </div>
             </div>
         </div>
     </div>
@@ -758,8 +1261,10 @@
                 <h4 style="color: var(--starbucks-green); margin-bottom: 15px;">
                     <i class="bi bi-upload"></i> Video Seç
                 </h4>
-                <input type="file" id="videoInput" accept="video/*" style="margin-bottom: 15px; color: var(--text-gray);">
-                <button onclick="uploadAndPlayVideo()" style="background: var(--starbucks-green); color: white; border: none; padding: 12px 20px; border-radius: 10px; cursor: pointer; width: 100%; font-weight: 600;">
+                <input type="file" id="videoInput" accept="video/*"
+                    style="margin-bottom: 15px; color: var(--text-gray);">
+                <button onclick="uploadAndPlayVideo()"
+                    style="background: var(--starbucks-green); color: white; border: none; padding: 12px 20px; border-radius: 10px; cursor: pointer; width: 100%; font-weight: 600;">
                     <i class="bi bi-play-circle"></i> Oynat
                 </button>
             </div>
@@ -769,7 +1274,8 @@
                 <h4 style="color: var(--starbucks-green); margin-bottom: 15px;">
                     <i class="bi bi-sliders"></i> Kontroller
                 </h4>
-                <button onclick="stopVideoPlayback()" style="background: var(--danger); color: white; border: none; padding: 12px 20px; border-radius: 10px; cursor: pointer; width: 100%; font-weight: 600; margin-bottom: 10px;">
+                <button onclick="stopVideoPlayback()"
+                    style="background: var(--danger); color: white; border: none; padding: 12px 20px; border-radius: 10px; cursor: pointer; width: 100%; font-weight: 600; margin-bottom: 10px;">
                     <i class="bi bi-stop-circle"></i> Videoyu Durdur
                 </button>
                 <div style="color: var(--text-gray); font-size: 0.9rem; margin-top: 10px;">
@@ -784,8 +1290,10 @@
                 <i class="bi bi-link"></i> URL ile Video Oynat
             </h4>
             <div style="display: flex; gap: 10px;">
-                <input type="text" id="videoUrlInput" placeholder="Video URL'sini girin..." style="flex: 1; padding: 10px 15px; background: rgba(255,255,255, 0.1); border: 1px solid rgba(255,255,255, 0.2); border-radius: 8px; color: var(--text-white);">
-                <button onclick="playVideoFromUrl()" style="background: var(--starbucks-green); color: white; border: none; padding: 10px 20px; border-radius: 8px; cursor: pointer; font-weight: 600;">
+                <input type="text" id="videoUrlInput" placeholder="Video URL'sini girin..."
+                    style="flex: 1; padding: 10px 15px; background: rgba(255,255,255, 0.1); border: 1px solid rgba(255,255,255, 0.2); border-radius: 8px; color: var(--text-white);">
+                <button onclick="playVideoFromUrl()"
+                    style="background: var(--starbucks-green); color: white; border: none; padding: 10px 20px; border-radius: 8px; cursor: pointer; font-weight: 600;">
                     <i class="bi bi-play-fill"></i> Oynat
                 </button>
             </div>
@@ -796,7 +1304,8 @@
             <h4 style="color: var(--starbucks-green); margin-bottom: 15px;">
                 <i class="bi bi-list-check"></i> Hazır Siparişleri Yönet
             </h4>
-            <div style="background: rgba(0, 112, 74, 0.1); padding: 15px; border-radius: 10px; border-left: 3px solid var(--starbucks-green);">
+            <div
+                style="background: rgba(0, 112, 74, 0.1); padding: 15px; border-radius: 10px; border-left: 3px solid var(--starbucks-green);">
                 <p style="color: var(--text-gray); margin-bottom: 0;">
                     TV Reklam ekranında hazır olan siparişler listesi gösterilir. Aşağıda siparişleri yönetebilirsiniz.
                 </p>
@@ -821,16 +1330,18 @@
                 Müşteriler yalnızca bu ürünlerden sipariş verebilir.
             </p>
         </div>
-        
+
         <div style="margin-bottom: 20px;">
-            <button onclick="selectAllSaturdayItems()" style="background: var(--starbucks-green); color: white; border: none; padding: 10px 20px; border-radius: 10px; cursor: pointer; margin-right: 10px;">
+            <button onclick="selectAllSaturdayItems()"
+                style="background: var(--starbucks-green); color: white; border: none; padding: 10px 20px; border-radius: 10px; cursor: pointer; margin-right: 10px;">
                 <i class="bi bi-check-all"></i> Tümünü Seç
             </button>
-            <button onclick="deselectAllSaturdayItems()" style="background: var(--danger); color: white; border: none; padding: 10px 20px; border-radius: 10px; cursor: pointer;">
+            <button onclick="deselectAllSaturdayItems()"
+                style="background: var(--danger); color: white; border: none; padding: 10px 20px; border-radius: 10px; cursor: pointer;">
                 <i class="bi bi-x-lg"></i> Tümünü Kaldır
             </button>
         </div>
-        
+
         <div class="stock-grid" id="saturdayMenuContainer"></div>
     </div>
 
@@ -852,7 +1363,7 @@
                     📈 Bu Ay
                 </button>
             </div>
-            
+
             <div class="report-section">
                 <h3>📅 Günlük Raporlar</h3>
                 <div id="dailyReports" class="report-grid"></div>
@@ -864,8 +1375,14 @@
         </div>
     </div>
 
-    <audio id="notificationSound" preload="auto">
-        <source src="data:audio/wav;base64,UklGRnoGAABXQVZFZm10IBAAAAABAAEAQB8AAEAfAAABAAgAZGF0YQoGAACBhYqFbF1fdJivrJBhNjVgodDbq2EcBj+a2/LDciUFLIHO8tiJNwgZaLvt559NEAxQp+PwtmMcBjiR1/LMeSwFJHfH8N2QQAoUXrTp66hVFApGn+DyvmwhBSuBzvLZiTYIGGi77eeeSwwPUKXh8LdjHQU2kdXy0HotBSJ1xe/ajz8KE12y6OynUxQLRp7e8r9pIAUsgs/y24o4CBhpvO7om0kMEE+k4PG5ZBkFNo/T8tR6LgUjdMPs2Ys+CRNbsOjqqVcVCkSb3fHAah4FK4HOuN2KNwgaab3v6qJODRBPo9/ytWUaBTWO0vHVei4FI3PD7tiLPwkSW6/n6qlXFQpFnN3xw2sfBSt/zLbci0AIG2m98OqiTg0RTqHf8rVlGgU1jtLx1XouBSNzw+7Yiz8JElqv5+qoVhYKQ5vb8MRsHwUrfsy13oxBCRtov+/ro00NEFCA4fK2Zx0FNI7R8tZ8MAUiccTt15A/CRJYrunqqVgWCkOb2/DGbSEFK37LtN+MQQgbZ7/u6qRODRBPf+DxtWccBTOO0fLYfTAFInHE7deQPgkRV6/o6atZFglCmtnwyG0jBSp9yrf0L/JTh+AAAAAAAA==">
+    <!-- Order Ready notification sound -->
+    <!-- Order Ready notification sound - handled by top audio element -->
+    <!-- Removed duplicate audio element -->
+
+    <!-- New Order notification sound - clear and loud notification sound -->
+    <audio id="newOrderSound" preload="auto">
+        <source src="https://assets.mixkit.co/active_storage/sfx/2869/2869-preview.mp3" type="audio/mpeg">
+        <source src="https://freesound.org/data/previews/320/320655_5260872-lq.mp3" type="audio/mpeg">
     </audio>
 
     <script src="/socket.io/socket.io.js"></script>
@@ -873,7 +1390,7 @@
         const socket = io();
         const container = document.getElementById('ordersContainer');
         const emptyState = document.getElementById('emptyState');
-        
+
         let stats = { total: 0, pending: 0, completed: 0 };
         let stockStatus = {}; // Stok durumunu tut
         let cafeIsClosed = false; // Kafe kapalı mı
@@ -882,9 +1399,7 @@
         const customNoteInput = document.getElementById('customNoteInput');
         const customDetailInput = document.getElementById('customDetailInput');
         const prayerNameInput = document.getElementById('prayerNameInput');
-        const countdownInfo = document.getElementById('countdownInfo');
-        let countdownEnd = null;
-        let countdownInterval = null;
+
 
         // Service Worker register et (bildirim için gerekli)
         if ('serviceWorker' in navigator) {
@@ -903,71 +1418,328 @@
         loadActiveOrders();
         socket.emit('getPrayerInfo');
 
-        // Notification izni iste
+        // Notification izni iste - Enhanced version
         function requestNotificationPermission() {
             console.log('Admin: requestNotificationPermission çağrıldı');
             console.log('Current permission:', Notification.permission);
-            
-            if ('Notification' in window) {
-                if (Notification.permission === 'default') {
-                    console.log('İzin isteniyor...');
-                    // Chrome için daha açık bir prompt
-                    if (confirm('Yeni siparişler için bildirim almak ister misiniz?')) {
-                        Notification.requestPermission().then(permission => {
-                            console.log('İzin yanıtı:', permission);
-                            if (permission === 'granted') {
-                                sendNotification('Admin Bildirimleri Aktif!', {
-                                    body: 'Yeni siparişler geldiğinde bilgilendirileceksiniz.',
-                                    tag: 'welcome'
-                                });
-                            }
-                        });
-                    }
-                } else {
-                    console.log('İzin zaten verilmiş:', Notification.permission);
-                }
-            } else {
+
+            if (!('Notification' in window)) {
                 console.log('Notification API desteklenmiyor');
+                alert('Bu tarayıcı bildirim desteği sunmuyor.');
+                return;
+            }
+
+            if (Notification.permission === 'granted') {
+                console.log('İzin zaten verilmiş');
+                updateNotificationBadge(true);
+                return;
+            }
+
+            if (Notification.permission === 'denied') {
+                console.log('Bildirim izni reddedilmiş');
+                alert('Bildirim izni reddedilmiş. Lütfen tarayıcı ayarlarından bildirimleri aktif edin.');
+                updateNotificationBadge(false);
+                return;
+            }
+
+            // Permission is 'default', request it
+            console.log('İzin isteniyor...');
+            Notification.requestPermission().then(permission => {
+                console.log('İzin yanıtı:', permission);
+                if (permission === 'granted') {
+                    sendNotification('✅ Admin Bildirimleri Aktif!', {
+                        body: 'Yeni siparişler geldiğinde bilgilendirileceksiniz.',
+                        tag: 'welcome'
+                    });
+                    updateNotificationBadge(true);
+                } else {
+                    updateNotificationBadge(false);
+                }
+            });
+        }
+
+        // Update notification status badge
+        function updateNotificationBadge(isEnabled) {
+            const badge = document.getElementById('notificationStatusBadge');
+            if (badge) {
+                if (isEnabled) {
+                    badge.style.background = 'rgba(0, 112, 74, 0.2)';
+                    badge.style.color = 'var(--starbucks-green)';
+                    badge.style.borderColor = 'var(--starbucks-green)';
+                    badge.innerHTML = '<i class="bi bi-bell-fill"></i> Bildirimler Açık';
+                } else {
+                    badge.style.background = 'rgba(255, 95, 87, 0.2)';
+                    badge.style.color = 'var(--danger)';
+                    badge.style.borderColor = 'var(--danger)';
+                    badge.innerHTML = '<i class="bi bi-bell-slash"></i> Bildirimler Kapalı';
+                }
             }
         }
 
-        // Sayfa yüklendiğinde notification izni iste
+        // Sayfa yüklendiğinde notification izni kontrol et ve gerekirse iste
         window.addEventListener('load', () => {
-            console.log('Admin sayfa yüklendi, izin isteniyor...');
-            // 1 saniye bekle sonra iste (sayfa yüklendikten sonra)
-            setTimeout(() => {
-                requestNotificationPermission();
-            }, 1000);
+            console.log('Admin sayfa yüklendi, bildirim durumu kontrol ediliyor...');
+
+            // Check current permission status
+            if ('Notification' in window) {
+                if (Notification.permission === 'granted') {
+                    updateNotificationBadge(true);
+                } else {
+                    updateNotificationBadge(false);
+                    // Auto-request after a short delay
+                    setTimeout(() => {
+                        requestNotificationPermission();
+                    }, 1500);
+                }
+            }
+
+            // Initialize audio system on first user interaction
+            initializeAudioSystem();
         });
 
-        // Bildirim gönder
+        // Track if audio is unlocked
+        let audioUnlocked = false;
+
+        // Initialize audio system to bypass autoplay restrictions
+        function initializeAudioSystem() {
+            console.log('🔊 Ses sistemi başlatılıyor...');
+
+            // Show persistent reminder to click
+            showAudioUnlockReminder();
+
+            // Set up handler to enable audio on ANY interaction
+            const enableAudio = function (eventType) {
+                console.log('🔊 Kullanıcı etkileşimi algılandı:', eventType);
+                const newOrderAudio = document.getElementById('newOrderSound');
+                const orderReadyAudio = document.getElementById('notificationSound');
+
+                let unlockPromises = [];
+
+                if (newOrderAudio) {
+                    newOrderAudio.volume = 1.0;
+                    // Play and immediately pause to "unlock" audio
+                    const p1 = newOrderAudio.play().then(() => {
+                        newOrderAudio.pause();
+                        newOrderAudio.currentTime = 0;
+                        console.log('✅ Yeni sipariş sesi aktif');
+                        return true;
+                    }).catch(e => {
+                        console.log('⚠️ Yeni sipariş sesi aktifleştirme başarısız:', e);
+                        return false;
+                    });
+                    unlockPromises.push(p1);
+                }
+
+                if (orderReadyAudio) {
+                    orderReadyAudio.volume = 1.0;
+                    const p2 = orderReadyAudio.play().then(() => {
+                        orderReadyAudio.pause();
+                        orderReadyAudio.currentTime = 0;
+                        console.log('✅ Sipariş hazır sesi aktif');
+                        return true;
+                    }).catch(e => {
+                        console.log('⚠️ Sipariş hazır sesi aktifleştirme başarısız:', e);
+                        return false;
+                    });
+                    unlockPromises.push(p2);
+                }
+
+                // Wait for all unlock attempts
+                Promise.all(unlockPromises).then(results => {
+                    if (results.some(r => r === true)) {
+                        audioUnlocked = true;
+                        console.log('✅✅✅ SES SİSTEMİ TAMAMEN AKTİF! ✅✅✅');
+                        // Show success indicator
+                        showAudioEnabledIndicator();
+                        // Remove reminder
+                        hideAudioUnlockReminder();
+                        // Remove all event listeners
+                        removeAudioUnlockListeners();
+                    }
+                });
+            };
+
+            // Create wrapper functions for each event type
+            const clickHandler = () => enableAudio('click');
+            const touchHandler = () => enableAudio('touchstart');
+            const keyHandler = () => enableAudio('keydown');
+            const mouseMoveHandler = () => enableAudio('mousemove');
+
+            // Store handlers for removal
+            window._audioUnlockHandlers = {
+                click: clickHandler,
+                touchstart: touchHandler,
+                keydown: keyHandler,
+                mousemove: mouseMoveHandler
+            };
+
+            // Listen for ANY user interaction
+            document.addEventListener('click', clickHandler);
+            document.addEventListener('touchstart', touchHandler);
+            document.addEventListener('keydown', keyHandler);
+            // Also try mousemove as a last resort
+            document.addEventListener('mousemove', mouseMoveHandler, { once: true });
+        }
+
+        // Remove all audio unlock listeners
+        function removeAudioUnlockListeners() {
+            if (window._audioUnlockHandlers) {
+                document.removeEventListener('click', window._audioUnlockHandlers.click);
+                document.removeEventListener('touchstart', window._audioUnlockHandlers.touchstart);
+                document.removeEventListener('keydown', window._audioUnlockHandlers.keydown);
+                document.removeEventListener('mousemove', window._audioUnlockHandlers.mousemove);
+                window._audioUnlockHandlers = null;
+            }
+        }
+
+        // Show persistent reminder to unlock audio
+        function showAudioUnlockReminder() {
+            const reminder = document.createElement('div');
+            reminder.id = 'audioUnlockReminder';
+            reminder.style.cssText = `
+                position: fixed;
+                bottom: 20px;
+                right: 20px;
+                background: linear-gradient(135deg, #ff6b6b, #ee5a6f);
+                color: white;
+                padding: 20px 30px;
+                border-radius: 16px;
+                box-shadow: 0 10px 40px rgba(255, 107, 107, 0.4);
+                z-index: 99998;
+                font-size: 1rem;
+                font-weight: 700;
+                text-align: center;
+                cursor: pointer;
+                animation: pulse 2s ease-in-out infinite;
+            `;
+            reminder.innerHTML = `
+                <div style="font-size: 2.5rem; margin-bottom: 10px;">🔇</div>
+                <div style="font-size: 1.1rem; margin-bottom: 5px;">Ses Sistemi Kapalı!</div>
+                <div style="font-size: 0.85rem; opacity: 0.9;">Aktifleştirmek için buraya tıklayın</div>
+            `;
+
+            // Clicking the reminder should trigger audio unlock
+            reminder.addEventListener('click', () => {
+                console.log('🔊 Hatırlatıcıya tıklandı, ses aktifleştiriliyor...');
+
+                // Immediately hide reminder to give feedback
+                hideAudioUnlockReminder();
+
+                // Manually trigger audio unlock
+                const newOrderAudio = document.getElementById('newOrderSound');
+                const orderReadyAudio = document.getElementById('notificationSound'); // Finds the first one (from file/server)
+
+                if (newOrderAudio) {
+                    newOrderAudio.volume = 1.0;
+                    newOrderAudio.play().then(() => {
+                        newOrderAudio.pause();
+                        newOrderAudio.currentTime = 0;
+                        console.log('✅ Yeni sipariş sesi aktif');
+                    }).catch(e => console.log('⚠️ Yeni sipariş sesi aktifleştirme başarısız:', e));
+                }
+
+                if (orderReadyAudio) {
+                    orderReadyAudio.volume = 1.0;
+                    orderReadyAudio.play().then(() => {
+                        orderReadyAudio.pause();
+                        orderReadyAudio.currentTime = 0;
+                        console.log('✅ Sipariş hazır sesi aktif');
+                    }).catch(e => console.log('⚠️ Sipariş hazır sesi aktifleştirme başarısız:', e));
+                }
+
+                audioUnlocked = true;
+                showAudioEnabledIndicator();
+                removeAudioUnlockListeners();
+            });
+
+            document.body.appendChild(reminder);
+        }
+
+        // Hide the audio unlock reminder
+        function hideAudioUnlockReminder() {
+            const reminder = document.getElementById('audioUnlockReminder');
+            if (reminder) {
+                reminder.style.opacity = '0';
+                reminder.style.transition = 'opacity 0.5s';
+                setTimeout(() => reminder.remove(), 500);
+            }
+        }
+
+        // Show brief indicator that audio is enabled
+        function showAudioEnabledIndicator() {
+            const indicator = document.createElement('div');
+            indicator.style.cssText = `
+                    position: fixed;
+                    top: 20px;
+                    right: 20px;
+                    background: rgba(0, 112, 74, 0.95);
+                    color: white;
+                    padding: 15px 25px;
+                    border-radius: 12px;
+                    box-shadow: 0 10px 30px rgba(0, 112, 74, 0.5);
+                    z-index: 99999;
+                    font-size: 0.95rem;
+                    font-weight: 700;
+                    text-align: center;
+                `;
+            indicator.innerHTML = `
+                    <div style="font-size: 1.5rem; margin-bottom: 5px;">🔊</div>
+                    <div>Ses Sistemi Aktif</div>
+                `;
+            document.body.appendChild(indicator);
+
+            setTimeout(() => {
+                indicator.style.opacity = '0';
+                indicator.style.transition = 'opacity 0.5s';
+                setTimeout(() => indicator.remove(), 500);
+            }, 2000);
+        }
+
+        // Bildirim gönder - Enhanced version
         function sendNotification(title, options = {}) {
             console.log('Admin sendNotification çağrıldı:', title);
             console.log('Notification permission:', Notification.permission);
-            
-            if ('Notification' in window && Notification.permission === 'granted') {
+
+            if (!('Notification' in window)) {
+                console.log('Notification API desteklenmiyor');
+                return;
+            }
+
+            if (Notification.permission === 'granted') {
                 console.log('Bildirim gönderiliyor...');
-                const notification = new Notification(title, {
-                    icon: 'https://images.unsplash.com/photo-1495474472287-4d71bcdd2085?w=100&q=80',
-                    badge: 'https://images.unsplash.com/photo-1495474472287-4d71bcdd2085?w=100&q=80',
-                    requireInteraction: true,
-                    ...options
-                });
-                console.log('Bildirim oluşturuldu:', notification);
+                try {
+                    const notification = new Notification(title, {
+                        icon: 'https://images.unsplash.com/photo-1495474472287-4d71bcdd2085?w=100&q=80',
+                        badge: 'https://images.unsplash.com/photo-1495474472287-4d71bcdd2085?w=100&q=80',
+                        requireInteraction: true,
+                        vibrate: [200, 100, 200],
+                        ...options
+                    });
+                    console.log('✅ Bildirim başarıyla oluşturuldu');
+
+                    // Auto-close notification after 10 seconds if not interacted
+                    setTimeout(() => notification.close(), 10000);
+                } catch (error) {
+                    console.error('Bildirim oluşturma hatası:', error);
+                }
+            } else if (Notification.permission === 'default') {
+                console.log('Bildirim izni henüz verilmemiş, izin isteniyor...');
+                requestNotificationPermission();
             } else {
                 console.log('Bildirim gönderilemedi. Permission:', Notification.permission);
+                updateNotificationBadge(false);
             }
         }
 
         // Cumartesi test modunu aç/kapat
-        window.toggleSaturdayTest = function() {
+        window.toggleSaturdayTest = function () {
             saturdayTestMode = !saturdayTestMode;
             socket.emit('toggleSaturdayTestMode');
-            
+
             // UI'ı güncelle
             const btn = document.getElementById('saturdayTestBtn');
             const text = document.getElementById('saturdayTestText');
-            
+
             if (saturdayTestMode) {
                 btn.style.background = 'rgba(255, 193, 7, 0.3)';
                 btn.style.color = '#ffc107';
@@ -982,10 +1754,10 @@
         };
 
         // Kafe durumunu değiştir
-        window.toggleCafeStatus = function() {
+        window.toggleCafeStatus = function () {
             cafeIsClosed = !cafeIsClosed;
             socket.emit('toggleCafeStatus', { isClosed: cafeIsClosed });
-            
+
             updateCafeStatusButton();
         };
 
@@ -1003,39 +1775,7 @@
             }
         }
 
-        function clearCountdown() {
-            countdownEnd = null;
-            if (countdownInterval) {
-                clearInterval(countdownInterval);
-                countdownInterval = null;
-            }
-            if (countdownInfo) countdownInfo.textContent = '';
-        }
 
-        function formatRemaining(ms) {
-            if (ms <= 0) return '00:00';
-            const totalSeconds = Math.floor(ms / 1000);
-            const m = Math.floor(totalSeconds / 60).toString().padStart(2, '0');
-            const s = (totalSeconds % 60).toString().padStart(2, '0');
-            return `${m}:${s}`;
-        }
-
-        function startCountdown(endTs) {
-            countdownEnd = endTs;
-            if (countdownInterval) clearInterval(countdownInterval);
-            const update = () => {
-                if (!countdownEnd) { clearCountdown(); return; }
-                const remaining = countdownEnd - Date.now();
-                if (remaining <= 0) {
-                    clearCountdown();
-                    updateCafeStatusButton();
-                    return;
-                }
-                if (countdownInfo) countdownInfo.textContent = `Kalan süre: ${formatRemaining(remaining)}`;
-            };
-            update();
-            countdownInterval = setInterval(update, 1000);
-        }
 
         function applyCustomClose({ note, detail }) {
             const customNote = note && note.trim() ? note.trim() : 'Sohbet Hazırlığı';
@@ -1048,8 +1788,7 @@
                 isClosed: true,
                 closedReason: 'custom',
                 customNote: customNote,
-                customDetail: customDetail || null,
-                countdownEnd: countdownEnd
+                customDetail: customDetail || null
             });
         }
 
@@ -1061,91 +1800,94 @@
                 isClosed: true,
                 closedReason: 'prayer',
                 prayerName: prayerName || 'Namaz Vakti',
-                prayerTime: prayerTime || null,
-                countdownEnd: countdownEnd || null
+                prayerTime: prayerTime || null
             });
         }
 
-        // Hızlı butonlar
-        document.getElementById('btnSetCustom').addEventListener('click', () => {
-            applyCustomClose({
-                note: customNoteInput.value || 'Sohbet Hazırlığı',
-                detail: customDetailInput.value
+        // === NEW QUICK ACTION FUNCTIONS ===
+
+        // Toggle Saturday menu on/off (uses items from Firebase)
+        window.toggleSaturdayMenu = function () {
+            // Just toggle the Saturday mode on/off
+            // Items are already loaded from Firebase
+            // Users can go to Saturday tab manually to change items
+            const btn = document.getElementById('btnSaturday');
+
+            if (btn.classList.contains('active')) {
+                // Turn OFF - disable Saturday mode
+                socket.emit('toggleSaturdayMode', false);
+                btn.classList.remove('active');
+            } else {
+                // Turn ON - enable Saturday mode with existing Firebase items
+                socket.emit('toggleSaturdayMode', true);
+                btn.classList.add('active');
+            }
+        };
+
+        // Update Saturday button active state
+        function updateSaturdayButton() {
+            const btn = document.getElementById('btnSaturday');
+            if (saturdayMenuItems.length > 0) {
+                btn.classList.add('active');
+            } else {
+                btn.classList.remove('active');
+            }
+        }
+
+        // Update cafe status badge in top bar
+        function updateCafeStatusBadge() {
+            const badge = document.getElementById('cafeStatusBadge');
+            const text = document.getElementById('cafeStatusText');
+            if (cafeIsClosed) {
+                badge.classList.remove('open');
+                text.textContent = 'Kapalı';
+            } else {
+                badge.classList.add('open');
+                text.textContent = 'Açık';
+            }
+        }
+
+        // Quick close cafe with preset messages
+        window.closeCafeQuick = function (type) {
+            const messages = {
+                // subtitle is null because it's already hardcoded in TV displays as "Hizmetimize kısa bir ara veriyoruz"
+                chat: { title: 'Sohbet Hazırlığı', subtitle: null },
+                prayer: { title: 'Namaz Vakti', subtitle: null },
+                break: { title: 'Mola', subtitle: null }
+            };
+
+            const msg = messages[type];
+            if (!msg) return;
+
+            socket.emit('toggleCafeStatus', {
+                isClosed: true,
+                closedReason: type,
+                customNote: msg.title,
+                customDetail: msg.subtitle
             });
-        });
 
-        document.getElementById('btnSetPrayer').addEventListener('click', () => {
-            const timerOptions = document.getElementById('prayerTimerOptions');
-            timerOptions.style.display = timerOptions.style.display === 'none' ? 'block' : 'none';
-        });
+            cafeIsClosed = true;
+            updateCafeStatusButton(msg.title);
+            updateCafeStatusBadge();
+        };
 
-        document.getElementById('btnPrayer15').addEventListener('click', () => {
-            countdownEnd = Date.now() + 15 * 60 * 1000;
-            startCountdown(countdownEnd);
-            applyPrayerClose({
-                prayerName: prayerNameInput.value || 'Namaz Vakti',
-                prayerTime: null
-            });
-            document.getElementById('prayerTimerOptions').style.display = 'none';
-        });
-
-        document.getElementById('btnPrayer30').addEventListener('click', () => {
-            countdownEnd = Date.now() + 30 * 60 * 1000;
-            startCountdown(countdownEnd);
-            applyPrayerClose({
-                prayerName: prayerNameInput.value || 'Namaz Vakti',
-                prayerTime: null
-            });
-            document.getElementById('prayerTimerOptions').style.display = 'none';
-        });
-
-        document.getElementById('btnPrayer45').addEventListener('click', () => {
-            countdownEnd = Date.now() + 45 * 60 * 1000;
-            startCountdown(countdownEnd);
-            applyPrayerClose({
-                prayerName: prayerNameInput.value || 'Namaz Vakti',
-                prayerTime: null
-            });
-            document.getElementById('prayerTimerOptions').style.display = 'none';
-        });
-
-        document.getElementById('btnCancelPrayer').addEventListener('click', () => {
-            document.getElementById('prayerTimerOptions').style.display = 'none';
-        });
-
-        document.getElementById('btnTimer15').addEventListener('click', () => {
-            countdownEnd = Date.now() + 15 * 60 * 1000;
-            startCountdown(countdownEnd);
-            applyCustomClose({
-                note: customNoteInput.value || 'Kısa Ara',
-                detail: customDetailInput.value || '15 dk'
-            });
-        });
-
-        document.getElementById('btnTimer30').addEventListener('click', () => {
-            countdownEnd = Date.now() + 30 * 60 * 1000;
-            startCountdown(countdownEnd);
-            applyCustomClose({
-                note: customNoteInput.value || 'Kısa Ara',
-                detail: customDetailInput.value || '30 dk'
-            });
-        });
-
-        document.getElementById('btnOpenCafe').addEventListener('click', () => {
+        // Open cafe
+        window.openCafe = function () {
+            socket.emit('toggleCafeStatus', { isClosed: false });
             cafeIsClosed = false;
             updateCafeStatusButton();
-            clearCountdown();
-            socket.emit('toggleCafeStatus', { isClosed: false });
-        });
+            updateCafeStatusBadge();
+        };
 
         // Kafe durumunu al
         socket.on('cafeStatus', (status) => {
             cafeIsClosed = status.isClosed;
+            updateCafeStatusBadge();
             if (status.customNote) customNoteInput.value = status.customNote;
             if (status.customDetail) customDetailInput.value = status.customDetail;
             if (status.prayerName) prayerNameInput.value = status.prayerName;
             if (status.countdownEnd) startCountdown(status.countdownEnd); else clearCountdown();
-            
+
             updateCafeStatusButton(status.customNote || (status.prayerName ? status.prayerName : undefined));
         });
 
@@ -1164,7 +1906,7 @@
             document.querySelectorAll('.tab-btn').forEach(button => {
                 button.classList.remove('active');
             });
-            
+
             // Seçili sekmeyi göster
             document.getElementById(tabName + 'Tab').classList.add('active');
             btn.classList.add('active');
@@ -1208,13 +1950,13 @@
         function renderStockGrid() {
             const stockContainer = document.getElementById('stockContainer');
             stockContainer.innerHTML = '';
-            
+
             allMenuItems.forEach(item => {
                 const isAvailable = stockStatus[item] !== false;
                 const statusClass = isAvailable ? 'available' : 'unavailable';
                 const statusText = isAvailable ? 'Stokta Var' : 'Stokta Yok';
                 const icon = isAvailable ? 'bi-check-circle' : 'bi-exclamation-circle';
-                
+
                 const itemDiv = document.createElement('div');
                 itemDiv.className = 'stock-item';
                 itemDiv.innerHTML = `
@@ -1231,17 +1973,17 @@
             // Stok grid'indeki butonları güncelle
             const stockContainer = document.getElementById('stockContainer');
             if (stockContainer.innerHTML === '') return; // Grid doldurulmamışsa çık
-            
+
             const buttons = stockContainer.querySelectorAll('.stock-toggle-btn');
             buttons.forEach(btn => {
                 const parent = btn.closest('.stock-item');
                 const name = parent.querySelector('.stock-item-name').textContent;
-                
+
                 if (name === itemName) {
                     const statusClass = isAvailable ? 'available' : 'unavailable';
                     const statusText = isAvailable ? 'Stokta Var' : 'Stokta Yok';
                     const icon = isAvailable ? 'bi-check-circle' : 'bi-exclamation-circle';
-                    
+
                     btn.classList.toggle('available', isAvailable);
                     btn.classList.toggle('unavailable', !isAvailable);
                     btn.innerHTML = `<i class="bi ${icon}"></i> ${statusText}`;
@@ -1252,14 +1994,14 @@
         function toggleStockGlobal(btn, itemName) {
             const isCurrentlyAvailable = btn.classList.contains('available');
             const newStatus = !isCurrentlyAvailable;
-            
+
             // UI'ı güncelle
             btn.classList.toggle('available', newStatus);
             btn.classList.toggle('unavailable', !newStatus);
-            btn.innerHTML = newStatus ? 
+            btn.innerHTML = newStatus ?
                 '<i class="bi bi-check-circle"></i> Stokta Var' :
                 '<i class="bi bi-exclamation-circle"></i> Stokta Yok';
-            
+
             // Sunucuya gönder
             socket.emit('updateStock', { itemName: itemName, isAvailable: newStatus });
         }
@@ -1268,13 +2010,13 @@
         function renderSaturdayMenuGrid() {
             const container = document.getElementById('saturdayMenuContainer');
             container.innerHTML = '';
-            
+
             allMenuItems.forEach(item => {
                 const isSelected = saturdayMenuItems.includes(item);
                 const statusClass = isSelected ? 'available' : 'unavailable';
                 const statusText = isSelected ? 'Seçili' : 'Seçili Değil';
                 const icon = isSelected ? 'bi-check-circle-fill' : 'bi-circle';
-                
+
                 const itemDiv = document.createElement('div');
                 itemDiv.className = 'stock-item';
                 itemDiv.innerHTML = `
@@ -1288,9 +2030,9 @@
         }
 
         // Cumartesi menüsünde ürün seç/kaldır
-        window.toggleSaturdayMenuItem = function(btn, itemName) {
+        window.toggleSaturdayMenuItem = function (btn, itemName) {
             const isCurrentlySelected = btn.classList.contains('available');
-            
+
             if (isCurrentlySelected) {
                 // Kaldır
                 saturdayMenuItems = saturdayMenuItems.filter(item => item !== itemName);
@@ -1304,20 +2046,20 @@
                 btn.classList.add('available');
                 btn.innerHTML = '<i class="bi bi-check-circle-fill"></i> Seçili';
             }
-            
+
             // Sunucuya gönder
             socket.emit('updateSaturdayMenu', saturdayMenuItems);
         };
 
         // Tüm ürünleri cumartesi menüsüne ekle
-        window.selectAllSaturdayItems = function() {
+        window.selectAllSaturdayItems = function () {
             saturdayMenuItems = [...allMenuItems];
             socket.emit('updateSaturdayMenu', saturdayMenuItems);
             renderSaturdayMenuGrid();
         };
 
         // Tüm ürünleri cumartesi menüsünden kaldır
-        window.deselectAllSaturdayItems = function() {
+        window.deselectAllSaturdayItems = function () {
             saturdayMenuItems = [];
             socket.emit('updateSaturdayMenu', saturdayMenuItems);
             renderSaturdayMenuGrid();
@@ -1330,7 +2072,7 @@
         }
 
         let currentReportFilter = 'all'; // Aktif filtre
-        
+
         function loadReports() {
             fetch(`/api/reports?filter=${currentReportFilter}`)
                 .then(response => response.json())
@@ -1342,16 +2084,16 @@
                     console.error('Rapor yükleme hatası:', error);
                 });
         }
-        
+
         function filterReports(filter) {
             currentReportFilter = filter;
-            
+
             // Buton stillerini güncelle
             document.querySelectorAll('.report-filter-btn').forEach(btn => {
                 btn.classList.remove('active');
             });
             document.querySelector(`[data-filter="${filter}"]`).classList.add('active');
-            
+
             // Raporları yeniden yükle
             loadReports();
         }
@@ -1374,27 +2116,40 @@
             stats.pending++;
             updateStats();
 
-            // Boş durumu gizle
-            if(emptyState) emptyState.style.display = 'none';
+            // Determine Box
+            const isCold = isColdItem(data.item);
+            const containerId = isCold ? 'coldOrdersContainer' : 'hotOrdersContainer';
+            const container = document.getElementById(containerId);
+
+            if (!container) return; // Safety
+
+            // Hide local empty state if present
+            const emptyState = container.querySelector('.empty-state');
+            if (emptyState) emptyState.style.display = 'none';
 
             // Kart Oluştur
             const card = document.createElement('div');
             card.className = 'order-card';
             card.id = `order-${data.id}`;
             card.setAttribute('data-item-name', data.item);
-            card.setAttribute('data-order-number', data.orderNumber || '');
-            card.setAttribute('data-guest-name', data.guestName || '');
-            card.setAttribute('data-item', data.item || '');
-            
-            // Sadece saati al (HH:MM)
-            const timeOnly = data.orderTime.split(' ')[1] || data.orderTime;
-            
+            // Fix: Add missing data attributes for finishOrder
+            card.setAttribute('data-order-number', data.orderNumber);
+            card.setAttribute('data-guest-name', data.guestName);
+            card.setAttribute('data-item', data.item);
+
+            // createdAt'ten zamanı al
+            let timeOnly = 'Yeni';
+            if (data.createdAt) {
+                try {
+                    const date = new Date(data.createdAt);
+                    timeOnly = date.toLocaleTimeString('tr-TR', { hour: '2-digit', minute: '2-digit' });
+                } catch (e) { console.warn(e); }
+            }
+
             // Stok durumunu kontrol et
-            const isInStock = stockStatus[data.item] !== false; // Varsayılan olarak stokta var
+            const isInStock = stockStatus[data.item] !== false;
             const stockButtonClass = isInStock ? 'btn-stock in-stock' : 'btn-stock';
-            const stockButtonText = isInStock ? 
-                '<i class="bi bi-check-circle"></i> Stokta Var' :
-                '<i class="bi bi-exclamation-circle"></i> Stokta Yok';
+            const stockButtonText = isInStock ? '<i class="bi bi-check-circle"></i> Stokta Var' : '<i class="bi bi-exclamation-circle"></i> Stokta Yok';
 
             card.innerHTML = `
                 <div class="card-header-row">
@@ -1409,14 +2164,33 @@
                     <button class="btn-stock ${stockButtonClass}" onclick="toggleStock(this, '${data.item}')">
                         ${stockButtonText}
                     </button>
+                    <!-- Using finishOrder for consistency -->
                     <button class="btn-complete" style="flex: 1;" onclick="finishOrder(this, '${data.id}')">
                         <i class="bi bi-check-lg"></i> Hazırla
+                    </button>
+                    <button class="btn-cancel" onclick="cancelOrder('${data.id}', '${data.guestName}')" style="margin-left:8px; background:var(--danger); color:white; border:none; padding:8px; border-radius:8px;">
+                        <i class="bi bi-x-lg"></i>
                     </button>
                 </div>
             `;
 
-            // En başa ekle (prepend)
-            container.insertBefore(card, container.firstChild);
+            // Append to the list
+            container.appendChild(card);
+        }
+
+        function isColdItem(name) {
+            if (!name) return false;
+            const lowerName = name.toLowerCase();
+            const coldKeywords = [
+                'ice', 'soğuk', 'cold', 'soda', 'cool', 'lime', 'frozen',
+                'milkshake', 'frappe', 'mix frozen', 'cococream', 'kokteyl',
+                'jungle', 'fizz', 'bubble', 'churchill', 'sparkling'
+            ];
+            // Exact matches for short words
+            if (lowerName === 'su' || lowerName === 'süt') return true;
+
+            // Keyword check
+            return coldKeywords.some(keyword => lowerName.includes(keyword));
         }
 
         function renderDailyReports(dailyData) {
@@ -1448,7 +2222,7 @@
                 // Müşteriler
                 html += '<h5>👥 Müşteriler</h5>';
                 Object.entries(dayData.customers)
-                    .sort(([,a], [,b]) => b - a)
+                    .sort(([, a], [, b]) => b - a)
                     .forEach(([name, count]) => {
                         html += `<div class="report-item">
                             <span class="report-name">${name}</span>
@@ -1459,7 +2233,7 @@
                 // Ürünler
                 html += '<h5>☕ Ürünler</h5>';
                 Object.entries(dayData.items)
-                    .sort(([,a], [,b]) => b - a)
+                    .sort(([, a], [, b]) => b - a)
                     .forEach(([item, count]) => {
                         html += `<div class="report-item">
                             <span class="report-name">${item}</span>
@@ -1500,7 +2274,7 @@
                 // Müşteriler
                 html += '<h5>👥 Müşteriler</h5>';
                 Object.entries(monthData.customers)
-                    .sort(([,a], [,b]) => b - a)
+                    .sort(([, a], [, b]) => b - a)
                     .forEach(([name, count]) => {
                         html += `<div class="report-item">
                             <span class="report-name">${name}</span>
@@ -1511,7 +2285,7 @@
                 // Ürünler
                 html += '<h5>☕ Ürünler</h5>';
                 Object.entries(monthData.items)
-                    .sort(([,a], [,b]) => b - a)
+                    .sort(([, a], [, b]) => b - a)
                     .forEach(([item, count]) => {
                         html += `<div class="report-item">
                             <span class="report-name">${item}</span>
@@ -1524,12 +2298,148 @@
             });
         }
 
-        function playSound() {
-            const audio = document.getElementById('notificationSound');
-            audio.currentTime = 0;
-            audio.play().catch(e => console.log("Ses izni gerekli"));
+        // Play notification sound when a new order comes in
+        function playNewOrderSound() {
+            const audio = document.getElementById('newOrderSound');
+            if (audio) {
+                audio.volume = 1.0; // Maximum volume
+                audio.currentTime = 0;
+                
+                // Try to play the sound
+                const playPromise = audio.play();
+                
+                if (playPromise !== undefined) {
+                    playPromise
+                        .then(() => {
+                            console.log("✅ Yeni sipariş sesi çalıyor!");
+                            
+                            // Play the sound 3 times for better attention
+                            let playCount = 0;
+                            audio.onended = function() {
+                                playCount++;
+                                if (playCount < 3) {
+                                    audio.currentTime = 0;
+                                    audio.play().catch(() => {});
+                                } else {
+                                    audio.onended = null; // Clean up
+                                }
+                            };
+                        })
+                        .catch(e => {
+                            console.log("⚠️ Yeni sipariş ses izni gerekli:", e);
+                            // Show visual alert if sound fails
+                            showAudioNotUnlockedWarning();
+                        });
+                }
+            } else {
+                console.error("❌ Ses elementi bulunamadı!");
+            }
         }
 
+        // Show very prominent warning that audio is not unlocked
+        function showAudioNotUnlockedWarning() {
+            const warning = document.createElement('div');
+            warning.style.cssText = `
+                position: fixed;
+                top: 50%;
+                left: 50%;
+                transform: translate(-50%, -50%);
+                background: linear-gradient(135deg, #ff6b6b, #ee5a6f);
+                color: white;
+                padding: 50px 70px;
+                border-radius: 24px;
+                box-shadow: 0 20px 60px rgba(255, 107, 107, 0.6);
+                z-index: 999999;
+                font-size: 2.5rem;
+                font-weight: 900;
+                text-align: center;
+                animation: shake 0.5s infinite;
+                cursor: pointer;
+            `;
+            warning.innerHTML = `
+                <div style="font-size: 5rem; margin-bottom: 20px;">🔇</div>
+                <div>SES SİSTEMİ KAPALI!</div>
+                <div style="font-size: 1.5rem; margin-top: 20px; font-weight: 600;">BURAYA TIKLAYIN!</div>
+            `;
+
+            // Remove on click
+            warning.addEventListener('click', () => {
+                warning.remove();
+            });
+
+            document.body.appendChild(warning);
+
+            // Auto-remove after 8 seconds
+            setTimeout(() => {
+                if (warning.parentNode) {
+                    warning.style.opacity = '0';
+                    warning.style.transition = 'opacity 0.5s';
+                    setTimeout(() => {
+                        if (warning.parentNode) warning.remove();
+                    }, 500);
+                }
+            }, 8000);
+        }
+
+        // Show alert when audio fails to play
+        function showAudioFailureAlert() {
+            const alertDiv = document.createElement('div');
+            alertDiv.style.cssText = `
+                    position: fixed;
+                    top: 20px;
+                    right: 20px;
+                    background: rgba(255, 95, 87, 0.95);
+                    color: white;
+                    padding: 20px 30px;
+                    border-radius: 12px;
+                    box-shadow: 0 10px 30px rgba(255, 95, 87, 0.5);
+                    z-index: 99999;
+                    font-size: 1rem;
+                    font-weight: 700;
+                    text-align: center;
+                    animation: shake 0.5s;
+                `;
+            alertDiv.innerHTML = `
+                    <div style="font-size: 2rem; margin-bottom: 10px;">🔇</div>
+                    <div>Ses çalmadı! Lütfen sayfaya tıklayın.</div>
+                `;
+            document.body.appendChild(alertDiv);
+
+            setTimeout(() => {
+                alertDiv.style.opacity = '0';
+                alertDiv.style.transition = 'opacity 0.5s';
+                setTimeout(() => alertDiv.remove(), 500);
+            }, 3000);
+        }
+
+        // Enable audio on next user click
+        let audioEnableHandler = null;
+        function enableAudioOnNextClick() {
+            if (audioEnableHandler) return; // Already set
+
+            audioEnableHandler = function () {
+                const audio = document.getElementById('newOrderSound');
+                audio.volume = 1.0;
+                audio.play().then(() => {
+                    audio.pause();
+                    audio.currentTime = 0;
+                    console.log('✅ Ses sistemi aktif edildi');
+                }).catch(e => console.log('Ses aktifleştirme başarısız:', e));
+
+                // Remove handler after first click
+                document.removeEventListener('click', audioEnableHandler);
+                audioEnableHandler = null;
+            };
+
+            document.addEventListener('click', audioEnableHandler);
+        }
+
+        // Play notification sound when an order is ready for pickup
+        function playOrderReadySound() {
+            const audio = document.getElementById('notificationSound');
+            audio.currentTime = 0;
+            audio.play().catch(e => console.log("Sipariş hazır ses izni gerekli"));
+        }
         // Admin yüklendiğinde stok durumunu iste
         socket.emit('getStock');
 
@@ -1542,19 +2452,44 @@
         });
 
         // Cumartesi menüsü durumunu al
-        socket.on('saturdayMenuStatus', (data) => {
-            saturdayMenuItems = data.items || [];
-            console.log('Cumartesi menüsü yüklendi:', saturdayMenuItems.length, 'ürün');
+        socket.on('saturdayMenuStatus', d => {
+            saturdayMenuItems = d.items || [];
+            const isActive = d.active || false;
+            const btn = document.getElementById('btnSaturday');
+            if (isActive) {
+                btn.classList.add('active');
+            } else {
+                btn.classList.remove('active');
+            }
+            console.log('Cumartesi menüsü yüklendi:', saturdayMenuItems.length, 'ürün', isActive ? '(AKTIF)' : '(KAPALI)');
         });
 
         // Cumartesi menüsü güncellendiğinde
-        socket.on('saturdayMenuUpdated', (items) => {
+        socket.on('saturdayMenuUpdated', items => {
             saturdayMenuItems = items;
             // Eğer cumartesi sekmesindeyse grid'i yeniden render et
             const saturdayTab = document.getElementById('saturdayTab');
             if (saturdayTab.classList.contains('active')) {
                 renderSaturdayMenuGrid();
             }
+        });
+
+        // Cumartesi modu açık/kapalı değiştiğinde
+        socket.on('saturdayModeToggled', data => {
+            const btn = document.getElementById('btnSaturday');
+            if (data.active) {
+                btn.classList.add('active');
+            } else {
+                btn.classList.remove('active');
+            }
+            console.log('Cumartesi modu:', data.active ? 'AÇIK' : 'KAPALI');
+        });
+
+        // Günlük İstatistikleri Güncelle (Server'dan gelen)
+        socket.on('dailyStats', stats => {
+            document.getElementById('totalCount').textContent = stats.total;
+            document.getElementById('pendingCount').textContent = stats.pending;
+            document.getElementById('completedCount').textContent = stats.completed;
         });
 
         // Stok güncellemelerini dinle
@@ -1575,7 +2510,7 @@
                     const btn = card.querySelector('.btn-stock');
                     if (btn) {
                         btn.classList.toggle('in-stock', isAvailable);
-                        btn.innerHTML = isAvailable ? 
+                        btn.innerHTML = isAvailable ?
                             '<i class="bi bi-check-circle"></i> Stokta Var' :
                             '<i class="bi bi-exclamation-circle"></i> Stokta Yok';
                     }
@@ -1584,29 +2519,88 @@
         }
 
         socket.on('newOrder', (data) => {
-            console.log('newOrder event alındı:', data);
-            playSound();
+            console.log('🔔 ========================================');
+            console.log('🔔 YENİ SİPARİŞ GELDİ!');
+            console.log('🔔 ========================================');
+            console.log('📦 Sipariş Detayları:', data);
+            console.log('🔌 Socket Bağlantısı:', socket.connected ? 'BAĞLI ✅' : 'BAĞLI DEĞİL ❌');
+            console.log('🔔 Bildirim İzni:', Notification.permission);
+            console.log('🔔 ========================================');
+
+            // CRITICAL: Play sound FIRST to ensure barista hears it
+            playNewOrderSound();
             
-            // Barista'ya bildirim gönder
-            console.log('Barista bildirimi gönderiliyor...');
-            sendNotification(`Yeni Sipariş! - ${data.guestName}`, {
-                body: `${data.item} isteniyor`,
-                tag: 'new-order'
-            });
-            
+            // Vibrate if supported (works on iPad/mobile devices)
+            if (navigator.vibrate) {
+                // Vibrate pattern: vibrate 300ms, pause 200ms, vibrate 300ms, pause 200ms, vibrate 300ms
+                navigator.vibrate([300, 200, 300, 200, 300]);
+            }
+
+            // Visual alert as backup
+            const alertDiv = document.createElement('div');
+            alertDiv.style.cssText = `
+                    position: fixed;
+                    top: 50%;
+                    left: 50%;
+                    transform: translate(-50%, -50%);
+                    background: linear-gradient(135deg, #00704A, #004d33);
+                    color: white;
+                    padding: 40px 60px;
+                    border-radius: 20px;
+                    box-shadow: 0 20px 60px rgba(0, 112, 74, 0.5);
+                    z-index: 99999;
+                    font-size: 2rem;
+                    font-weight: 900;
+                    text-align: center;
+                    animation: pulse 0.5s ease-in-out infinite alternate;
+                `;
+            alertDiv.innerHTML = `
+                    <div style="font-size: 4rem; margin-bottom: 20px;">🔔</div>
+                    <div>YENİ SİPARİŞ!</div>
+                    <div style="font-size: 1.5rem; margin-top: 15px; font-weight: 600;">#${data.orderNumber} - ${data.guestName}</div>
+                    <div style="font-size: 1.2rem; margin-top: 10px; opacity: 0.9;">${data.item}</div>
+                `;
+            document.body.appendChild(alertDiv);
+
+            // Remove visual alert after 5 seconds
+            setTimeout(() => {
+                alertDiv.style.opacity = '0';
+                alertDiv.style.transition = 'opacity 0.5s';
+                setTimeout(() => alertDiv.remove(), 500);
+            }, 5000);
+
+            // Try to send browser notification
+            console.log('🔔 Tarayıcı bildirimi gönderiliyor...');
+            if (Notification.permission === 'granted') {
+                sendNotification(`Yeni Sipariş! - ${data.guestName}`, {
+                    body: `${data.item} isteniyor`,
+                    tag: 'new-order',
+                    requireInteraction: true
+                });
+                console.log('✅ Bildirim gönderildi');
+            } else if (Notification.permission === 'default') {
+                console.log('⚠️ Bildirim izni yok, izin isteniyor...');
+                requestNotificationPermission();
+            } else {
+                console.log('❌ Bildirim izni reddedilmiş, sadece ses ve görsel uyarı kullanılıyor');
+            }
+
+            // Add order to UI
             addOrderToUI(data);
+
+            console.log('🔔 Yeni sipariş işleme tamamlandı ✅');
         });
 
-        window.toggleStock = function(btn, itemName) {
+        window.toggleStock = function (btn, itemName) {
             const isCurrentlyInStock = btn.classList.contains('in-stock');
             const newStatus = !isCurrentlyInStock;
-            
+
             // UI'ı güncelle
             btn.classList.toggle('in-stock', newStatus);
-            btn.innerHTML = newStatus ? 
+            btn.innerHTML = newStatus ?
                 '<i class="bi bi-check-circle"></i> Stokta Var' :
                 '<i class="bi bi-exclamation-circle"></i> Stokta Yok';
-            
+
             // Sunucuya gönder
             socket.emit('updateStock', { itemName: itemName, isAvailable: newStatus });
         };
@@ -1615,7 +2609,7 @@
         let tvReadyOrders = [];
 
         // Video yükleme ve oynatma
-        window.uploadAndPlayVideo = function() {
+        window.uploadAndPlayVideo = function () {
             const fileInput = document.getElementById('videoInput');
             const file = fileInput.files[0];
 
@@ -1647,29 +2641,29 @@
                 method: 'POST',
                 body: formData
             })
-            .then(response => response.json())
-            .then(data => {
-                if (data.success) {
-                    // Sunucudan gelen URL'i oynat
-                    socket.emit('playVideo', {
-                        videoUrl: data.videoUrl
-                    });
-                    document.getElementById('videoStatus').textContent = `Oynatılıyor: ${file.name}`;
-                    updateTvReadyOrdersList();
-                } else {
-                    alert('Video yüklenemedi: ' + data.error);
+                .then(response => response.json())
+                .then(data => {
+                    if (data.success) {
+                        // Sunucudan gelen URL'i oynat
+                        socket.emit('playVideo', {
+                            videoUrl: data.videoUrl
+                        });
+                        document.getElementById('videoStatus').textContent = `Oynatılıyor: ${file.name}`;
+                        updateTvReadyOrdersList();
+                    } else {
+                        alert('Video yüklenemedi: ' + data.error);
+                        document.getElementById('videoStatus').textContent = 'Hata!';
+                    }
+                })
+                .catch(error => {
+                    console.error('Video yükleme hatası:', error);
+                    alert('Video yüklenemedi');
                     document.getElementById('videoStatus').textContent = 'Hata!';
-                }
-            })
-            .catch(error => {
-                console.error('Video yükleme hatası:', error);
-                alert('Video yüklenemedi');
-                document.getElementById('videoStatus').textContent = 'Hata!';
-            });
+                });
         };
 
         // URL'den video oynatma
-        window.playVideoFromUrl = function() {
+        window.playVideoFromUrl = function () {
             const urlInput = document.getElementById('videoUrlInput');
             const videoUrl = urlInput.value.trim();
 
@@ -1682,7 +2676,7 @@
             if (videoUrl.includes('youtube.com') || videoUrl.includes('youtu.be')) {
                 // YouTube URL'den video ID'yi çıkar
                 let videoId = '';
-                
+
                 try {
                     if (videoUrl.includes('youtube.com')) {
                         const params = new URL(videoUrl).searchParams;
@@ -1721,7 +2715,7 @@
         };
 
         // Video oynatmayı durdur
-        window.stopVideoPlayback = function() {
+        window.stopVideoPlayback = function () {
             socket.emit('stopVideo');
             document.getElementById('videoStatus').textContent = 'Hazır';
             document.getElementById('videoInput').value = '';
@@ -1749,7 +2743,7 @@
         // Hazır siparişler listesini güncelle
         function updateTvReadyOrdersList() {
             const container = document.getElementById('tvReadyOrdersList');
-            
+
             if (!tvReadyOrders || tvReadyOrders.length === 0) {
                 container.innerHTML = '<div style="color: var(--text-gray); padding: 20px; text-align: center;">Hazır sipariş bulunmamaktadır</div>';
                 return;
@@ -1762,14 +2756,14 @@
                         <div style="color: var(--text-gray); font-size: 0.9rem; margin-top: 4px;">${order.guestName}</div>
                     </div>
                     <button onclick="completeOrderFromTv('${order.id}')" style="background: var(--starbucks-green); color: white; border: none; padding: 8px 16px; border-radius: 8px; cursor: pointer; font-weight: 600;">
-                        <i class="bi bi-check-circle"></i> Tamamlandı
+                        <i class="bi bi-check-circle"></i> Sipariş Teslim Edildi
                     </button>
                 </div>
             `).join('');
         }
 
         // TV'den sipariş tamamlama
-        window.completeOrderFromTv = function(orderId) {
+        window.completeOrderFromTv = function (orderId) {
             socket.emit('completeOrderFromTv', { orderId: orderId });
             // Listeden kaldır
             tvReadyOrders = tvReadyOrders.filter(o => o.id !== orderId);
@@ -1779,9 +2773,9 @@
         // İlk yüklenmede hazır siparişleri iste
         socket.emit('getReadyOrdersForTv');
 
-        window.finishOrder = function(btn, id) {
+        window.finishOrder = function (btn, id) {
             const card = btn.parentElement.parentElement;
-            
+
             // Get order data from data attributes
             const orderNumber = card.getAttribute('data-order-number');
             const guestName = card.getAttribute('data-guest-name');
@@ -1794,11 +2788,11 @@
                 guestName: guestName,
                 item: item
             });
-            
+
             // Animasyonla Sil
             card.style.transform = 'scale(0.9) translateY(20px)';
             card.style.opacity = '0';
-            
+
             setTimeout(() => {
                 card.remove();
                 stats.pending--;
@@ -1807,10 +2801,11 @@
 
                 // Eğer kart kalmadıysa boş durumu göster
                 if (container.children.length === 0 || (container.children.length === 1 && container.children[0].id === 'emptyState')) {
-                    if(emptyState) emptyState.style.display = 'block';
+                    if (emptyState) emptyState.style.display = 'block';
                 }
             }, 300);
         };
     </script>
 </body>
+
 </html>

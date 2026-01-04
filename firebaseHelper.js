@@ -51,6 +51,23 @@ class FirebaseHelper {
         return new Date(now.getTime() + this.turkishOffset);
     }
 
+    /**
+     * Clean object by removing undefined values
+     * @param {Object} obj - Object to clean
+     * @returns {Object} - Cleaned object without undefined values
+     */
+    cleanObject(obj) {
+        if (!obj || typeof obj !== 'object') return {};
+
+        const cleaned = {};
+        for (const key in obj) {
+            if (obj[key] !== undefined && obj[key] !== null) {
+                cleaned[key] = obj[key];
+            }
+        }
+        return cleaned;
+    }
+
     // ============ ORDER RIGHTS MANAGEMENT ============
 
     /**
@@ -203,7 +220,7 @@ class FirebaseHelper {
             phone: phone,
             date: today,
             lastOrderAt: this.admin.firestore.FieldValue.serverTimestamp(),
-            deviceInfo: orderData.deviceInfo || {}
+            deviceInfo: this.cleanObject(orderData.deviceInfo || {})
         }); // Using set to overwrite/create
 
 
@@ -211,8 +228,8 @@ class FirebaseHelper {
         const rightsRef = this.db.collection('orderRights').doc(phone);
         const rightsDoc = await rightsRef.get();
 
-        // Ensure deviceInfo is always an object
-        const deviceInfo = orderData.deviceInfo || {};
+        // Ensure deviceInfo is always an object and clean it
+        const deviceInfo = this.cleanObject(orderData.deviceInfo || {});
         const now = new Date().toISOString();
 
         if (!rightsDoc.exists || rightsDoc.data().date !== today) {
@@ -280,13 +297,16 @@ class FirebaseHelper {
         const orderRef = this.db.collection('activeOrders').doc();
         const orderId = orderRef.id;
 
+        // Clean deviceInfo to remove undefined values
+        const cleanDeviceInfo = this.cleanObject(deviceInfo || {});
+
         await orderRef.set({
             orderId: orderId,
             orderNumber: orderNumber,
             guestName: guestName,
             phone: phone,
             deviceId: deviceId,
-            deviceInfo: deviceInfo || {},
+            deviceInfo: cleanDeviceInfo,
             item: item,
             slot: slot,
             fcmToken: fcmToken || null,

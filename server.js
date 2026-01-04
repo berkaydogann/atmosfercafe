@@ -500,7 +500,7 @@ io.on('connection', (socket) => {
       cachedCafeStatus.saturdayMenuItems = menuItems;
 
       // Broadcast update to all clients
-      io.emit('saturdayMenuUpdated', { items: menuItems });
+      io.emit('saturdayMenuUpdated', menuItems);
       io.emit('cafeStatus', cachedCafeStatus);
 
       console.log(`[${getTimestamp()}] 📅 Cumartesi menüsü güncellendi: ${menuItems.length} ürün`);

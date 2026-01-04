@@ -1259,18 +1259,25 @@
             </p>
         </div>
 
-        <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 20px; margin-bottom: 20px;">
-            <!-- Video Seçme -->
+        <div style="display: grid; grid-template-columns: 2fr 1fr; gap: 20px; margin-bottom: 20px;">
+            <!-- URL ile Video Oynat - Now takes more space -->
             <div style="background: var(--card-dark); padding: 20px; border-radius: 16px;">
                 <h4 style="color: var(--starbucks-green); margin-bottom: 15px;">
-                    <i class="bi bi-upload"></i> Video Seç
+                    <i class="bi bi-link"></i> URL ile Video Oynat
                 </h4>
-                <input type="file" id="videoInput" accept="video/*"
-                    style="margin-bottom: 15px; color: var(--text-gray);">
-                <button onclick="uploadAndPlayVideo()"
-                    style="background: var(--starbucks-green); color: white; border: none; padding: 12px 20px; border-radius: 10px; cursor: pointer; width: 100%; font-weight: 600;">
-                    <i class="bi bi-play-circle"></i> Oynat
-                </button>
+                <div style="display: flex; gap: 10px;">
+                    <input type="text" id="videoUrlInput" placeholder="YouTube URL (Normal, Shorts, Canlı Yayın)..."
+                        style="flex: 1; padding: 10px 15px; background: rgba(255,255,255, 0.1); border: 1px solid rgba(255,255,255, 0.2); border-radius: 8px; color: var(--text-white);">
+                    <button onclick="playVideoFromUrl()"
+                        style="background: var(--starbucks-green); color: white; border: none; padding: 10px 20px; border-radius: 8px; cursor: pointer; font-weight: 600;">
+                        <i class="bi bi-play-fill"></i> Oynat
+                    </button>
+                </div>
+                <div style="color: var(--text-gray); font-size: 0.85rem; margin-top: 10px;">
+                    <p>✓ Normal YouTube videoları</p>
+                    <p>✓ YouTube Shorts</p>
+                    <p>✓ Canlı yayınlar</p>
+                </div>
             </div>
 
             <!-- Video Kontrolleri -->
@@ -1285,21 +1292,6 @@
                 <div style="color: var(--text-gray); font-size: 0.9rem; margin-top: 10px;">
                     <p><strong>Durum:</strong> <span id="videoStatus">Hazır</span></p>
                 </div>
-            </div>
-        </div>
-
-        <!-- Örnek Video URL'si -->
-        <div style="background: var(--card-dark); padding: 20px; border-radius: 16px; margin-bottom: 20px;">
-            <h4 style="color: var(--starbucks-green); margin-bottom: 15px;">
-                <i class="bi bi-link"></i> URL ile Video Oynat
-            </h4>
-            <div style="display: flex; gap: 10px;">
-                <input type="text" id="videoUrlInput" placeholder="Video URL'sini girin..."
-                    style="flex: 1; padding: 10px 15px; background: rgba(255,255,255, 0.1); border: 1px solid rgba(255,255,255, 0.2); border-radius: 8px; color: var(--text-white);">
-                <button onclick="playVideoFromUrl()"
-                    style="background: var(--starbucks-green); color: white; border: none; padding: 10px 20px; border-radius: 8px; cursor: pointer; font-weight: 600;">
-                    <i class="bi bi-play-fill"></i> Oynat
-                </button>
             </div>
         </div>
 
@@ -2686,19 +2678,35 @@
                 return;
             }
 
-            // YouTube URL kontrolü - YouTube desteği ekle
+            // YouTube URL kontrolü - Normal, Shorts, ve Canlı Yayın desteği
             if (videoUrl.includes('youtube.com') || videoUrl.includes('youtu.be')) {
-                // YouTube URL'den video ID'yi çıkar
                 let videoId = '';
 
                 try {
-                    if (videoUrl.includes('youtube.com')) {
+                    // youtube.com/watch?v=VIDEO_ID
+                    if (videoUrl.includes('youtube.com/watch')) {
                         const params = new URL(videoUrl).searchParams;
                         videoId = params.get('v');
-                    } else if (videoUrl.includes('youtu.be')) {
-                        // youtu.be/ID veya youtu.be/ID?t=... formatından ID'yi çıkar
+                    }
+                    // youtube.com/shorts/VIDEO_ID
+                    else if (videoUrl.includes('youtube.com/shorts/')) {
+                        const match = videoUrl.match(/\/shorts\/([^?&#]+)/);
+                        if (match) videoId = match[1];
+                    }
+                    // youtube.com/live/VIDEO_ID (canlı yayın)
+                    else if (videoUrl.includes('youtube.com/live/')) {
+                        const match = videoUrl.match(/\/live\/([^?&#]+)/);
+                        if (match) videoId = match[1];
+                    }
+                    // youtu.be/VIDEO_ID
+                    else if (videoUrl.includes('youtu.be/')) {
                         const pathParts = videoUrl.split('/');
                         videoId = pathParts[pathParts.length - 1].split('?')[0].split('&')[0];
+                    }
+                    // youtube.com/embed/VIDEO_ID
+                    else if (videoUrl.includes('youtube.com/embed/')) {
+                        const match = videoUrl.match(/\/embed\/([^?&#]+)/);
+                        if (match) videoId = match[1];
                     }
                 } catch (e) {
                     console.error('YouTube URL çözümleme hatası:', e);

@@ -195,19 +195,39 @@ io.on('connection', (socket) => {
 
   // ============ ADMIN OPERATIONS ============
 
+  // Get current cafe status from Firestore
+  socket.on('getCafeStatus', async () => {
+    try {
+      const cafeStatus = await fbHelper.getCafeStatus();
+      const status = {
+        ...cafeStatus,
+        isClosed: !cafeStatus.isOpen
+      };
+      socket.emit('cafeStatus', status);
+      console.log(`[${getTimestamp()}] 📋 Kafe durumu gönderildi: ${cafeStatus.isOpen ? 'AÇIK' : 'KAPALI'}`);
+    } catch (error) {
+      console.error(`[${getTimestamp()}] ❌ Error fetching cafe status:`, error);
+    }
+  });
+
   // Cafe status toggle
   socket.on('toggleCafeStatus', async (data = {}) => {
     try {
       const { isClosed, closedReason, customNote, customDetail, prayerName, prayerTime } = data;
 
-      await fbHelper.updateCafeStatus(!isClosed, closedReason, {
-        customMessage: customNote,
-        customDetail: customDetail,
-        prayerInfo: closedReason === 'prayer' ? {
+      // Prepare options object - only include defined values
+      const options = {};
+      if (customNote) options.customMessage = customNote;
+      if (customDetail) options.customDetail = customDetail;
+      
+      if (closedReason === 'prayer' && prayerName && prayerTime) {
+        options.prayerInfo = {
           name: prayerName,
           startTime: prayerTime
-        } : null
-      });
+        };
+      }
+
+      await fbHelper.updateCafeStatus(!isClosed, closedReason, options);
 
       // Update local cache
       cachedCafeStatus.isOpen = !isClosed;
@@ -353,6 +373,37 @@ io.on('connection', (socket) => {
     io.emit('stopVideo');
   });
 
+  // Toggle Saturday menu mode
+  socket.on('toggleSaturdayMode', async (data) => {
+    try {
+      const isActive = data.active || false;
+      const cafeStatus = await fbHelper.getCafeStatus();
+      
+      await fbHelper.updateCafeStatus(
+        cafeStatus.isOpen,
+        cafeStatus.closureReason,
+        {
+          customMessage: cafeStatus.customMessage,
+          customDetail: cafeStatus.customDetail,
+          prayerInfo: cafeStatus.prayerInfo,
+          saturdayMenuActive: isActive,
+          saturdayMenuItems: cafeStatus.saturdayMenuItems || []
+        }
+      );
+
+      // Update cache
+      cachedCafeStatus.saturdayMenuActive = isActive;
+
+      // Broadcast to all clients
+      io.emit('saturdayModeToggled', { active: isActive });
+      io.emit('cafeStatus', cachedCafeStatus);
+
+      console.log(`[${getTimestamp()}] 📅 Cumartesi menüsü: ${isActive ? 'AÇIK' : 'KAPALI'}`);
+    } catch (error) {
+      console.error(`[${getTimestamp()}] ❌ Error toggling Saturday mode:`, error);
+    }
+  });
+
   // Get Saturday menu status
   socket.on('getSaturdayMenuStatus', async () => {
     try {
@@ -366,13 +417,15 @@ io.on('connection', (socket) => {
       // Get Saturday menu items from cafe status
       const cafeStatus = await fbHelper.getCafeStatus();
       const saturdayMenuItems = cafeStatus.saturdayMenuItems || [];
+      const saturdayMenuActive = cafeStatus.saturdayMenuActive || false;
       
       socket.emit('saturdayMenuStatus', {
         isSaturdayEvening: isSaturdayEvening,
-        items: saturdayMenuItems
+        items: saturdayMenuItems,
+        active: saturdayMenuActive
       });
       
-      console.log(`[${getTimestamp()}] 📅 Cumartesi menü durumu: ${isSaturdayEvening ? 'Aktif' : 'Pasif'}`);
+      console.log(`[${getTimestamp()}] 📅 Cumartesi menü durumu: ${saturdayMenuActive ? 'Manuel Aktif' : (isSaturdayEvening ? 'Otomatik Aktif' : 'Pasif')}`);
     } catch (error) {
       console.error(`[${getTimestamp()}] ❌ Error fetching Saturday menu status:`, error);
     }

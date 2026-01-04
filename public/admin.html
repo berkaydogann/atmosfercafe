@@ -1110,6 +1110,9 @@
             <button class="ctrl-btn open-btn" onclick="openCafe()">
                 <i class="bi bi-door-open"></i> Kafeyi Aç
             </button>
+            <button class="ctrl-btn" id="btnSaturday" onclick="toggleSaturdayMenu()" style="background: #9333ea; border: 2px solid transparent;">
+                <i class="bi bi-calendar-week"></i> Cumartesi Menüsü
+            </button>
         </div>
 
         <!-- NEW: Stats in Top Bar -->
@@ -1478,7 +1481,15 @@
 
         // Sayfa yüklendiğinde notification izni kontrol et ve gerekirse iste
         window.addEventListener('load', () => {
-            console.log('Admin sayfa yüklendi, bildirim durumu kontrol ediliyor...');
+            console.log('Admin sayfa yüklendi, Firestore\'dan son durum çekiliyor...');
+
+            // Socket bağlantısı kurulduktan sonra kafe durumunu çek
+            setTimeout(() => {
+                socket.emit('getCafeStatus');
+                socket.emit('getSaturdayMenuStatus');
+                socket.emit('getStock');
+                console.log('📋 Firestore\'dan son durum çekiliyor...');
+            }, 500);
 
             // Check current permission status
             if ('Notification' in window) {
@@ -1881,14 +1892,14 @@
 
         // Kafe durumunu al
         socket.on('cafeStatus', (status) => {
-            cafeIsClosed = status.isClosed;
+            cafeIsClosed = !status.isOpen;
             updateCafeStatusBadge();
-            if (status.customNote) customNoteInput.value = status.customNote;
+            if (status.customMessage) customNoteInput.value = status.customMessage;
             if (status.customDetail) customDetailInput.value = status.customDetail;
-            if (status.prayerName) prayerNameInput.value = status.prayerName;
+            if (status.prayerInfo && status.prayerInfo.name) prayerNameInput.value = status.prayerInfo.name;
             if (status.countdownEnd) startCountdown(status.countdownEnd); else clearCountdown();
 
-            updateCafeStatusButton(status.customNote || (status.prayerName ? status.prayerName : undefined));
+            updateCafeStatusButton(status.customMessage || (status.prayerInfo?.name ? status.prayerInfo.name : undefined));
         });
 
         // Anlık namaz bilgisi (API'den gelen) için alanları otomatik doldur
@@ -2456,10 +2467,12 @@
             saturdayMenuItems = d.items || [];
             const isActive = d.active || false;
             const btn = document.getElementById('btnSaturday');
-            if (isActive) {
-                btn.classList.add('active');
-            } else {
-                btn.classList.remove('active');
+            if (btn) {
+                if (isActive) {
+                    btn.classList.add('active');
+                } else {
+                    btn.classList.remove('active');
+                }
             }
             console.log('Cumartesi menüsü yüklendi:', saturdayMenuItems.length, 'ürün', isActive ? '(AKTIF)' : '(KAPALI)');
         });

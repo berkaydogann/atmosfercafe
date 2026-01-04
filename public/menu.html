@@ -1,11 +1,10 @@
 <!DOCTYPE html>
 <html lang="tr">
-
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
     <title>Atmosfer Kafe | Menü</title>
-
+    
     <link href="https://fonts.googleapis.com/css2?family=Outfit:wght@300;400;500;700;900&display=swap" rel="stylesheet">
     <link href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.1/font/bootstrap-icons.css" rel="stylesheet">
     <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/css/bootstrap.min.css" rel="stylesheet">
@@ -60,7 +59,7 @@
             content: '';
             position: fixed;
             inset: 0;
-            background:
+            background: 
                 radial-gradient(circle at 20% 30%, rgba(0, 220, 130, 0.12) 0%, transparent 50%),
                 radial-gradient(circle at 80% 70%, rgba(255, 179, 71, 0.12) 0%, transparent 50%),
                 radial-gradient(circle at 50% 10%, rgba(0, 220, 130, 0.08) 0%, transparent 40%),
@@ -73,18 +72,14 @@
         }
 
         @keyframes auroraFloat {
-
-            0%,
-            100% {
+            0%, 100% {
                 transform: translate(0, 0) scale(1);
                 opacity: 1;
             }
-
             33% {
                 transform: translate(2%, -1%) scale(1.02);
                 opacity: 0.95;
             }
-
             66% {
                 transform: translate(-1%, 2%) scale(0.98);
                 opacity: 1;
@@ -95,7 +90,7 @@
             content: '';
             position: fixed;
             inset: 0;
-            background:
+            background: 
                 radial-gradient(ellipse at 30% 50%, rgba(0, 220, 130, 0.06) 0%, transparent 60%),
                 radial-gradient(ellipse at 70% 50%, rgba(255, 179, 71, 0.06) 0%, transparent 60%);
             filter: blur(120px);
@@ -130,7 +125,7 @@
         .hero-bg {
             position: absolute;
             inset: 0;
-            background:
+            background: 
                 linear-gradient(180deg, rgba(17, 17, 17, 0.3) 0%, rgba(17, 17, 17, 0.5) 50%, rgba(242, 244, 248, 0.85) 85%, var(--bg-premium) 100%),
                 url('https://images.unsplash.com/photo-1509042239860-f550ce710b93?w=1200&q=85') center/cover;
             background-size: cover;
@@ -173,7 +168,7 @@
             letter-spacing: -0.5px;
             margin: 0 0 6px 0;
             color: #ffffff;
-            text-shadow:
+            text-shadow: 
                 0 2px 4px rgba(0, 0, 0, 0.4),
                 0 4px 12px rgba(0, 0, 0, 0.3),
                 0 8px 24px rgba(0, 0, 0, 0.2);
@@ -322,15 +317,12 @@
             0% {
                 transform: scale(1);
             }
-
             50% {
                 transform: scale(0.9);
             }
-
             70% {
                 transform: scale(1.05);
             }
-
             100% {
                 transform: scale(1);
             }
@@ -425,7 +417,7 @@
 
         .product-card:hover {
             transform: translateY(-8px) rotateX(2deg) rotateY(-1deg);
-            box-shadow:
+            box-shadow: 
                 0 12px 40px rgba(0, 0, 0, 0.12),
                 0 0 30px rgba(0, 220, 130, 0.15);
         }
@@ -771,67 +763,6 @@
             display: flex;
         }
 
-        /* Error Modal (Custom Alert) */
-        .error-overlay {
-            position: fixed;
-            inset: 0;
-            background: rgba(0, 0, 0, 0.6);
-            backdrop-filter: blur(4px);
-            z-index: 11000;
-            display: none;
-            align-items: center;
-            justify-content: center;
-            padding: 20px;
-            animation: fadeIn 0.3s ease;
-        }
-
-        .error-overlay.show {
-            display: flex;
-        }
-
-        .error-card {
-            background: var(--card-white);
-            border-radius: 20px;
-            padding: 30px;
-            width: 100%;
-            max-width: 340px;
-            text-align: center;
-            box-shadow: var(--shadow-deep);
-            animation: scaleInBounce 0.4s cubic-bezier(0.34, 1.56, 0.64, 1);
-        }
-
-        .error-icon {
-            font-size: 3rem;
-            color: #ff5f57;
-            margin-bottom: 15px;
-        }
-
-        .error-title {
-            font-size: 1.25rem;
-            font-weight: 800;
-            color: var(--text-dark);
-            margin-bottom: 10px;
-        }
-
-        .error-message {
-            font-size: 0.95rem;
-            color: var(--text-medium);
-            line-height: 1.5;
-            margin-bottom: 20px;
-        }
-
-        .btn-error-close {
-            background: var(--text-dark);
-            color: white;
-            border: none;
-            border-radius: 12px;
-            padding: 12px 24px;
-            font-size: 1rem;
-            font-weight: 700;
-            cursor: pointer;
-            width: 100%;
-        }
-
         .success-icon {
             font-size: clamp(4.5rem, 16vw, 6.5rem);
             color: var(--accent-green);
@@ -1005,13 +936,8 @@
            ANIMATIONS
         ======================================== */
         @keyframes fadeIn {
-            from {
-                opacity: 0;
-            }
-
-            to {
-                opacity: 1;
-            }
+            from { opacity: 0; }
+            to { opacity: 1; }
         }
 
         @keyframes fadeInUp {
@@ -1019,7 +945,6 @@
                 opacity: 0;
                 transform: translateY(30px);
             }
-
             to {
                 opacity: 1;
                 transform: translateY(0);
@@ -1031,7 +956,6 @@
                 opacity: 0;
                 transform: scale(0.85);
             }
-
             to {
                 opacity: 1;
                 transform: scale(1);
@@ -1043,15 +967,12 @@
                 transform: scale(0.3);
                 opacity: 0;
             }
-
             50% {
                 transform: scale(1.1);
             }
-
             70% {
                 transform: scale(0.95);
             }
-
             100% {
                 transform: scale(1);
                 opacity: 1;
@@ -1115,19 +1036,7 @@
         }
     </style>
 </head>
-
 <body>
-    <!-- Error Overlay -->
-    <div id="errorOverlay" class="error-overlay">
-        <div class="error-card">
-            <div class="error-icon">
-                <i class="bi bi-exclamation-circle-fill"></i>
-            </div>
-            <h3 class="error-title" id="errorTitle">Hata</h3>
-            <p class="error-message" id="errorMessage">Bir sorun oluştu.</p>
-            <button class="btn-error-close" onclick="closeErrorModal()">Tamam</button>
-        </div>
-    </div>
 
     <!-- Cafe Closed Overlay -->
     <div id="cafeClosedAlert" class="cafe-closed-overlay">
@@ -1156,8 +1065,7 @@
     <!-- Order Rights Banner -->
     <div class="info-banner">
         <i class="bi bi-info-circle"></i>
-        <span>Belirtilen saatler araliklarinda 1 adet içecek sipariş hakkınız var (16:00-18:00, 18:00-20:00,
-            20:00-22:00, 22:00 sonrasi)</span>
+        <span>Belirtilen saatler araliklarinda 1 adet içecek sipariş hakkınız var (16:00-18:00, 18:00-20:00, 20:00-22:00, 22:00 sonrasi)</span>
     </div>
 
     <!-- Sticky Navigation -->
@@ -1253,7 +1161,7 @@
 
         try {
             firebase.initializeApp(firebaseConfig);
-
+            
             // Register Service Worker for Firebase Messaging
             if ('serviceWorker' in navigator) {
                 navigator.serviceWorker.register('/firebase-messaging-sw.js')
@@ -1285,14 +1193,14 @@
 
             try {
                 const permission = await Notification.requestPermission();
-
+                
                 if (permission === 'granted') {
                     console.log('Notification permission granted');
-
+                    
                     fcmToken = await messaging.getToken({
                         vapidKey: 'BEdYqvd8leroGph2B-IXQPE2quPnRtDDb2h8irs0gpCLQfyLRqCor56wJJ-Y5Ayq8Z5Xw1wcKoZcQ1uVDIErENU'
                     });
-
+                    
                     if (fcmToken) {
                         console.log('FCM Token:', fcmToken);
                         localStorage.setItem('fcmToken', fcmToken);
@@ -1311,7 +1219,7 @@
         if (messaging) {
             messaging.onMessage((payload) => {
                 console.log('Foreground message received:', payload);
-
+                
                 const notificationTitle = payload.notification?.title || 'Siparişiniz Hazır!';
                 const notificationOptions = {
                     body: payload.notification?.body || 'Siparişiniz hazır. Lütfen kafeye gelerek alabilirsiniz.',
@@ -1366,7 +1274,7 @@
                         tag: options.tag || 'general',
                         body: options.body
                     });
-
+                    
                     const audio = new Audio('data:audio/wav;base64,UklGRnoGAABXQVZFZm10IBAAAAABAAEAQB8AAEAfAAABAAgAZGF0YQoGAACBhYqFbF1fdJivrJBhNjVgodDbq2EcBj+a2/LDciUFLIHO8tiJNwgZaLvt559NEAxQp+PwtmMcBjiR1/LMeSwFJHfH8N2QQAoUXrTp66hVFApGn+DyvmwhBSuBzvLZiTYIGGi77eeeSwwPUKXh8LdjHQU2kdXy0HotBSJ1xe/ajz8KE12y6OynUxQLRp7e8r9pIAUsgs/y24o4CBhpvO7om0kMEE+k4PG5ZBkFNo/T8tR6LgUjdMPs2Ys+CRNbsOjqqVcVCkSb3fHAah4FK4HOuN2KNwgaab3v6qJODRBPo9/ytWUaBTWO0vHVei4FI3PD7tiLPwkSW6/n6qlXFQpFnN3xw2sfBSt/zLbci0AIG2m98OqiTg0RTqHf8rVlGgU1jtLx1XouBSNzw+7Yiz8JElqv5+qoVhYKQ5vb8MRsHwUrfsy13oxBCRtov+/ro00NEFCA4fK2Zx0FNI7R8tZ8MAUiccTt15A/CRJYrunqqVgWCkOb2/DGbSEFK37LtN+MQQgbZ7/u6qRODRBPf+DxtWccBTOO0fLYfTAFInHE7deQPgkRV6/o6atZFglCmtnwyG0jBSp9yrf0L/JTh+AAAAAAAA=');
                     audio.play().catch(e => console.log('Ses çalma engellendi.'));
                 });
@@ -1375,7 +1283,7 @@
 
         socket.on('orderReady', (data) => {
             const lastOrderNumber = localStorage.getItem('lastOrderNumber');
-
+            
             console.log('Sipariş hazır sinyali:', data);
 
             if (lastOrderNumber && data.orderNumber && lastOrderNumber == data.orderNumber) {
@@ -1396,16 +1304,16 @@
                 });
             }
         });
-
+        
         // MENU DATA - DO NOT MODIFY
         const menuData = [
-
-            {
+            
+                {
                 id: 'cay_ve_sohbet',
                 title: 'Çay ve Sohbet',
                 icon: 'bi-cup',
                 items: [
-                    { name: 'Bardak Çay', desc: 'Sıcak çay bardakta', img: 'img/turkcayi.png' },
+                   { name: 'Bardak Çay', desc: 'Sıcak çay bardakta', img: 'img/turkcayi.png' },
                     { name: 'Kupa Çay', desc: 'Büyük fincan çay', img: 'img/fincanturkcayi.png' },
                     { name: 'Limonlu Çay', desc: 'Çay + taze limon', img: 'img/limoncayi.png' },
                     { name: 'Yeşil Çay', desc: 'Sağlıklı yeşil çay', img: 'img/yesilcay.png' },
@@ -1415,7 +1323,7 @@
                     { name: 'Atom Çayı', desc: 'Özel atom çay karışımı', img: 'img/atomcayi.png' },
                 ]
             },
-
+               
             {
                 id: 'sicak_kahveler',
                 title: 'Sıcak Kahveler',
@@ -1448,6 +1356,10 @@
                     { name: 'Çikolat Cappuccino', desc: 'Çikolata + cappuccino', img: 'img/cikolatlicappucino.png' },
                     { name: 'Sahlep Cappuccino', desc: 'Sahlep + cappuccino', img: 'img/sahlepcappucion.png' },
                     { name: 'Vanilya Cappuccino', desc: 'Vanilya + cappuccino', img: 'img/vanilyacappucino.png' },
+                    { name: 'Türk Kahvesi', desc: 'Çifte kavrulmuş, lokum ile', img: 'img/turkkahvesi.png' },
+                    { name: 'Sütlü Türk Kahvesi', desc: 'Türk kahvesi + süt', img: 'img/sutluturkkahvesi.png' },
+                    { name: 'Dibek Kahvesi', desc: 'Yumuşak içim, taş değirmen', img: 'img/dibekkahvesi.png' },
+                    { name: 'Sütlü Dibek Kahvesi', desc: 'Dibek kahvesi + süt', img: 'img/sutludibekkahvesi.png' },
                     { name: 'Atmosfer Coffee', desc: '2 küp şeker + espresso + hindistan cevizi + az köpüklü süt', img: 'img/atmosfercoffee.png' }
                 ]
             },
@@ -1478,11 +1390,11 @@
                     { name: 'Ice Hazelnut Latte', desc: 'Fındık + ice latte', img: 'img/coconatlatte.png' },
                     { name: 'Ice Caramel Latte', desc: 'Karamel + ice latte', img: 'img/caramellatte.png' },
                     { name: 'Ice Coconut Latte', desc: 'Hindistan cevizi + ice latte', img: 'img/coconatlatte.png' },
-
+                
                     { name: 'Ice White Mocha', desc: 'Beyaz çikolata + ice kahve', img: 'img/whitemocha.png' },
                     { name: 'Ice Mix Mocha', desc: 'Karışık çikolata + ice kahve', img: 'img/mocha.png' },
                     { name: 'Cococream Latte', desc: 'Hindistan cevizi kaymağı + ice latte', img: 'img/cococream.png' },
-
+                   
                 ]
             },
             {
@@ -1540,27 +1452,29 @@
                 title: 'Geleneksel Kahveler',
                 icon: 'bi-cup',
                 items: [
+                    { name: 'Sütlü Filtre Kahve', desc: 'Filtre kahve + sıcak süt', img: 'img/sutlufiltrekahve.png' },
+                    { name: 'Filtre Kahve', desc: 'Taze demlenmiş filtre kahve', img: 'img/filtrekahve.png' },
                     { name: 'Sütlü Dibek Kahvesi', desc: 'Dibek kahvesi + süt', img: 'img/sutludibekkahvesi.png' },
                     { name: 'Sütlü Türk Kahvesi', desc: 'Türk kahvesi + süt', img: 'img/sutluturkkahvesi.png' },
                     { name: 'Türk Kahvesi', desc: 'Çifte kavrulmuş, lokum ile', img: 'img/turkkahvesi.png' },
                     { name: 'Dibek Kahvesi', desc: 'Yumuşak içim, taş değirmen', img: 'img/dibekkahvesi.png' }
                 ]
             },
-
+            
 
             {
                 id: 'special_sicaklar',
                 title: 'Pratik Sıcaklar',
                 icon: 'bi-stars',
                 items: [
-                    { name: 'Chai Tea Latte', desc: 'Chai çayı sütlü', img: 'img/chaitealatee.png' },
+                   { name: 'Chai Tea Latte', desc: 'Chai çayı sütlü', img: 'img/chaitealatee.png' },
                     { name: 'Sıcak Çikolata', desc: 'Kremalı sıcak çikolata', img: 'img/sicakcikolata.png' },
                     { name: 'Sahlep', desc: 'Tarçınlı sıcak sahlep', img: 'img/sahlep.png' }
                 ]
             }
         ];
 
-        let stockStatus = {};
+       let stockStatus = {}; 
         let selectedItemName = "";
         let saturdayMenuItems = [];
         let isSaturdayEvening = false;
@@ -1581,241 +1495,97 @@
         function renderMenu() {
             const navContainer = document.getElementById('categoryNav');
             const menuContainer = document.getElementById('menuContainer');
+            
+            navContainer.innerHTML = '';
+            menuContainer.innerHTML = '';
 
-            // Initialize
-            let activeCategory = 'all';
-            let stockStatus = {};
-            let saturdayMenuItems = []; // Cumartesi menüsü öğeleri
-            let isSaturdayMode = false; // Cumartesi modu açık mı?
-
-            // DOM Elements
-            const grid = document.getElementById('menuContainer'); // Changed to menuContainer
-            const searchInput = document.getElementById('searchInput');
-            const categoryContainer = document.getElementById('categoryNav'); // Changed to categoryNav
-
-            // Socket.io Setup
-            const socket = io();
-
-            // 1. Listen for Stock Updates
-            socket.on('stockStatus', (status) => {
-                stockStatus = status;
-                renderProducts();
-            });
-
-            socket.on('stockUpdated', (data) => {
-                stockStatus[data.itemName] = data.isAvailable;
-                updateProductCard(data.itemName, data.isAvailable);
-            });
-
-            // 2. Listen for Saturday Menu Updates
-            socket.on('saturdayMenuStatus', (data) => {
-                saturdayMenuItems = data.items || [];
-                isSaturdayMode = data.active || false;
-                updateSaturdayBadge();
-                renderProducts();
-            });
-
-            socket.on('saturdayMenuUpdated', (items) => {
-                saturdayMenuItems = items;
-                // Mode doesn't change, just items
-                renderProducts();
-            });
-
-            socket.on('saturdayModeToggled', (data) => {
-                isSaturdayMode = data.active;
-                saturdayMenuItems = data.items || [];
-                updateSaturdayBadge();
-                renderProducts();
-            });
-
-            // Request initial status
-            socket.emit('getStock');
-            socket.emit('getSaturdayMenuStatus');
-
-
-            function updateSaturdayBadge() {
-                // Optional: You could show a badge on the UI if desired
-                // For now we just filter the products
-                if (isSaturdayMode) {
-                    console.log('Cumartesi modu aktif, menü filtreleniyor.');
-                }
-            }
-
-            // Helper to flatten menuData into a single array of items
-            const menuItems = menuData.flatMap(category =>
-                category.items.map(item => ({
-                    ...item,
-                    category: category.title, // Add category title to each item
-                    categoryId: category.id, // Add category id to each item
-                    icon: category.icon // Add category icon to each item
-                }))
-            );
-
-            // Helper to get category icon (used for section headers)
-            function getCategoryIcon(categoryTitle) {
-                const category = menuData.find(cat => cat.title === categoryTitle);
-                return category ? category.icon.replace('bi-', '') : 'cup'; // Default icon if not found
-            }
-
-            // Helper to create a product card HTML
-            function createProductCard(item) {
-                const isAvailable = stockStatus[item.name] !== false;
-                const outOfStockClass = isAvailable ? '' : 'out-of-stock';
-                const buttonText = isAvailable ? '<i class="bi bi-plus-lg"></i> Ekle' : 'Tükendi';
-                const buttonDisabled = isAvailable ? '' : 'disabled';
-
-                return `
-                <div class="product-card ${outOfStockClass}" data-item-name="${item.name}">
-                    <div class="product-img-wrapper">
-                        <img src="${item.img}" class="product-img" loading="lazy" alt="${item.name}">
-                    </div>
-                    <div class="card-content">
-                        <div class="product-name">${item.name}</div>
-                        <div class="product-desc">${item.desc}</div>
-                        <button class="btn-add" onclick="event.stopPropagation(); openModal('${item.name}')" ${buttonDisabled}>
-                            ${buttonText}
-                        </button>
-                    </div>
-                </div>
-            `;
-            }
-
-            // Render Logic
-            function renderProducts() {
-                grid.innerHTML = '';
-
-                const searchTerm = searchInput.value.toLowerCase();
-
-                // Filter items
-                let filteredItems = menuItems.filter(item => {
-                    // 1. Search Filter
-                    const matchesSearch = item.name.toLowerCase().includes(searchTerm) ||
-                        item.category.toLowerCase().includes(searchTerm);
-                    if (!matchesSearch) return false;
-
-                    // 2. Category Filter
-                    const matchesCategory = activeCategory === 'all' || item.categoryId === activeCategory; // Use categoryId
-                    if (!matchesCategory) return false;
-
-                    // 3. Saturday Mode Filter
-                    if (isSaturdayMode && saturdayMenuItems.length > 0) {
-                        // Normalize names for comparison (remove whitespace, case insensitive)
-                        const normalizedItemName = item.name.trim();
-                        const isInSaturdayMenu = saturdayMenuItems.some(sItem => sItem.trim() === normalizedItemName);
-                        if (!isInSaturdayMenu) return false;
-                    }
-
-                    return true;
-                });
-
-                // Group by category for section headers if showing all
-                if (activeCategory === 'all' && !searchTerm) {
-                    const categories = [...new Set(filteredItems.map(item => item.category))];
-
-                    categories.forEach(catTitle => {
-                        const catItems = filteredItems.filter(i => i.category === catTitle);
-                        if (catItems.length === 0) return;
-
-                        // Section Header
-                        const sectionDiv = document.createElement('div');
-                        sectionDiv.className = 'menu-section';
-                        sectionDiv.id = menuData.find(c => c.title === catTitle)?.id || catTitle; // Set ID for scrolling
-                        sectionDiv.innerHTML = `
-                        <div class="section-header">
-                            <div class="section-icon">
-                                <i class="bi bi-${getCategoryIcon(catTitle)}"></i>
-                            </div>
-                            <h3 class="section-title">${catTitle}</h3>
-                        </div>
-                        <div class="product-grid">
-                            ${catItems.map(item => createProductCard(item)).join('')}
-                        </div>
-                    `;
-                        grid.appendChild(sectionDiv);
-                    });
-                } else {
-                    // Flat grid for search or single category
-                    const gridDiv = document.createElement('div');
-                    gridDiv.className = 'product-grid';
-                    gridDiv.innerHTML = filteredItems.map(item => createProductCard(item)).join('');
-
-                    if (filteredItems.length === 0) {
-                        grid.innerHTML = `
-                        <div style="text-align: center; padding: 40px; width: 100%; grid-column: 1/-1;">
-                            <i class="bi bi-search" style="font-size: 2rem; color: var(--text-light); margin-bottom: 15px;"></i>
-                            <p style="color: var(--text-medium);">Aradığınız ürün bulunamadı${isSaturdayMode ? ' (Cumartesi Menüsü Aktif)' : ''}.</p>
-                        </div>
-                    `;
-                        return;
-                    }
-
-                    grid.appendChild(gridDiv);
-                }
-
-                // Re-apply animations
-                const cards = document.querySelectorAll('.product-card');
-                cards.forEach((card, index) => {
-                    card.style.animationDelay = `${index * 0.05}s`;
-                });
-
-                // Update category pills after rendering
-                renderCategoryPills();
-            }
-
-            // Render Category Pills
-            function renderCategoryPills() {
-                categoryContainer.innerHTML = '';
-
-                // "All" category pill
-                const allPill = document.createElement('div');
-                allPill.className = `category-pill ${activeCategory === 'all' ? 'active' : ''}`;
-                allPill.textContent = 'Tümü';
-                allPill.dataset.target = 'all';
-                allPill.onclick = () => {
-                    activeCategory = 'all';
-                    renderProducts();
-                    updatePillActiveState();
-                    window.scrollTo({ top: 0, behavior: 'smooth' });
-                };
-                categoryContainer.appendChild(allPill);
-
-                menuData.forEach(cat => {
-                    const pill = document.createElement('div');
-                    pill.className = `category-pill ${activeCategory === cat.id ? 'active' : ''}`;
-                    pill.textContent = cat.title;
-                    pill.dataset.target = cat.id;
-                    pill.onclick = () => {
-                        activeCategory = cat.id;
-                        renderProducts();
-                        updatePillActiveState();
-                        // Scroll to top or specific section if we were using sections
-                        window.scrollTo({ top: 0, behavior: 'smooth' });
+            let categoriesToRender = menuData;
+            
+            if (isSaturdayEvening && saturdayMenuItems.length > 0) {
+                categoriesToRender = menuData.map(cat => {
+                    const filteredItems = cat.items.filter(item => 
+                        saturdayMenuItems.includes(item.name)
+                    );
+                    
+                    return {
+                        ...cat,
+                        items: filteredItems
                     };
-                    categoryContainer.appendChild(pill);
-                });
+                }).filter(cat => cat.items.length > 0);
+                
+                const banner = document.createElement('div');
+                banner.className = 'saturday-banner';
+                banner.innerHTML = '<i class="bi bi-calendar-week"></i> Cumartesi Özel Menüsü (18:00 sonrası)';
+                menuContainer.appendChild(banner);
             }
 
-            function updatePillActiveState() {
-                const pills = document.querySelectorAll('.category-pill');
-                pills.forEach(pill => {
-                    if (pill.dataset.target === activeCategory) {
-                        pill.classList.add('active');
-                    } else {
-                        pill.classList.remove('active');
-                    }
-                });
-            }
+            categoriesToRender.forEach((cat, index) => {
+                // Navigation Pills
+                const pill = document.createElement('div');
+                pill.className = `category-pill ${index === 0 ? 'active' : ''}`;
+                pill.textContent = cat.title;
+                pill.dataset.target = cat.id;
+                pill.onclick = () => scrollToSection(cat.id);
+                navContainer.appendChild(pill);
 
+                // Menu Section
+                const section = document.createElement('div');
+                section.className = 'menu-section';
+                section.id = cat.id;
+                section.style.animationDelay = `${index * 0.08}s`;
+                
+                const header = document.createElement('div');
+                header.className = 'section-header';
+                header.innerHTML = `
+                    <div class="section-icon">
+                        <i class="${cat.icon}"></i>
+                    </div>
+                    <h3 class="section-title">${cat.title}</h3>
+                `;
+                section.appendChild(header);
+
+                // Product Grid
+                const grid = document.createElement('div');
+                grid.className = 'product-grid';
+
+                cat.items.forEach(item => {
+                    const card = document.createElement('div');
+                    card.className = 'product-card';
+                    card.dataset.itemName = item.name;
+                    card.onclick = () => openModal(item.name);
+                    
+                    const imgUrl = item.img;
+
+                    card.innerHTML = `
+                        ${cat.special ? '<div class="special-badge">ÖZEL</div>' : ''}
+                        <div class="product-img-wrapper">
+                            <img src="${imgUrl}" class="product-img" loading="lazy" alt="${item.name}">
+                        </div>
+                        <div class="card-content">
+                            <div class="product-name">${item.name}</div>
+                            <div class="product-desc">${item.desc}</div>
+                            <button class="btn-add" onclick="event.stopPropagation(); openModal('${item.name}')">
+                                <i class="bi bi-plus-lg"></i> Ekle
+                            </button>
+                        </div>
+                    `;
+                    grid.appendChild(card);
+                });
+
+                section.appendChild(grid);
+                menuContainer.appendChild(section);
+            });
+            
             updateStockUI();
         }
 
         function scrollToSection(id) {
             const element = document.getElementById(id);
-            if (element) {
+            if(element) {
                 const headerOffset = 150;
                 const elementPosition = element.getBoundingClientRect().top;
                 const offsetPosition = elementPosition + window.pageYOffset - headerOffset;
-
+            
                 window.scrollTo({
                     top: offsetPosition,
                     behavior: "smooth"
@@ -1843,8 +1613,8 @@
                     if (entry.isIntersecting) {
                         navItems.forEach(nav => {
                             nav.classList.toggle('active', nav.dataset.target === entry.target.id);
-
-                            if (nav.dataset.target === entry.target.id) {
+                            
+                            if(nav.dataset.target === entry.target.id) {
                                 document.getElementById('categoryNav').scrollTo({
                                     left: nav.offsetLeft - 20,
                                     behavior: 'smooth'
@@ -1912,10 +1682,12 @@
 
         socket.on('saturdayMenuStatus', (data) => {
             saturdayMenuItems = data.items || [];
-            isSaturdayEvening = data.isSaturdayEvening || false;
-            console.log('Cumartesi durumu:', isSaturdayEvening ? 'Cumartesi akşamı' : 'Normal menü');
+            const manualActive = data.active || false;
+            const autoActive = data.isSaturdayEvening || false;
+            isSaturdayEvening = manualActive || autoActive;
+            console.log('Cumartesi durumu:', manualActive ? 'Manuel Aktif' : (autoActive ? 'Otomatik Aktif' : 'Kapalı'));
             console.log('Cumartesi menüsü:', saturdayMenuItems.length, 'ürün');
-
+            
             const menuContainer = document.getElementById('menuContainer');
             if (menuContainer.innerHTML === '' && isReadyToRender()) {
                 renderMenu();
@@ -1927,17 +1699,27 @@
         socket.on('saturdayMenuUpdated', (items) => {
             saturdayMenuItems = items;
             console.log('Cumartesi menüsü güncellendi:', items.length, 'ürün');
-
+            
             if (isSaturdayEvening) {
                 renderMenu();
             }
+        });
+
+        socket.on('saturdayModeToggled', (data) => {
+            const turkishTime = new Date(Date.now() + (3 * 60 * 60 * 1000));
+            const dayOfWeek = turkishTime.getUTCDay();
+            const hour = turkishTime.getUTCHours();
+            const autoActive = (dayOfWeek === 6 && hour >= 18);
+            isSaturdayEvening = data.active || autoActive;
+            console.log('Cumartesi menüsü güncellendi:', isSaturdayEvening ? 'Aktif' : 'Kapalı');
+            renderMenu();
         });
 
         function updateStockUI() {
             document.querySelectorAll('.product-card').forEach(card => {
                 const name = card.dataset.itemName;
                 const isAvailable = stockStatus[name] !== false;
-
+                
                 const btn = card.querySelector('.btn-add');
 
                 if (!isAvailable) {
@@ -1981,15 +1763,15 @@
         function openModal(name) {
             selectedItemName = name;
             document.getElementById('modalItemName').textContent = name;
-
+            
             const savedName = localStorage.getItem('guestName');
             const savedPhone = localStorage.getItem('guestPhone');
-            if (savedName) document.getElementById('guestName').value = savedName;
-            if (savedPhone) document.getElementById('guestPhone').value = savedPhone;
+            if(savedName) document.getElementById('guestName').value = savedName;
+            if(savedPhone) document.getElementById('guestPhone').value = savedPhone;
 
             const backdrop = document.getElementById('modalBackdrop');
             const modal = document.getElementById('orderModal');
-
+            
             backdrop.classList.add('show');
             modal.classList.add('show');
             document.body.style.overflow = 'hidden';
@@ -1999,13 +1781,8 @@
             const guest = document.getElementById('guestName').value.trim();
             const phone = document.getElementById('guestPhone').value.trim();
 
-            if (guest.length < 3) {
-                showErrorModal('Eksik Bilgi', "Lütfen isminizi en az 3 harf olacak şekilde giriniz.");
-                return;
-            }
-
-            if (!phone.match(/^5\d{9}$/)) {
-                showErrorModal('Hatalı Telefon', "Telefon numarası başında '0' olmadan, 5 ile başlamalı ve 10 haneli olmalıdır.\n(Örn: 5xxxxxxxxx)");
+            if(guest.length < 3 || !phone.match(/^5\d{9}$/)) {
+                alert("Lütfen geçerli bilgiler giriniz.");
                 return;
             }
 
@@ -2020,7 +1797,7 @@
                 phone: phone,
                 deviceId: deviceId,
                 item: selectedItemName,
-                orderTime: new Date().toLocaleTimeString('tr-TR', { hour: '2-digit', minute: '2-digit' }),
+                orderTime: new Date().toLocaleTimeString('tr-TR', {hour:'2-digit', minute:'2-digit'}),
                 fcmToken: currentFcmToken
             });
 
@@ -2069,7 +1846,7 @@
 
                 if (titleEl) titleEl.textContent = titleText;
                 if (messageEl) messageEl.textContent = messageText;
-
+                
                 clearCountdown();
                 const endTs = status.countdownEnd ? Number(status.countdownEnd) : null;
                 if (endTs && countdownEl) {
@@ -2082,8 +1859,8 @@
                             return;
                         }
                         const totalSeconds = Math.floor(remaining / 1000);
-                        const m = Math.floor(totalSeconds / 60).toString().padStart(2, '0');
-                        const s = (totalSeconds % 60).toString().padStart(2, '0');
+                        const m = Math.floor(totalSeconds / 60).toString().padStart(2,'0');
+                        const s = (totalSeconds % 60).toString().padStart(2,'0');
                         countdownEl.textContent = `${m}:${s}`;
                         countdownEl.style.display = 'block';
                     };
@@ -2092,7 +1869,7 @@
                 } else if (countdownEl) {
                     countdownEl.style.display = 'none';
                 }
-
+                
                 if (reasonEl) {
                     reasonEl.textContent = detailText;
                     reasonEl.style.display = detailText ? 'block' : 'none';
@@ -2105,8 +1882,8 @@
         });
 
         socket.on('orderLimitExceeded', (data) => {
-            showErrorModal('Sipariş Limiti', `${data.message}\n\nKalan hakkınız: ${data.remaining}`);
-
+            alert(`❌ ${data.message}\n\nKalan hakkınız: ${data.remaining}`);
+            
             const orderBtn = document.querySelector('.btn-submit');
             if (orderBtn) {
                 orderBtn.disabled = true;
@@ -2116,13 +1893,12 @@
         });
 
         socket.on('phoneNameMismatch', (data) => {
-            // Replacing alert with modal
-            showErrorModal('Bilgi Uyuşmazlığı', data.message);
+            alert(`⚠️ ${data.message}`);
         });
 
         socket.on('deviceLimitExceeded', (data) => {
-            showErrorModal('Cihaz Limiti', data.message);
-
+            alert(`🚫 ${data.message}`);
+            
             const orderBtn = document.querySelector('.btn-submit');
             if (orderBtn) {
                 orderBtn.disabled = true;
@@ -2130,31 +1906,10 @@
                 orderBtn.style.background = '#ccc';
             }
         });
-
-        socket.on('orderError', (data) => {
-            showErrorModal('Sipariş Hatası', data.message);
-        });
-
-        // Error Modal Logic
-        const errorOverlay = document.getElementById('errorOverlay');
-        const errorTitle = document.getElementById('errorTitle');
-        const errorMessage = document.getElementById('errorMessage');
-
-        function showErrorModal(title, msg) {
-            errorTitle.textContent = title;
-            errorMessage.textContent = msg;
-            errorOverlay.classList.add('show');
-        }
-
-        window.closeErrorModal = function () {
-            errorOverlay.classList.remove('show');
-        }
-
+        
         function checkCafeStatus() {
             // Socket will handle status
         }
-
     </script>
 </body>
-
 </html>

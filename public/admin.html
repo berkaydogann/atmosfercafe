@@ -1110,7 +1110,8 @@
             <button class="ctrl-btn open-btn" onclick="openCafe()">
                 <i class="bi bi-door-open"></i> Kafeyi Aç
             </button>
-            <button class="ctrl-btn" id="btnSaturday" onclick="toggleSaturdayMenu()" style="background: #9333ea; border: 2px solid transparent;">
+            <button class="ctrl-btn" id="btnSaturday" onclick="toggleSaturdayMenu()"
+                style="background: #9333ea; border: 2px solid transparent;">
                 <i class="bi bi-calendar-week"></i> Cumartesi Menüsü
             </button>
         </div>
@@ -1420,6 +1421,7 @@
         // Sayfa yüklendiğinde aktif siparişleri çek
         loadActiveOrders();
         socket.emit('getPrayerInfo');
+        socket.emit('getReports', { filter: 'daily' }); // Günlük istatistikleri yükle
 
         // Notification izni iste - Enhanced version
         function requestNotificationPermission() {
@@ -2314,22 +2316,22 @@
             if (audio) {
                 audio.volume = 1.0; // Maximum volume
                 audio.currentTime = 0;
-                
+
                 // Try to play the sound
                 const playPromise = audio.play();
-                
+
                 if (playPromise !== undefined) {
                     playPromise
                         .then(() => {
                             console.log("✅ Yeni sipariş sesi çalıyor!");
-                            
+
                             // Play the sound 3 times for better attention
                             let playCount = 0;
-                            audio.onended = function() {
+                            audio.onended = function () {
                                 playCount++;
                                 if (playCount < 3) {
                                     audio.currentTime = 0;
-                                    audio.play().catch(() => {});
+                                    audio.play().catch(() => { });
                                 } else {
                                     audio.onended = null; // Clean up
                                 }
@@ -2541,7 +2543,7 @@
 
             // CRITICAL: Play sound FIRST to ensure barista hears it
             playNewOrderSound();
-            
+
             // Vibrate if supported (works on iPad/mobile devices)
             if (navigator.vibrate) {
                 // Vibrate pattern: vibrate 300ms, pause 200ms, vibrate 300ms, pause 200ms, vibrate 300ms

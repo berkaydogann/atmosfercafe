@@ -94,17 +94,17 @@ async function initializeCache() {
   try {
     cachedCafeStatus = await fbHelper.getCafeStatus() || cachedCafeStatus;
     cachedStockStatus = await fbHelper.getStockStatus() || {};
-    
+
     // Load Saturday menu from Firebase
     try {
-      const saturdayMenuDoc = await db.collection('menus').doc('saturdayMenu').get();
+      const saturdayMenuDoc = await db.collection('saturdayMenu').doc('current').get();
       if (saturdayMenuDoc.exists) {
         cachedCafeStatus.saturdayMenuItems = saturdayMenuDoc.data().items || [];
       }
     } catch (err) {
       console.warn('⚠️ Could not load Saturday menu from Firebase');
     }
-    
+
     // Load today's active orders
     const activeOrders = await fbHelper.getActiveOrders();
     console.log(`[${fbHelper.getTurkishTime()}] 📋 ${activeOrders.length} aktif sipariş yüklendi`);
@@ -246,7 +246,7 @@ io.on('connection', (socket) => {
       const options = {};
       if (customNote) options.customMessage = customNote;
       if (customDetail) options.customDetail = customDetail;
-      
+
       if (closedReason === 'prayer' && prayerName && prayerTime) {
         options.prayerInfo = {
           name: prayerName,
@@ -408,18 +408,18 @@ io.on('connection', (socket) => {
     try {
       const isActive = data.active || false;
       const cafeStatus = await fbHelper.getCafeStatus();
-      
-      // Get Saturday menu items from Firebase saturdayMenu collection
+
+      // Get Saturday menu items from Firebase saturdayMenu/current collection
       let saturdayMenuItems = [];
       try {
-        const saturdayMenuDoc = await db.collection('menus').doc('saturdayMenu').get();
+        const saturdayMenuDoc = await db.collection('saturdayMenu').doc('current').get();
         if (saturdayMenuDoc.exists) {
           saturdayMenuItems = saturdayMenuDoc.data().items || [];
         }
       } catch (err) {
         console.warn(`[${getTimestamp()}] ⚠️ Could not fetch Saturday menu from Firebase:`, err.message);
       }
-      
+
       await fbHelper.updateCafeStatus(
         cafeStatus.isOpen,
         cafeStatus.closureReason,
@@ -452,21 +452,21 @@ io.on('connection', (socket) => {
       const turkishTime = new Date(Date.now() + (3 * 60 * 60 * 1000));
       const dayOfWeek = turkishTime.getUTCDay();
       const hour = turkishTime.getUTCHours();
-      
+
       // Check if it's Saturday (6) and after 18:00
       const isSaturdayEvening = (dayOfWeek === 6 && hour >= 18);
-      
+
       // Get Saturday menu items from cafe status
       const cafeStatus = await fbHelper.getCafeStatus();
       const saturdayMenuItems = cafeStatus.saturdayMenuItems || [];
       const saturdayMenuActive = cafeStatus.saturdayMenuActive || false;
-      
+
       socket.emit('saturdayMenuStatus', {
         isSaturdayEvening: isSaturdayEvening,
         items: saturdayMenuItems,
         active: saturdayMenuActive
       });
-      
+
       console.log(`[${getTimestamp()}] 📅 Cumartesi menü durumu: ${saturdayMenuActive ? 'Manuel Aktif' : (isSaturdayEvening ? 'Otomatik Aktif' : 'Pasif')}`);
     } catch (error) {
       console.error(`[${getTimestamp()}] ❌ Error fetching Saturday menu status:`, error);
@@ -476,8 +476,8 @@ io.on('connection', (socket) => {
   // Update Saturday menu items
   socket.on('updateSaturdayMenu', async (menuItems) => {
     try {
-      // Save to Firebase menus/saturdayMenu
-      await db.collection('menus').doc('saturdayMenu').set({
+      // Save to Firebase saturdayMenu/current
+      await db.collection('saturdayMenu').doc('current').set({
         items: menuItems,
         lastUpdated: admin.firestore.FieldValue.serverTimestamp()
       });
@@ -514,10 +514,10 @@ io.on('connection', (socket) => {
     try {
       const filter = data.filter || 'daily';
       const reports = await fbHelper.getReports(filter);
-      
+
       // Send reports data
       socket.emit('reports', reports);
-      
+
       // Also send stats separately for quick UI update
       if (reports.stats) {
         socket.emit('dailyStats', reports.stats);
@@ -566,17 +566,17 @@ app.get('/api/completed-orders', async (req, res) => {
 app.get('/api/reports', async (req, res) => {
   try {
     const { filter = 'all' } = req.query;
-    
+
     // Get data for both daily and monthly
     const dailyReports = await fbHelper.getReports('daily');
     const monthlyReports = await fbHelper.getReports('monthly');
-    
+
     // Format response for admin.html
     const response = {
       daily: formatDailyReports(dailyReports),
       monthly: formatMonthlyReports(monthlyReports)
     };
-    
+
     res.json(response);
   } catch (error) {
     console.error('Reports API error:', error);
@@ -587,57 +587,57 @@ app.get('/api/reports', async (req, res) => {
 // Helper to format daily reports
 function formatDailyReports(data) {
   const result = {};
-  
+
   if (data && data.orders) {
     data.orders.forEach(order => {
       const date = order.createdAt ? order.createdAt.substring(0, 10) : order.date;
-      
+
       if (!result[date]) {
         result[date] = {
           customers: {},
           items: {}
         };
       }
-      
+
       // Count customers
       const customerName = order.guestName || 'Misafir';
       result[date].customers[customerName] = (result[date].customers[customerName] || 0) + 1;
-      
+
       // Count items
       const itemName = order.item || 'Bilinmeyen';
       result[date].items[itemName] = (result[date].items[itemName] || 0) + 1;
     });
   }
-  
+
   return result;
 }
 
 // Helper to format monthly reports
 function formatMonthlyReports(data) {
   const result = {};
-  
+
   if (data && data.orders) {
     data.orders.forEach(order => {
       const date = order.createdAt ? order.createdAt.substring(0, 10) : order.date;
       const month = date.substring(0, 7); // YYYY-MM
-      
+
       if (!result[month]) {
         result[month] = {
           customers: {},
           items: {}
         };
       }
-      
+
       // Count customers
       const customerName = order.guestName || 'Misafir';
       result[month].customers[customerName] = (result[month].customers[customerName] || 0) + 1;
-      
+
       // Count items
       const itemName = order.item || 'Bilinmeyen';
       result[month].items[itemName] = (result[month].items[itemName] || 0) + 1;
     });
   }
-  
+
   return result;
 }
 

@@ -82,7 +82,9 @@ let cachedCafeStatus = {
   customMessage: null,
   customDetail: null,
   prayerInfo: null,
-  countdownEnd: null
+  countdownEnd: null,
+  saturdayMenuActive: false,
+  saturdayMenuItems: []
 };
 let tvReadyOrders = [];
 let currentVideoUrl = null;
@@ -92,6 +94,16 @@ async function initializeCache() {
   try {
     cachedCafeStatus = await fbHelper.getCafeStatus() || cachedCafeStatus;
     cachedStockStatus = await fbHelper.getStockStatus() || {};
+    
+    // Load Saturday menu from Firebase
+    try {
+      const saturdayMenuDoc = await db.collection('menus').doc('saturdayMenu').get();
+      if (saturdayMenuDoc.exists) {
+        cachedCafeStatus.saturdayMenuItems = saturdayMenuDoc.data().items || [];
+      }
+    } catch (err) {
+      console.warn('⚠️ Could not load Saturday menu from Firebase');
+    }
     
     // Load today's active orders
     const activeOrders = await fbHelper.getActiveOrders();
@@ -130,6 +142,18 @@ function initializeMenuItems() {
   menuItems.forEach(item => {
     cachedStockStatus[item] = true; // true = available
   });
+}
+
+// Helper function to broadcast daily stats
+async function broadcastDailyStats() {
+  try {
+    const reports = await fbHelper.getReports('daily');
+    if (reports.stats) {
+      io.emit('dailyStats', reports.stats);
+    }
+  } catch (error) {
+    console.warn(`[${getTimestamp()}] ⚠️ Could not broadcast daily stats:`, error.message);
+  }
 }
 
 // Socket.io connection handler
@@ -186,6 +210,9 @@ io.on('connection', (socket) => {
         slot: result.slot,
         createdAt: getTimestamp()
       });
+
+      // Update daily stats
+      broadcastDailyStats();
 
     } catch (error) {
       console.error(`[${getTimestamp()}] ❌ Sipariş hatası:`, error.message);
@@ -342,6 +369,9 @@ io.on('connection', (socket) => {
         item: orderData.item
       });
 
+      // Update daily stats
+      broadcastDailyStats();
+
     } catch (error) {
       console.error(`[${getTimestamp()}] ❌ completeOrder error:`, error.message);
     }
@@ -379,6 +409,17 @@ io.on('connection', (socket) => {
       const isActive = data.active || false;
       const cafeStatus = await fbHelper.getCafeStatus();
       
+      // Get Saturday menu items from Firebase saturdayMenu collection
+      let saturdayMenuItems = [];
+      try {
+        const saturdayMenuDoc = await db.collection('menus').doc('saturdayMenu').get();
+        if (saturdayMenuDoc.exists) {
+          saturdayMenuItems = saturdayMenuDoc.data().items || [];
+        }
+      } catch (err) {
+        console.warn(`[${getTimestamp()}] ⚠️ Could not fetch Saturday menu from Firebase:`, err.message);
+      }
+      
       await fbHelper.updateCafeStatus(
         cafeStatus.isOpen,
         cafeStatus.closureReason,
@@ -387,18 +428,19 @@ io.on('connection', (socket) => {
           customDetail: cafeStatus.customDetail,
           prayerInfo: cafeStatus.prayerInfo,
           saturdayMenuActive: isActive,
-          saturdayMenuItems: cafeStatus.saturdayMenuItems || []
+          saturdayMenuItems: saturdayMenuItems
         }
       );
 
       // Update cache
       cachedCafeStatus.saturdayMenuActive = isActive;
+      cachedCafeStatus.saturdayMenuItems = saturdayMenuItems;
 
       // Broadcast to all clients
-      io.emit('saturdayModeToggled', { active: isActive });
+      io.emit('saturdayModeToggled', { active: isActive, items: saturdayMenuItems });
       io.emit('cafeStatus', cachedCafeStatus);
 
-      console.log(`[${getTimestamp()}] 📅 Cumartesi menüsü: ${isActive ? 'AÇIK' : 'KAPALI'}`);
+      console.log(`[${getTimestamp()}] 📅 Cumartesi menüsü: ${isActive ? 'AÇIK' : 'KAPALI'} (${saturdayMenuItems.length} ürün)`);
     } catch (error) {
       console.error(`[${getTimestamp()}] ❌ Error toggling Saturday mode:`, error);
     }
@@ -431,12 +473,55 @@ io.on('connection', (socket) => {
     }
   });
 
+  // Update Saturday menu items
+  socket.on('updateSaturdayMenu', async (menuItems) => {
+    try {
+      // Save to Firebase menus/saturdayMenu
+      await db.collection('menus').doc('saturdayMenu').set({
+        items: menuItems,
+        lastUpdated: admin.firestore.FieldValue.serverTimestamp()
+      });
+
+      // Also update cafe status with items
+      const cafeStatus = await fbHelper.getCafeStatus();
+      await fbHelper.updateCafeStatus(
+        cafeStatus.isOpen,
+        cafeStatus.closureReason,
+        {
+          customMessage: cafeStatus.customMessage,
+          customDetail: cafeStatus.customDetail,
+          prayerInfo: cafeStatus.prayerInfo,
+          saturdayMenuActive: cafeStatus.saturdayMenuActive || false,
+          saturdayMenuItems: menuItems
+        }
+      );
+
+      // Update cache
+      cachedCafeStatus.saturdayMenuItems = menuItems;
+
+      // Broadcast update to all clients
+      io.emit('saturdayMenuUpdated', { items: menuItems });
+      io.emit('cafeStatus', cachedCafeStatus);
+
+      console.log(`[${getTimestamp()}] 📅 Cumartesi menüsü güncellendi: ${menuItems.length} ürün`);
+    } catch (error) {
+      console.error(`[${getTimestamp()}] ❌ Error updating Saturday menu:`, error);
+    }
+  });
+
   // Get reports
   socket.on('getReports', async (data = {}) => {
     try {
       const filter = data.filter || 'daily';
       const reports = await fbHelper.getReports(filter);
+      
+      // Send reports data
       socket.emit('reports', reports);
+      
+      // Also send stats separately for quick UI update
+      if (reports.stats) {
+        socket.emit('dailyStats', reports.stats);
+      }
     } catch (error) {
       console.error(`[${getTimestamp()}] ❌ Error fetching reports:`, error);
     }

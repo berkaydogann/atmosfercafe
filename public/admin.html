@@ -1819,18 +1819,17 @@
 
         // Toggle Saturday menu on/off (uses items from Firebase)
         window.toggleSaturdayMenu = function () {
-            // Just toggle the Saturday mode on/off
+            // Toggle the Saturday mode on/off
             // Items are already loaded from Firebase
-            // Users can go to Saturday tab manually to change items
             const btn = document.getElementById('btnSaturday');
 
             if (btn.classList.contains('active')) {
                 // Turn OFF - disable Saturday mode
-                socket.emit('toggleSaturdayMode', false);
+                socket.emit('toggleSaturdayMode', { active: false });
                 btn.classList.remove('active');
             } else {
                 // Turn ON - enable Saturday mode with existing Firebase items
-                socket.emit('toggleSaturdayMode', true);
+                socket.emit('toggleSaturdayMode', { active: true });
                 btn.classList.add('active');
             }
         };

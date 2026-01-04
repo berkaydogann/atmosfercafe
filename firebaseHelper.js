@@ -441,6 +441,7 @@ class FirebaseHelper {
         const itemCounts = {};
         const slotCounts = {};
         let totalOrders = 0;
+        let completedOrders = 0;
 
         allOrders.forEach(order => {
             // Count by item
@@ -450,12 +451,30 @@ class FirebaseHelper {
             slotCounts[order.slot] = (slotCounts[order.slot] || 0) + 1;
 
             totalOrders++;
+            completedOrders++;
         });
+
+        // For daily reports, also get today's active (pending) orders
+        let pendingOrders = 0;
+        if (filter === 'daily' && start === today) {
+            try {
+                const activeOrders = await this.getActiveOrders();
+                pendingOrders = activeOrders.length;
+                totalOrders += pendingOrders;
+            } catch (err) {
+                console.warn('Warning: Could not fetch active orders for today:', err.message);
+            }
+        }
 
         return {
             filter: filter,
             startDate: start,
             endDate: end,
+            stats: {
+                total: totalOrders,
+                completed: completedOrders,
+                pending: pendingOrders
+            },
             totalOrders: totalOrders,
             itemCounts: itemCounts,
             slotCounts: slotCounts,

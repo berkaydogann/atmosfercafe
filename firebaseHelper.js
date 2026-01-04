@@ -499,14 +499,16 @@ class FirebaseHelper {
                 closureReason: null,
                 customMessage: null,
                 customDetail: null,
-                prayerInfo: null
+                prayerInfo: null,
+                saturdayMenuItems: []
             };
         }
 
         const data = statusDoc.data();
         return {
             ...data,
-            lastUpdated: data.lastUpdated?.toDate?.()?.toISOString() || this.getTurkishTime()
+            lastUpdated: data.lastUpdated?.toDate?.()?.toISOString() || this.getTurkishTime(),
+            saturdayMenuItems: data.saturdayMenuItems || []
         };
     }
 
@@ -524,7 +526,8 @@ class FirebaseHelper {
             customMessage: options.customMessage || null,
             customDetail: options.customDetail || null,
             prayerInfo: options.prayerInfo || null,
-            saturdayMenuActive: options.saturdayMenuActive !== undefined ? options.saturdayMenuActive : false
+            saturdayMenuActive: options.saturdayMenuActive !== undefined ? options.saturdayMenuActive : false,
+            saturdayMenuItems: options.saturdayMenuItems || []
         });
     }
 

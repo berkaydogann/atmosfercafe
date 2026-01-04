@@ -353,6 +353,31 @@ io.on('connection', (socket) => {
     io.emit('stopVideo');
   });
 
+  // Get Saturday menu status
+  socket.on('getSaturdayMenuStatus', async () => {
+    try {
+      const turkishTime = new Date(Date.now() + (3 * 60 * 60 * 1000));
+      const dayOfWeek = turkishTime.getUTCDay();
+      const hour = turkishTime.getUTCHours();
+      
+      // Check if it's Saturday (6) and after 18:00
+      const isSaturdayEvening = (dayOfWeek === 6 && hour >= 18);
+      
+      // Get Saturday menu items from cafe status
+      const cafeStatus = await fbHelper.getCafeStatus();
+      const saturdayMenuItems = cafeStatus.saturdayMenuItems || [];
+      
+      socket.emit('saturdayMenuStatus', {
+        isSaturdayEvening: isSaturdayEvening,
+        items: saturdayMenuItems
+      });
+      
+      console.log(`[${getTimestamp()}] 📅 Cumartesi menü durumu: ${isSaturdayEvening ? 'Aktif' : 'Pasif'}`);
+    } catch (error) {
+      console.error(`[${getTimestamp()}] ❌ Error fetching Saturday menu status:`, error);
+    }
+  });
+
   // Get reports
   socket.on('getReports', async (data = {}) => {
     try {
@@ -402,13 +427,81 @@ app.get('/api/completed-orders', async (req, res) => {
 // Get reports
 app.get('/api/reports', async (req, res) => {
   try {
-    const { filter = 'daily', startDate, endDate } = req.query;
-    const reports = await fbHelper.getReports(filter, startDate, endDate);
-    res.json(reports);
+    const { filter = 'all' } = req.query;
+    
+    // Get data for both daily and monthly
+    const dailyReports = await fbHelper.getReports('daily');
+    const monthlyReports = await fbHelper.getReports('monthly');
+    
+    // Format response for admin.html
+    const response = {
+      daily: formatDailyReports(dailyReports),
+      monthly: formatMonthlyReports(monthlyReports)
+    };
+    
+    res.json(response);
   } catch (error) {
+    console.error('Reports API error:', error);
     res.status(500).json({ error: error.message });
   }
 });
+
+// Helper to format daily reports
+function formatDailyReports(data) {
+  const result = {};
+  
+  if (data && data.orders) {
+    data.orders.forEach(order => {
+      const date = order.createdAt ? order.createdAt.substring(0, 10) : order.date;
+      
+      if (!result[date]) {
+        result[date] = {
+          customers: {},
+          items: {}
+        };
+      }
+      
+      // Count customers
+      const customerName = order.guestName || 'Misafir';
+      result[date].customers[customerName] = (result[date].customers[customerName] || 0) + 1;
+      
+      // Count items
+      const itemName = order.item || 'Bilinmeyen';
+      result[date].items[itemName] = (result[date].items[itemName] || 0) + 1;
+    });
+  }
+  
+  return result;
+}
+
+// Helper to format monthly reports
+function formatMonthlyReports(data) {
+  const result = {};
+  
+  if (data && data.orders) {
+    data.orders.forEach(order => {
+      const date = order.createdAt ? order.createdAt.substring(0, 10) : order.date;
+      const month = date.substring(0, 7); // YYYY-MM
+      
+      if (!result[month]) {
+        result[month] = {
+          customers: {},
+          items: {}
+        };
+      }
+      
+      // Count customers
+      const customerName = order.guestName || 'Misafir';
+      result[month].customers[customerName] = (result[month].customers[customerName] || 0) + 1;
+      
+      // Count items
+      const itemName = order.item || 'Bilinmeyen';
+      result[month].items[itemName] = (result[month].items[itemName] || 0) + 1;
+    });
+  }
+  
+  return result;
+}
 
 // Get available order slots
 app.get('/api/order-slots', async (req, res) => {

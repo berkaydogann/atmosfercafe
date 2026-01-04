@@ -3,10 +3,11 @@ const admin = require('firebase-admin');
 // Initialize Firebase Admin SDK
 let db;
 try {
-    if (!process.env.FIREBASE_KEY) {
-        throw new Error('❌ FIREBASE_KEY environment variable bulunamadı!');
+    if (!process.env.FIREBASE_KEY_BASE64) {
+        throw new Error('❌ FIREBASE_KEY_BASE64 environment variable bulunamadı!');
     }
-    const serviceAccount = JSON.parse(process.env.FIREBASE_KEY);
+    const decodedKey = Buffer.from(process.env.FIREBASE_KEY_BASE64, 'base64').toString('utf-8');
+    const serviceAccount = JSON.parse(decodedKey);
 
     admin.initializeApp({
         credential: admin.credential.cert(serviceAccount)

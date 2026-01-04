@@ -23,12 +23,13 @@ let fbHelper;
 try {
   let serviceAccount;
 
-  // Firebase anahtarını Digital Ocean environment variable'dan oku
-  if (!process.env.FIREBASE_KEY) {
-    throw new Error('❌ FIREBASE_KEY environment variable bulunamadı! Digital Ocean ayarlarını kontrol edin.');
+  // Firebase anahtarını Digital Ocean environment variable'dan oku (Base64 formatında)
+  if (!process.env.FIREBASE_KEY_BASE64) {
+    throw new Error('❌ FIREBASE_KEY_BASE64 environment variable bulunamadı! Digital Ocean ayarlarını kontrol edin.');
   }
-  console.log('🔄 Firebase anahtarı Environment Variable üzerinden okunuyor...');
-  serviceAccount = JSON.parse(process.env.FIREBASE_KEY);
+  console.log('🔄 Firebase anahtarı Environment Variable üzerinden okunuyor (Base64)...');
+  const decodedKey = Buffer.from(process.env.FIREBASE_KEY_BASE64, 'base64').toString('utf-8');
+  serviceAccount = JSON.parse(decodedKey);
 
   admin.initializeApp({
     credential: admin.credential.cert(serviceAccount)

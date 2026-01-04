@@ -384,6 +384,13 @@ io.on('connection', (socket) => {
     console.log(`[${getTimestamp()}] 👤 Sipariş teslim edildi: ${data.orderId}`);
   });
 
+  // Complete order from TV display (admin marks as completed)
+  socket.on('completeOrderFromTv', (data) => {
+    tvReadyOrders = tvReadyOrders.filter(o => o.id !== data.orderId);
+    io.emit('orderPickedUp', data.orderId);
+    console.log(`[${getTimestamp()}] ✅ TV'den sipariş tamamlandı: ${data.orderId}`);
+  });
+
   // TV operations
   socket.on('getReadyOrders', () => {
     socket.emit('readyOrders', tvReadyOrders);

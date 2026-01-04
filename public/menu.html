@@ -1,10 +1,11 @@
 <!DOCTYPE html>
 <html lang="tr">
+
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
     <title>Atmosfer Kafe | Menü</title>
-    
+
     <link href="https://fonts.googleapis.com/css2?family=Outfit:wght@300;400;500;700;900&display=swap" rel="stylesheet">
     <link href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.1/font/bootstrap-icons.css" rel="stylesheet">
     <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/css/bootstrap.min.css" rel="stylesheet">
@@ -59,7 +60,7 @@
             content: '';
             position: fixed;
             inset: 0;
-            background: 
+            background:
                 radial-gradient(circle at 20% 30%, rgba(0, 220, 130, 0.12) 0%, transparent 50%),
                 radial-gradient(circle at 80% 70%, rgba(255, 179, 71, 0.12) 0%, transparent 50%),
                 radial-gradient(circle at 50% 10%, rgba(0, 220, 130, 0.08) 0%, transparent 40%),
@@ -72,14 +73,18 @@
         }
 
         @keyframes auroraFloat {
-            0%, 100% {
+
+            0%,
+            100% {
                 transform: translate(0, 0) scale(1);
                 opacity: 1;
             }
+
             33% {
                 transform: translate(2%, -1%) scale(1.02);
                 opacity: 0.95;
             }
+
             66% {
                 transform: translate(-1%, 2%) scale(0.98);
                 opacity: 1;
@@ -90,7 +95,7 @@
             content: '';
             position: fixed;
             inset: 0;
-            background: 
+            background:
                 radial-gradient(ellipse at 30% 50%, rgba(0, 220, 130, 0.06) 0%, transparent 60%),
                 radial-gradient(ellipse at 70% 50%, rgba(255, 179, 71, 0.06) 0%, transparent 60%);
             filter: blur(120px);
@@ -125,7 +130,7 @@
         .hero-bg {
             position: absolute;
             inset: 0;
-            background: 
+            background:
                 linear-gradient(180deg, rgba(17, 17, 17, 0.3) 0%, rgba(17, 17, 17, 0.5) 50%, rgba(242, 244, 248, 0.85) 85%, var(--bg-premium) 100%),
                 url('https://images.unsplash.com/photo-1509042239860-f550ce710b93?w=1200&q=85') center/cover;
             background-size: cover;
@@ -168,7 +173,7 @@
             letter-spacing: -0.5px;
             margin: 0 0 6px 0;
             color: #ffffff;
-            text-shadow: 
+            text-shadow:
                 0 2px 4px rgba(0, 0, 0, 0.4),
                 0 4px 12px rgba(0, 0, 0, 0.3),
                 0 8px 24px rgba(0, 0, 0, 0.2);
@@ -317,12 +322,15 @@
             0% {
                 transform: scale(1);
             }
+
             50% {
                 transform: scale(0.9);
             }
+
             70% {
                 transform: scale(1.05);
             }
+
             100% {
                 transform: scale(1);
             }
@@ -417,7 +425,7 @@
 
         .product-card:hover {
             transform: translateY(-8px) rotateX(2deg) rotateY(-1deg);
-            box-shadow: 
+            box-shadow:
                 0 12px 40px rgba(0, 0, 0, 0.12),
                 0 0 30px rgba(0, 220, 130, 0.15);
         }
@@ -936,8 +944,13 @@
            ANIMATIONS
         ======================================== */
         @keyframes fadeIn {
-            from { opacity: 0; }
-            to { opacity: 1; }
+            from {
+                opacity: 0;
+            }
+
+            to {
+                opacity: 1;
+            }
         }
 
         @keyframes fadeInUp {
@@ -945,6 +958,7 @@
                 opacity: 0;
                 transform: translateY(30px);
             }
+
             to {
                 opacity: 1;
                 transform: translateY(0);
@@ -956,6 +970,7 @@
                 opacity: 0;
                 transform: scale(0.85);
             }
+
             to {
                 opacity: 1;
                 transform: scale(1);
@@ -967,12 +982,15 @@
                 transform: scale(0.3);
                 opacity: 0;
             }
+
             50% {
                 transform: scale(1.1);
             }
+
             70% {
                 transform: scale(0.95);
             }
+
             100% {
                 transform: scale(1);
                 opacity: 1;
@@ -1036,6 +1054,7 @@
         }
     </style>
 </head>
+
 <body>
 
     <!-- Cafe Closed Overlay -->
@@ -1065,7 +1084,8 @@
     <!-- Order Rights Banner -->
     <div class="info-banner">
         <i class="bi bi-info-circle"></i>
-        <span>Belirtilen saatler araliklarinda 1 adet içecek sipariş hakkınız var (16:00-18:00, 18:00-20:00, 20:00-22:00, 22:00 sonrasi)</span>
+        <span>Belirtilen saatler araliklarinda 1 adet içecek sipariş hakkınız var (16:00-18:00, 18:00-20:00,
+            20:00-22:00, 22:00 sonrasi)</span>
     </div>
 
     <!-- Sticky Navigation -->
@@ -1161,7 +1181,7 @@
 
         try {
             firebase.initializeApp(firebaseConfig);
-            
+
             // Register Service Worker for Firebase Messaging
             if ('serviceWorker' in navigator) {
                 navigator.serviceWorker.register('/firebase-messaging-sw.js')
@@ -1193,14 +1213,14 @@
 
             try {
                 const permission = await Notification.requestPermission();
-                
+
                 if (permission === 'granted') {
                     console.log('Notification permission granted');
-                    
+
                     fcmToken = await messaging.getToken({
                         vapidKey: 'BEdYqvd8leroGph2B-IXQPE2quPnRtDDb2h8irs0gpCLQfyLRqCor56wJJ-Y5Ayq8Z5Xw1wcKoZcQ1uVDIErENU'
                     });
-                    
+
                     if (fcmToken) {
                         console.log('FCM Token:', fcmToken);
                         localStorage.setItem('fcmToken', fcmToken);
@@ -1219,7 +1239,7 @@
         if (messaging) {
             messaging.onMessage((payload) => {
                 console.log('Foreground message received:', payload);
-                
+
                 const notificationTitle = payload.notification?.title || 'Siparişiniz Hazır!';
                 const notificationOptions = {
                     body: payload.notification?.body || 'Siparişiniz hazır. Lütfen kafeye gelerek alabilirsiniz.',
@@ -1274,7 +1294,7 @@
                         tag: options.tag || 'general',
                         body: options.body
                     });
-                    
+
                     const audio = new Audio('data:audio/wav;base64,UklGRnoGAABXQVZFZm10IBAAAAABAAEAQB8AAEAfAAABAAgAZGF0YQoGAACBhYqFbF1fdJivrJBhNjVgodDbq2EcBj+a2/LDciUFLIHO8tiJNwgZaLvt559NEAxQp+PwtmMcBjiR1/LMeSwFJHfH8N2QQAoUXrTp66hVFApGn+DyvmwhBSuBzvLZiTYIGGi77eeeSwwPUKXh8LdjHQU2kdXy0HotBSJ1xe/ajz8KE12y6OynUxQLRp7e8r9pIAUsgs/y24o4CBhpvO7om0kMEE+k4PG5ZBkFNo/T8tR6LgUjdMPs2Ys+CRNbsOjqqVcVCkSb3fHAah4FK4HOuN2KNwgaab3v6qJODRBPo9/ytWUaBTWO0vHVei4FI3PD7tiLPwkSW6/n6qlXFQpFnN3xw2sfBSt/zLbci0AIG2m98OqiTg0RTqHf8rVlGgU1jtLx1XouBSNzw+7Yiz8JElqv5+qoVhYKQ5vb8MRsHwUrfsy13oxBCRtov+/ro00NEFCA4fK2Zx0FNI7R8tZ8MAUiccTt15A/CRJYrunqqVgWCkOb2/DGbSEFK37LtN+MQQgbZ7/u6qRODRBPf+DxtWccBTOO0fLYfTAFInHE7deQPgkRV6/o6atZFglCmtnwyG0jBSp9yrf0L/JTh+AAAAAAAA=');
                     audio.play().catch(e => console.log('Ses çalma engellendi.'));
                 });
@@ -1283,7 +1303,7 @@
 
         socket.on('orderReady', (data) => {
             const lastOrderNumber = localStorage.getItem('lastOrderNumber');
-            
+
             console.log('Sipariş hazır sinyali:', data);
 
             if (lastOrderNumber && data.orderNumber && lastOrderNumber == data.orderNumber) {
@@ -1304,16 +1324,16 @@
                 });
             }
         });
-        
+
         // MENU DATA - DO NOT MODIFY
         const menuData = [
-            
-                {
+
+            {
                 id: 'cay_ve_sohbet',
                 title: 'Çay ve Sohbet',
                 icon: 'bi-cup',
                 items: [
-                   { name: 'Bardak Çay', desc: 'Sıcak çay bardakta', img: 'img/turkcayi.png' },
+                    { name: 'Bardak Çay', desc: 'Sıcak çay bardakta', img: 'img/turkcayi.png' },
                     { name: 'Kupa Çay', desc: 'Büyük fincan çay', img: 'img/fincanturkcayi.png' },
                     { name: 'Limonlu Çay', desc: 'Çay + taze limon', img: 'img/limoncayi.png' },
                     { name: 'Yeşil Çay', desc: 'Sağlıklı yeşil çay', img: 'img/yesilcay.png' },
@@ -1323,7 +1343,7 @@
                     { name: 'Atom Çayı', desc: 'Özel atom çay karışımı', img: 'img/atomcayi.png' },
                 ]
             },
-               
+
             {
                 id: 'sicak_kahveler',
                 title: 'Sıcak Kahveler',
@@ -1390,11 +1410,11 @@
                     { name: 'Ice Hazelnut Latte', desc: 'Fındık + ice latte', img: 'img/coconatlatte.png' },
                     { name: 'Ice Caramel Latte', desc: 'Karamel + ice latte', img: 'img/caramellatte.png' },
                     { name: 'Ice Coconut Latte', desc: 'Hindistan cevizi + ice latte', img: 'img/coconatlatte.png' },
-                
+
                     { name: 'Ice White Mocha', desc: 'Beyaz çikolata + ice kahve', img: 'img/whitemocha.png' },
                     { name: 'Ice Mix Mocha', desc: 'Karışık çikolata + ice kahve', img: 'img/mocha.png' },
                     { name: 'Cococream Latte', desc: 'Hindistan cevizi kaymağı + ice latte', img: 'img/cococream.png' },
-                   
+
                 ]
             },
             {
@@ -1460,21 +1480,21 @@
                     { name: 'Dibek Kahvesi', desc: 'Yumuşak içim, taş değirmen', img: 'img/dibekkahvesi.png' }
                 ]
             },
-            
+
 
             {
                 id: 'special_sicaklar',
                 title: 'Pratik Sıcaklar',
                 icon: 'bi-stars',
                 items: [
-                   { name: 'Chai Tea Latte', desc: 'Chai çayı sütlü', img: 'img/chaitealatee.png' },
+                    { name: 'Chai Tea Latte', desc: 'Chai çayı sütlü', img: 'img/chaitealatee.png' },
                     { name: 'Sıcak Çikolata', desc: 'Kremalı sıcak çikolata', img: 'img/sicakcikolata.png' },
                     { name: 'Sahlep', desc: 'Tarçınlı sıcak sahlep', img: 'img/sahlep.png' }
                 ]
             }
         ];
 
-       let stockStatus = {}; 
+        let stockStatus = {};
         let selectedItemName = "";
         let saturdayMenuItems = [];
         let isSaturdayEvening = false;
@@ -1495,24 +1515,24 @@
         function renderMenu() {
             const navContainer = document.getElementById('categoryNav');
             const menuContainer = document.getElementById('menuContainer');
-            
+
             navContainer.innerHTML = '';
             menuContainer.innerHTML = '';
 
             let categoriesToRender = menuData;
-            
+
             if (isSaturdayEvening && saturdayMenuItems.length > 0) {
                 categoriesToRender = menuData.map(cat => {
-                    const filteredItems = cat.items.filter(item => 
+                    const filteredItems = cat.items.filter(item =>
                         saturdayMenuItems.includes(item.name)
                     );
-                    
+
                     return {
                         ...cat,
                         items: filteredItems
                     };
                 }).filter(cat => cat.items.length > 0);
-                
+
                 const banner = document.createElement('div');
                 banner.className = 'saturday-banner';
                 banner.innerHTML = '<i class="bi bi-calendar-week"></i> Cumartesi Özel Menüsü (18:00 sonrası)';
@@ -1533,7 +1553,7 @@
                 section.className = 'menu-section';
                 section.id = cat.id;
                 section.style.animationDelay = `${index * 0.08}s`;
-                
+
                 const header = document.createElement('div');
                 header.className = 'section-header';
                 header.innerHTML = `
@@ -1553,7 +1573,7 @@
                     card.className = 'product-card';
                     card.dataset.itemName = item.name;
                     card.onclick = () => openModal(item.name);
-                    
+
                     const imgUrl = item.img;
 
                     card.innerHTML = `
@@ -1575,17 +1595,17 @@
                 section.appendChild(grid);
                 menuContainer.appendChild(section);
             });
-            
+
             updateStockUI();
         }
 
         function scrollToSection(id) {
             const element = document.getElementById(id);
-            if(element) {
+            if (element) {
                 const headerOffset = 150;
                 const elementPosition = element.getBoundingClientRect().top;
                 const offsetPosition = elementPosition + window.pageYOffset - headerOffset;
-            
+
                 window.scrollTo({
                     top: offsetPosition,
                     behavior: "smooth"
@@ -1613,8 +1633,8 @@
                     if (entry.isIntersecting) {
                         navItems.forEach(nav => {
                             nav.classList.toggle('active', nav.dataset.target === entry.target.id);
-                            
-                            if(nav.dataset.target === entry.target.id) {
+
+                            if (nav.dataset.target === entry.target.id) {
                                 document.getElementById('categoryNav').scrollTo({
                                     left: nav.offsetLeft - 20,
                                     behavior: 'smooth'
@@ -1687,7 +1707,7 @@
             isSaturdayEvening = manualActive || autoActive;
             console.log('Cumartesi durumu:', manualActive ? 'Manuel Aktif' : (autoActive ? 'Otomatik Aktif' : 'Kapalı'));
             console.log('Cumartesi menüsü:', saturdayMenuItems.length, 'ürün');
-            
+
             const menuContainer = document.getElementById('menuContainer');
             if (menuContainer.innerHTML === '' && isReadyToRender()) {
                 renderMenu();
@@ -1699,7 +1719,7 @@
         socket.on('saturdayMenuUpdated', (items) => {
             saturdayMenuItems = items;
             console.log('Cumartesi menüsü güncellendi:', items.length, 'ürün');
-            
+
             if (isSaturdayEvening) {
                 renderMenu();
             }
@@ -1719,7 +1739,7 @@
             document.querySelectorAll('.product-card').forEach(card => {
                 const name = card.dataset.itemName;
                 const isAvailable = stockStatus[name] !== false;
-                
+
                 const btn = card.querySelector('.btn-add');
 
                 if (!isAvailable) {
@@ -1763,15 +1783,15 @@
         function openModal(name) {
             selectedItemName = name;
             document.getElementById('modalItemName').textContent = name;
-            
+
             const savedName = localStorage.getItem('guestName');
             const savedPhone = localStorage.getItem('guestPhone');
-            if(savedName) document.getElementById('guestName').value = savedName;
-            if(savedPhone) document.getElementById('guestPhone').value = savedPhone;
+            if (savedName) document.getElementById('guestName').value = savedName;
+            if (savedPhone) document.getElementById('guestPhone').value = savedPhone;
 
             const backdrop = document.getElementById('modalBackdrop');
             const modal = document.getElementById('orderModal');
-            
+
             backdrop.classList.add('show');
             modal.classList.add('show');
             document.body.style.overflow = 'hidden';
@@ -1781,7 +1801,7 @@
             const guest = document.getElementById('guestName').value.trim();
             const phone = document.getElementById('guestPhone').value.trim();
 
-            if(guest.length < 3 || !phone.match(/^5\d{9}$/)) {
+            if (guest.length < 3 || !phone.match(/^5\d{9}$/)) {
                 alert("Lütfen geçerli bilgiler giriniz.");
                 return;
             }
@@ -1797,7 +1817,7 @@
                 phone: phone,
                 deviceId: deviceId,
                 item: selectedItemName,
-                orderTime: new Date().toLocaleTimeString('tr-TR', {hour:'2-digit', minute:'2-digit'}),
+                orderTime: new Date().toLocaleTimeString('tr-TR', { hour: '2-digit', minute: '2-digit' }),
                 fcmToken: currentFcmToken
             });
 
@@ -1817,6 +1837,18 @@
             setTimeout(() => {
                 successOverlay.classList.remove('show');
             }, 3000);
+        });
+
+        // Handle order errors
+        socket.on('orderError', (data) => {
+            alert('❌ Sipariş Hatası\n\n' + (data.message || 'Sipariş işlenirken bir hata oluştu.'));
+
+            // Re-enable the submit button if it was disabled
+            const submitBtn = document.querySelector('.btn-submit');
+            if (submitBtn) {
+                submitBtn.disabled = false;
+                submitBtn.textContent = 'Siparişi Tamamla';
+            }
         });
 
         // Cafe Closed Logic
@@ -1846,7 +1878,7 @@
 
                 if (titleEl) titleEl.textContent = titleText;
                 if (messageEl) messageEl.textContent = messageText;
-                
+
                 clearCountdown();
                 const endTs = status.countdownEnd ? Number(status.countdownEnd) : null;
                 if (endTs && countdownEl) {
@@ -1859,8 +1891,8 @@
                             return;
                         }
                         const totalSeconds = Math.floor(remaining / 1000);
-                        const m = Math.floor(totalSeconds / 60).toString().padStart(2,'0');
-                        const s = (totalSeconds % 60).toString().padStart(2,'0');
+                        const m = Math.floor(totalSeconds / 60).toString().padStart(2, '0');
+                        const s = (totalSeconds % 60).toString().padStart(2, '0');
                         countdownEl.textContent = `${m}:${s}`;
                         countdownEl.style.display = 'block';
                     };
@@ -1869,7 +1901,7 @@
                 } else if (countdownEl) {
                     countdownEl.style.display = 'none';
                 }
-                
+
                 if (reasonEl) {
                     reasonEl.textContent = detailText;
                     reasonEl.style.display = detailText ? 'block' : 'none';
@@ -1883,7 +1915,7 @@
 
         socket.on('orderLimitExceeded', (data) => {
             alert(`❌ ${data.message}\n\nKalan hakkınız: ${data.remaining}`);
-            
+
             const orderBtn = document.querySelector('.btn-submit');
             if (orderBtn) {
                 orderBtn.disabled = true;
@@ -1898,7 +1930,7 @@
 
         socket.on('deviceLimitExceeded', (data) => {
             alert(`🚫 ${data.message}`);
-            
+
             const orderBtn = document.querySelector('.btn-submit');
             if (orderBtn) {
                 orderBtn.disabled = true;
@@ -1906,10 +1938,11 @@
                 orderBtn.style.background = '#ccc';
             }
         });
-        
+
         function checkCafeStatus() {
             // Socket will handle status
         }
     </script>
 </body>
+
 </html>

@@ -438,9 +438,16 @@ class FirebaseHelper {
             start = end = startDate || today;
         } else if (filter === 'weekly') {
             // Last 7 days using Turkish Date as base
-            const dateObj = new Date(today); // Use today (Turkish YYYY-MM-DD) as base
-            dateObj.setDate(dateObj.getDate() - 7);
-            start = startDate || dateObj.toISOString().substring(0, 10);
+            // Parse YYYY-MM-DD string properly to avoid timezone issues
+            const parts = today.split('-');
+            const dateObj = new Date(parseInt(parts[0]), parseInt(parts[1]) - 1, parseInt(parts[2]));
+            dateObj.setDate(dateObj.getDate() - 6); // Go back 6 days (today + 6 previous = 7 days total)
+
+            const year = dateObj.getFullYear();
+            const month = String(dateObj.getMonth() + 1).padStart(2, '0');
+            const day = String(dateObj.getDate()).padStart(2, '0');
+
+            start = startDate || `${year}-${month}-${day}`;
             end = endDate || today;
         } else if (filter === 'monthly') {
             // Current month

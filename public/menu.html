@@ -1863,17 +1863,29 @@
             let countdownInterval = null;
             const clearCountdown = () => { if (countdownInterval) { clearInterval(countdownInterval); countdownInterval = null; } };
 
-            if (status.isClosed) {
+            // Fix: Check !status.isOpen since server might not send isClosed
+            const isClosed = status && (status.isClosed === true || status.isOpen === false);
+
+            if (isClosed) {
                 alert.classList.add('show');
                 document.body.style.overflow = 'hidden';
 
-                const isPrayer = status.closedReason === 'prayer';
-                const prayerLine = (status.prayerName || status.prayerTime)
-                    ? `${status.prayerName || ''}${(status.prayerName && status.prayerTime) ? ' - ' : ''}${status.prayerTime || ''}`
-                    : '';
+                // Fix: property names matching server.js (closureReason, customMessage)
+                const reason = status.closureReason || status.closedReason;
+                const isPrayer = reason === 'prayer';
 
-                const titleText = status.customNote || (isPrayer ? 'Namaz Vakti' : 'Kafe Kapalı');
+                const prayerLine = (status.prayerInfo && status.prayerInfo.name)
+                    ? `${status.prayerInfo.name} ${status.prayerInfo.startTime ? '- ' + status.prayerInfo.startTime : ''}`
+                    : ((status.prayerName || status.prayerTime) ? `${status.prayerName || ''} ${status.prayerTime ? '- ' + status.prayerTime : ''}` : '');
+
+                const titleText = status.customMessage || status.customNote || (isPrayer ? 'Namaz Vakti' : 'Kafe Kapalı');
                 let messageText = status.customDetail || (isPrayer ? 'Hizmetimize kısa bir ara veriyoruz' : 'Şu an hizmet veremiyoruz.');
+
+                // If customDetail is empty but we have prayer info, show that
+                if (!status.customDetail && isPrayer && prayerLine) {
+                    messageText = prayerLine;
+                }
+
                 let detailText = status.customDetail || prayerLine || 'Kısa bir ara.';
 
                 if (titleEl) titleEl.textContent = titleText;
@@ -1940,7 +1952,7 @@
         });
 
         function checkCafeStatus() {
-            // Socket will handle status
+            socket.emit('getCafeStatus');
         }
     </script>
 </body>

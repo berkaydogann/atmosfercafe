@@ -275,7 +275,7 @@ class FirebaseHelper {
      * @returns {Promise<Object>} - { orderId, orderNumber, slot }
      */
     async placeOrder(orderData) {
-        const { guestName, phone, deviceId, item, fcmToken, deviceInfo } = orderData;
+        const { guestName, phone, deviceId, item, fcmToken, deviceInfo, rating } = orderData;
 
         // Check order rights
         const rights = await this.checkOrderRights(phone, deviceId);
@@ -286,12 +286,24 @@ class FirebaseHelper {
         const today = this.getTurkishDate();
         const slot = rights.slot;
 
-        // Get today's order count to assign order number
-        const todayOrdersSnapshot = await this.db.collection('activeOrders')
-            .where('date', '==', today)
-            .get();
+        // Get next order number using a dedicated counter (guarantees unique, sequential numbers)
+        const counterRef = this.db.collection('dailyCounters').doc(today);
+        const orderNumber = await this.db.runTransaction(async (transaction) => {
+            const counterDoc = await transaction.get(counterRef);
+            let nextNumber = 1;
 
-        const orderNumber = todayOrdersSnapshot.size + 1;
+            if (counterDoc.exists) {
+                nextNumber = (counterDoc.data().lastOrderNumber || 0) + 1;
+            }
+
+            transaction.set(counterRef, {
+                lastOrderNumber: nextNumber,
+                date: today,
+                lastUpdated: this.admin.firestore.FieldValue.serverTimestamp()
+            });
+
+            return nextNumber;
+        });
 
         // Create order document
         const orderRef = this.db.collection('activeOrders').doc();
@@ -309,10 +321,16 @@ class FirebaseHelper {
             deviceInfo: cleanDeviceInfo,
             item: item,
             slot: slot,
+            rating: rating || null, // Only store if provided
             fcmToken: fcmToken || null,
             createdAt: this.admin.firestore.FieldValue.serverTimestamp(),
             date: today
         });
+
+        // Update item rating aggregation only if rating provided
+        if (rating && rating >= 1 && rating <= 5) {
+            await this.updateItemRating(item, rating);
+        }
 
         // Update order rights
         await this.updateOrderRights(phone, deviceId, {
@@ -388,8 +406,67 @@ class FirebaseHelper {
         return {
             orderNumber: orderData.orderNumber,
             item: orderData.item,
-            guestName: orderData.guestName
+            guestName: orderData.guestName,
+            rating: orderData.rating
         };
+    }
+
+    // ============ ITEM RATINGS MANAGEMENT ============
+
+    /**
+     * Update item rating aggregation
+     * @param {string} itemName - Item name
+     * @param {number} rating - Rating value (1-5)
+     */
+    async updateItemRating(itemName, rating) {
+        if (!rating || rating < 1 || rating > 5) return;
+
+        const ratingRef = this.db.collection('itemRatings').doc(itemName);
+        const ratingDoc = await ratingRef.get();
+
+        if (!ratingDoc.exists) {
+            // First rating for this item
+            await ratingRef.set({
+                itemName: itemName,
+                totalRatings: 1,
+                ratingSum: rating,
+                averageRating: rating,
+                lastUpdated: this.admin.firestore.FieldValue.serverTimestamp()
+            });
+        } else {
+            // Update existing ratings
+            const data = ratingDoc.data();
+            const newTotal = (data.totalRatings || 0) + 1;
+            const newSum = (data.ratingSum || 0) + rating;
+            const newAverage = newSum / newTotal;
+
+            await ratingRef.update({
+                totalRatings: newTotal,
+                ratingSum: newSum,
+                averageRating: newAverage,
+                lastUpdated: this.admin.firestore.FieldValue.serverTimestamp()
+            });
+        }
+    }
+
+    /**
+     * Get all item ratings
+     * @returns {Promise<Object>} - Object with item names as keys
+     */
+    async getItemRatings() {
+        const snapshot = await this.db.collection('itemRatings').get();
+        const ratings = {};
+
+        snapshot.forEach(doc => {
+            const data = doc.data();
+            ratings[doc.id] = {
+                totalRatings: data.totalRatings || 0,
+                averageRating: data.averageRating || 0,
+                ratingSum: data.ratingSum || 0
+            };
+        });
+
+        return ratings;
     }
 
     // ============ DAILY ORDERS & REPORTS ============
@@ -453,15 +530,41 @@ class FirebaseHelper {
             // Current month
             start = startDate || `${today.substring(0, 7)}-01`;
             end = endDate || today;
+        } else if (filter === 'all') {
+            // Fetch all historical data - we'll get all dailyOrders documents
+            start = null;
+            end = null;
         }
 
         // Fetch all completed orders in range
         const allOrders = [];
-        const dateRange = this.getDateRange(start, end);
 
-        for (const date of dateRange) {
-            const orders = await this.getCompletedOrders(date);
-            allOrders.push(...orders);
+        if (filter === 'all') {
+            // Fetch all dailyOrders documents (all dates)
+            const dailyOrdersSnapshot = await this.db.collection('dailyOrders').get();
+
+            for (const dateDoc of dailyOrdersSnapshot.docs) {
+                const date = dateDoc.id; // Document ID is the date (YYYY-MM-DD)
+                const ordersSnapshot = await dateDoc.ref.collection('orders').get();
+                ordersSnapshot.forEach(orderDoc => {
+                    const data = orderDoc.data();
+                    allOrders.push({
+                        id: orderDoc.id,
+                        ...data,
+                        date: date, // Set date from parent document ID
+                        createdAt: data.createdAt?.toDate?.()?.toISOString() || null,
+                        completedAt: data.completedAt?.toDate?.()?.toISOString() || null
+                    });
+                });
+            }
+        } else {
+            // Fetch orders for specific date range
+            const dateRange = this.getDateRange(start, end);
+
+            for (const date of dateRange) {
+                const orders = await this.getCompletedOrders(date);
+                allOrders.push(...orders);
+            }
         }
 
         // Aggregate data

@@ -22,14 +22,29 @@ let fbHelper;
 
 try {
   let serviceAccount;
+  const fs = require('fs');
 
-  // Firebase anahtarını Digital Ocean environment variable'dan oku (Base64 formatında)
-  if (!process.env.FIREBASE_KEY_BASE64) {
-    throw new Error('❌ FIREBASE_KEY_BASE64 environment variable bulunamadı! Digital Ocean ayarlarını kontrol edin.');
+  // Önce yerel geliştirme için serviceAccountKey.json dosyasını kontrol et
+  const localKeyPath = path.join(__dirname, 'cinaralticafe-73b9e-firebase-adminsdk-fbsvc-b4c8ad6677.json');
+
+  if (fs.existsSync(localKeyPath)) {
+    // LOCAL DEVELOPMENT: serviceAccountKey.json dosyası bulundu
+    console.log('🔧 LOCAL DEVELOPMENT MODE: serviceAccountKey.json kullanılıyor...');
+    serviceAccount = require(localKeyPath);
+    console.log('✅ Firebase anahtarı yerel dosyadan yüklendi');
+  } else if (process.env.FIREBASE_KEY_BASE64) {
+    // PRODUCTION: Digital Ocean environment variable kullan (Base64 formatında)
+    console.log('� PRODUCTION MODE: Environment Variable (Base64) kullanılıyor...');
+    const decodedKey = Buffer.from(process.env.FIREBASE_KEY_BASE64, 'base64').toString('utf-8');
+    serviceAccount = JSON.parse(decodedKey);
+    console.log('✅ Firebase anahtarı Environment Variable\'dan yüklendi');
+  } else {
+    throw new Error(
+      '❌ Firebase anahtarı bulunamadı!\n' +
+      '   LOCAL TEST için: serviceAccountKey.json dosyasını proje klasörüne ekleyin\n' +
+      '   PRODUCTION için: FIREBASE_KEY_BASE64 environment variable\'ı ayarlayın'
+    );
   }
-  console.log('🔄 Firebase anahtarı Environment Variable üzerinden okunuyor (Base64)...');
-  const decodedKey = Buffer.from(process.env.FIREBASE_KEY_BASE64, 'base64').toString('utf-8');
-  serviceAccount = JSON.parse(decodedKey);
 
   admin.initializeApp({
     credential: admin.credential.cert(serviceAccount)
@@ -82,10 +97,16 @@ let cachedCafeStatus = {
   customMessage: null,
   customDetail: null,
   prayerInfo: null,
-  countdownEnd: null,
-  saturdayMenuActive: false,
-  saturdayMenuItems: []
+  countdownEnd: null
 };
+
+// Special menus cache (Chat, Chat Prep, Atmosfer)
+let specialMenus = {
+  chat: { active: false, items: [] },
+  chatPrep: { active: false, items: [] },
+  atmosfer: { active: false, items: [] }
+};
+
 let tvReadyOrders = [];
 let currentVideoUrl = null;
 
@@ -95,15 +116,23 @@ async function initializeCache() {
     cachedCafeStatus = await fbHelper.getCafeStatus() || cachedCafeStatus;
     cachedStockStatus = await fbHelper.getStockStatus() || {};
 
-    // Load Saturday menu from Firebase
-    try {
-      const saturdayMenuDoc = await db.collection('saturdayMenu').doc('current').get();
-      if (saturdayMenuDoc.exists) {
-        cachedCafeStatus.saturdayMenuItems = saturdayMenuDoc.data().items || [];
+    // Load all three special menus from Firebase
+    const menuTypes = ['chat', 'chatPrep', 'atmosfer'];
+    for (const menuType of menuTypes) {
+      try {
+        const menuDoc = await db.collection('specialMenus').doc(menuType).get();
+        if (menuDoc.exists) {
+          const data = menuDoc.data();
+          specialMenus[menuType] = {
+            active: data.active || false,
+            items: data.items || []
+          };
+        }
+      } catch (err) {
+        console.warn(`⚠️ Could not load ${menuType} menu from Firebase`);
       }
-    } catch (err) {
-      console.warn('⚠️ Could not load Saturday menu from Firebase');
     }
+    console.log(`[${fbHelper.getTurkishTime()}] 📋 Special menus loaded: Chat(${specialMenus.chat.items.length}), ChatPrep(${specialMenus.chatPrep.items.length}), Atmosfer(${specialMenus.atmosfer.items.length})`);
 
     // Load today's active orders
     const activeOrders = await fbHelper.getActiveOrders();
@@ -179,6 +208,7 @@ io.on('connection', (socket) => {
         phone: orderData.phone,
         deviceId: orderData.deviceId,
         item: orderData.item,
+        rating: orderData.rating || null, // Only include if provided
         fcmToken: orderData.fcmToken,
         deviceInfo: {
           deviceModel: orderData.deviceModel,
@@ -207,6 +237,7 @@ io.on('connection', (socket) => {
         guestName: orderData.guestName,
         phone: orderData.phone,
         item: orderData.item,
+        rating: orderData.rating || null,
         slot: result.slot,
         createdAt: getTimestamp()
       });
@@ -301,6 +332,18 @@ io.on('connection', (socket) => {
       socket.emit('orderSlots', slots);
     } catch (error) {
       console.error(`[${getTimestamp()}] ❌ Error fetching slots:`, error);
+    }
+  });
+
+  // Get item ratings for menu display
+  socket.on('getItemRatings', async () => {
+    try {
+      const ratings = await fbHelper.getItemRatings();
+      socket.emit('itemRatings', ratings);
+      console.log(`[${getTimestamp()}] ⭐ Item ratings sent: ${Object.keys(ratings).length} items`);
+    } catch (error) {
+      console.error(`[${getTimestamp()}] ❌ Error fetching item ratings:`, error);
+      socket.emit('itemRatings', {});
     }
   });
 
@@ -410,109 +453,78 @@ io.on('connection', (socket) => {
     io.emit('stopVideo');
   });
 
-  // Toggle Saturday menu mode
-  socket.on('toggleSaturdayMode', async (data) => {
-    try {
-      const isActive = data.active || false;
-      const cafeStatus = await fbHelper.getCafeStatus();
+  // ============ SPECIAL MENUS (Chat, Chat Prep, Atmosfer) ============
 
-      // Get Saturday menu items from Firebase saturdayMenu/current collection
-      let saturdayMenuItems = [];
-      try {
-        const saturdayMenuDoc = await db.collection('saturdayMenu').doc('current').get();
-        if (saturdayMenuDoc.exists) {
-          saturdayMenuItems = saturdayMenuDoc.data().items || [];
-        }
-      } catch (err) {
-        console.warn(`[${getTimestamp()}] ⚠️ Could not fetch Saturday menu from Firebase:`, err.message);
+  // Get all special menus status
+  socket.on('getSpecialMenuStatus', async () => {
+    try {
+      // Return all three menus from cache
+      socket.emit('specialMenuStatus', specialMenus);
+      console.log(`[${getTimestamp()}] 📋 Special menus status sent`);
+    } catch (error) {
+      console.error(`[${getTimestamp()}] ❌ Error fetching special menu status:`, error);
+    }
+  });
+
+  // Toggle a specific special menu
+  socket.on('toggleSpecialMenu', async (data) => {
+    try {
+      const { menuType, active } = data;
+
+      // Validate menu type
+      if (!['chat', 'chatPrep', 'atmosfer'].includes(menuType)) {
+        console.error(`[${getTimestamp()}] ❌ Invalid menu type: ${menuType}`);
+        return;
       }
 
-      await fbHelper.updateCafeStatus(
-        cafeStatus.isOpen,
-        cafeStatus.closureReason,
-        {
-          customMessage: cafeStatus.customMessage,
-          customDetail: cafeStatus.customDetail,
-          prayerInfo: cafeStatus.prayerInfo,
-          saturdayMenuActive: isActive,
-          saturdayMenuItems: saturdayMenuItems
-        }
-      );
-
       // Update cache
-      cachedCafeStatus.saturdayMenuActive = isActive;
-      cachedCafeStatus.saturdayMenuItems = saturdayMenuItems;
+      specialMenus[menuType].active = active;
+
+      // Save to Firebase
+      await db.collection('specialMenus').doc(menuType).set({
+        active: active,
+        items: specialMenus[menuType].items,
+        lastUpdated: admin.firestore.FieldValue.serverTimestamp()
+      }, { merge: true });
 
       // Broadcast to all clients
-      io.emit('saturdayModeToggled', { active: isActive, items: saturdayMenuItems });
-      io.emit('cafeStatus', cachedCafeStatus);
+      io.emit('specialMenuToggled', { menuType, active, items: specialMenus[menuType].items });
 
-      console.log(`[${getTimestamp()}] 📅 Cumartesi menüsü: ${isActive ? 'AÇIK' : 'KAPALI'} (${saturdayMenuItems.length} ürün)`);
+      const menuNames = { chat: 'Sohbet', chatPrep: 'Sohbet Hazırlık', atmosfer: 'Atmosfer' };
+      console.log(`[${getTimestamp()}] 📋 ${menuNames[menuType]} menüsü: ${active ? 'AÇIK' : 'KAPALI'}`);
     } catch (error) {
-      console.error(`[${getTimestamp()}] ❌ Error toggling Saturday mode:`, error);
+      console.error(`[${getTimestamp()}] ❌ Error toggling special menu:`, error);
     }
   });
 
-  // Get Saturday menu status
-  socket.on('getSaturdayMenuStatus', async () => {
+  // Update items for a specific special menu
+  socket.on('updateSpecialMenuItems', async (data) => {
     try {
-      const turkishTime = new Date(Date.now() + (3 * 60 * 60 * 1000));
-      const dayOfWeek = turkishTime.getUTCDay();
-      const hour = turkishTime.getUTCHours();
+      const { menuType, items } = data;
 
-      // Check if it's Saturday (6) and after 18:00
-      const isSaturdayEvening = (dayOfWeek === 6 && hour >= 18);
+      // Validate menu type
+      if (!['chat', 'chatPrep', 'atmosfer'].includes(menuType)) {
+        console.error(`[${getTimestamp()}] ❌ Invalid menu type: ${menuType}`);
+        return;
+      }
 
-      // Get Saturday menu items from cafe status
-      const cafeStatus = await fbHelper.getCafeStatus();
-      const saturdayMenuItems = cafeStatus.saturdayMenuItems || [];
-      const saturdayMenuActive = cafeStatus.saturdayMenuActive || false;
+      // Update cache
+      specialMenus[menuType].items = items;
 
-      socket.emit('saturdayMenuStatus', {
-        isSaturdayEvening: isSaturdayEvening,
-        items: saturdayMenuItems,
-        active: saturdayMenuActive
-      });
-
-      console.log(`[${getTimestamp()}] 📅 Cumartesi menü durumu: ${saturdayMenuActive ? 'Manuel Aktif' : (isSaturdayEvening ? 'Otomatik Aktif' : 'Pasif')}`);
-    } catch (error) {
-      console.error(`[${getTimestamp()}] ❌ Error fetching Saturday menu status:`, error);
-    }
-  });
-
-  // Update Saturday menu items
-  socket.on('updateSaturdayMenu', async (menuItems) => {
-    try {
-      // Save to Firebase saturdayMenu/current
-      await db.collection('saturdayMenu').doc('current').set({
-        items: menuItems,
+      // Save to Firebase
+      await db.collection('specialMenus').doc(menuType).set({
+        active: specialMenus[menuType].active,
+        items: items,
         lastUpdated: admin.firestore.FieldValue.serverTimestamp()
       });
 
-      // Also update cafe status with items
-      const cafeStatus = await fbHelper.getCafeStatus();
-      await fbHelper.updateCafeStatus(
-        cafeStatus.isOpen,
-        cafeStatus.closureReason,
-        {
-          customMessage: cafeStatus.customMessage,
-          customDetail: cafeStatus.customDetail,
-          prayerInfo: cafeStatus.prayerInfo,
-          saturdayMenuActive: cafeStatus.saturdayMenuActive || false,
-          saturdayMenuItems: menuItems
-        }
-      );
-
-      // Update cache
-      cachedCafeStatus.saturdayMenuItems = menuItems;
-
       // Broadcast update to all clients
-      io.emit('saturdayMenuUpdated', menuItems);
-      io.emit('cafeStatus', cachedCafeStatus);
+      io.emit('specialMenuUpdated', { menuType, items, active: specialMenus[menuType].active });
 
-      console.log(`[${getTimestamp()}] 📅 Cumartesi menüsü güncellendi: ${menuItems.length} ürün`);
+      const menuNames = { chat: 'Sohbet', chatPrep: 'Sohbet Hazırlık', atmosfer: 'Atmosfer' };
+      console.log(`[${getTimestamp()}] 📋 ${menuNames[menuType]} menüsü güncellendi: ${items.length} ürün`);
     } catch (error) {
-      console.error(`[${getTimestamp()}] ❌ Error updating Saturday menu:`, error);
+      console.error(`[${getTimestamp()}] ❌ Error updating special menu items:`, error);
     }
   });
 
@@ -574,15 +586,35 @@ app.get('/api/reports', async (req, res) => {
   try {
     const { filter = 'all' } = req.query;
 
-    // Get data for both daily and monthly
-    const dailyReports = await fbHelper.getReports('daily');
-    const monthlyReports = await fbHelper.getReports('monthly');
+    console.log(`[${getTimestamp()}] 📊 Rapor çekiliyor - Filtre: ${filter}`);
+
+    // Get data based on filter
+    let reportsData;
+
+    if (filter === 'all') {
+      // Fetch all historical data
+      reportsData = await fbHelper.getReports('all');
+    } else if (filter === 'daily') {
+      // Fetch only today's data
+      reportsData = await fbHelper.getReports('daily');
+    } else if (filter === 'weekly') {
+      // Fetch last 7 days
+      reportsData = await fbHelper.getReports('weekly');
+    } else if (filter === 'monthly') {
+      // Fetch current month
+      reportsData = await fbHelper.getReports('monthly');
+    } else {
+      // Default to all if unknown filter
+      reportsData = await fbHelper.getReports('all');
+    }
 
     // Format response for admin.html
     const response = {
-      daily: formatDailyReports(dailyReports),
-      monthly: formatMonthlyReports(monthlyReports)
+      daily: formatDailyReports(reportsData),
+      monthly: formatMonthlyReports(reportsData)
     };
+
+    console.log(`[${getTimestamp()}] ✅ Rapor gönderildi - ${reportsData.orders?.length || 0} sipariş`);
 
     res.json(response);
   } catch (error) {
@@ -602,7 +634,8 @@ function formatDailyReports(data) {
       if (!result[date]) {
         result[date] = {
           customers: {},
-          items: {}
+          items: {},
+          itemRatings: {} // { itemName: { sum, count, avg } }
         };
       }
 
@@ -610,9 +643,20 @@ function formatDailyReports(data) {
       const customerName = order.guestName || 'Misafir';
       result[date].customers[customerName] = (result[date].customers[customerName] || 0) + 1;
 
-      // Count items
+      // Count items and aggregate ratings
       const itemName = order.item || 'Bilinmeyen';
       result[date].items[itemName] = (result[date].items[itemName] || 0) + 1;
+
+      // Aggregate item ratings
+      if (order.rating) {
+        if (!result[date].itemRatings[itemName]) {
+          result[date].itemRatings[itemName] = { sum: 0, count: 0 };
+        }
+        result[date].itemRatings[itemName].sum += order.rating;
+        result[date].itemRatings[itemName].count += 1;
+        result[date].itemRatings[itemName].avg =
+          result[date].itemRatings[itemName].sum / result[date].itemRatings[itemName].count;
+      }
     });
   }
 
@@ -631,7 +675,8 @@ function formatMonthlyReports(data) {
       if (!result[month]) {
         result[month] = {
           customers: {},
-          items: {}
+          items: {},
+          itemRatings: {} // { itemName: { sum, count, avg } }
         };
       }
 
@@ -639,9 +684,20 @@ function formatMonthlyReports(data) {
       const customerName = order.guestName || 'Misafir';
       result[month].customers[customerName] = (result[month].customers[customerName] || 0) + 1;
 
-      // Count items
+      // Count items and aggregate ratings
       const itemName = order.item || 'Bilinmeyen';
       result[month].items[itemName] = (result[month].items[itemName] || 0) + 1;
+
+      // Aggregate item ratings
+      if (order.rating) {
+        if (!result[month].itemRatings[itemName]) {
+          result[month].itemRatings[itemName] = { sum: 0, count: 0 };
+        }
+        result[month].itemRatings[itemName].sum += order.rating;
+        result[month].itemRatings[itemName].count += 1;
+        result[month].itemRatings[itemName].avg =
+          result[month].itemRatings[itemName].sum / result[month].itemRatings[itemName].count;
+      }
     });
   }
 

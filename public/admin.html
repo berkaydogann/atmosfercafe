@@ -1095,11 +1095,20 @@
             </div>
         </div>
         <div class="control-buttons-row">
-            <button class="ctrl-btn" id="btnSaturday" onclick="toggleSaturdayMenu()">
-                <i class="bi bi-calendar-week"></i> Cumartesi
+            <button class="ctrl-btn" id="btnChatMenu" onclick="toggleSpecialMenu('chat')"
+                style="background: #3b82f6; border: 2px solid transparent;">
+                <i class="bi bi-chat-dots"></i> Sohbet Menüsü
+            </button>
+            <button class="ctrl-btn" id="btnChatPrepMenu" onclick="toggleSpecialMenu('chatPrep')"
+                style="background: #8b5cf6; border: 2px solid transparent;">
+                <i class="bi bi-tools"></i> Sohbet Hazırlık
+            </button>
+            <button class="ctrl-btn" id="btnAtmosferMenu" onclick="toggleSpecialMenu('atmosfer')"
+                style="background: #ec4899; border: 2px solid transparent;">
+                <i class="bi bi-stars"></i> Atmosfer Menüsü
             </button>
             <button class="ctrl-btn" onclick="closeCafeQuick('chat')">
-                <i class="bi bi-chat-dots"></i> Sohbet
+                <i class="bi bi-pause-circle"></i> Sohbet Molası
             </button>
             <button class="ctrl-btn" onclick="closeCafeQuick('prayer')">
                 <i class="bi bi-moon-stars"></i> Namaz
@@ -1109,10 +1118,6 @@
             </button>
             <button class="ctrl-btn open-btn" onclick="openCafe()">
                 <i class="bi bi-door-open"></i> Kafeyi Aç
-            </button>
-            <button class="ctrl-btn" id="btnSaturday" onclick="toggleSaturdayMenu()"
-                style="background: #9333ea; border: 2px solid transparent;">
-                <i class="bi bi-calendar-week"></i> Cumartesi Menüsü
             </button>
         </div>
 
@@ -1144,8 +1149,8 @@
         <button class="tab-btn" onclick="switchTab('stock', this)">
             <i class="bi bi-boxes"></i> Stok Yönetimi
         </button>
-        <button class="tab-btn" onclick="switchTab('saturday', this)">
-            <i class="bi bi-calendar-week"></i> Cumartesi Menüsü
+        <button class="tab-btn" onclick="switchTab('specialMenus', this)">
+            <i class="bi bi-list-stars"></i> Özel Menüler
         </button>
         <button class="tab-btn" onclick="switchTab('reports', this)">
             <i class="bi bi-bar-chart"></i> Raporlar
@@ -1315,30 +1320,56 @@
         <div class="stock-grid" id="stockContainer"></div>
     </div>
 
-    <!-- Cumartesi Menüsü Sekmesi -->
-    <div id="saturdayTab" class="tab-content">
+    <!-- Special Menus Tab (Chat, Chat Prep, Atmosfer) -->
+    <div id="specialMenusTab" class="tab-content">
         <div style="background: var(--card-dark); padding: 20px; border-radius: 16px; margin-bottom: 20px;">
             <h3 style="color: var(--starbucks-green); margin-bottom: 10px;">
-                <i class="bi bi-calendar-week"></i> Cumartesi Akşam Menüsü (18:00 sonrası)
+                <i class="bi bi-list-stars"></i> Özel Menüler - Ürün Seçimi
             </h3>
             <p style="color: var(--text-gray); margin-bottom: 0;">
-                Cumartesi günleri saat 18:00'dan sonra sadece burada seçtiğiniz ürünler menüde görünecektir.
-                Müşteriler yalnızca bu ürünlerden sipariş verebilir.
+                Her menü türü için gösterilecek ürünleri seçin. Üst bardaki butonlarla menüleri aktif/pasif
+                yapabilirsiniz.
             </p>
         </div>
 
+        <!-- Sub-tabs for each menu type -->
+        <div class="special-menu-subtabs" style="display: flex; gap: 10px; margin-bottom: 20px;">
+            <button class="special-subtab active" id="subtabChat" onclick="switchSpecialMenuSubtab('chat')"
+                style="flex: 1; padding: 12px; background: #3b82f6; color: white; border: none; border-radius: 10px; cursor: pointer; font-weight: 600;">
+                <i class="bi bi-chat-dots"></i> Sohbet Menüsü
+            </button>
+            <button class="special-subtab" id="subtabChatPrep" onclick="switchSpecialMenuSubtab('chatPrep')"
+                style="flex: 1; padding: 12px; background: rgba(139, 92, 246, 0.3); color: white; border: none; border-radius: 10px; cursor: pointer; font-weight: 600;">
+                <i class="bi bi-tools"></i> Sohbet Hazırlık
+            </button>
+            <button class="special-subtab" id="subtabAtmosfer" onclick="switchSpecialMenuSubtab('atmosfer')"
+                style="flex: 1; padding: 12px; background: rgba(236, 72, 153, 0.3); color: white; border: none; border-radius: 10px; cursor: pointer; font-weight: 600;">
+                <i class="bi bi-stars"></i> Atmosfer Menüsü
+            </button>
+        </div>
+
+        <!-- Bulk Actions -->
         <div style="margin-bottom: 20px;">
-            <button onclick="selectAllSaturdayItems()"
+            <button onclick="selectAllSpecialItems()"
                 style="background: var(--starbucks-green); color: white; border: none; padding: 10px 20px; border-radius: 10px; cursor: pointer; margin-right: 10px;">
                 <i class="bi bi-check-all"></i> Tümünü Seç
             </button>
-            <button onclick="deselectAllSaturdayItems()"
+            <button onclick="deselectAllSpecialItems()"
                 style="background: var(--danger); color: white; border: none; padding: 10px 20px; border-radius: 10px; cursor: pointer;">
                 <i class="bi bi-x-lg"></i> Tümünü Kaldır
             </button>
         </div>
 
-        <div class="stock-grid" id="saturdayMenuContainer"></div>
+        <!-- Sub-tab content containers -->
+        <div id="chatMenuContent" class="special-menu-content active">
+            <div class="stock-grid" id="chatMenuContainer"></div>
+        </div>
+        <div id="chatPrepMenuContent" class="special-menu-content" style="display: none;">
+            <div class="stock-grid" id="chatPrepMenuContainer"></div>
+        </div>
+        <div id="atmosferMenuContent" class="special-menu-content" style="display: none;">
+            <div class="stock-grid" id="atmosferMenuContainer"></div>
+        </div>
     </div>
 
     <!-- Raporlar Sekmesi -->
@@ -1390,8 +1421,15 @@
         let stats = { total: 0, pending: 0, completed: 0 };
         let stockStatus = {}; // Stok durumunu tut
         let cafeIsClosed = false; // Kafe kapalı mı
-        let saturdayMenuItems = []; // Cumartesi menüsü için seçilen ürünler
-        let saturdayTestMode = false; // Cumartesi test modu
+
+        // Special menus state (Chat, Chat Prep, Atmosfer)
+        let specialMenus = {
+            chat: { active: false, items: [] },
+            chatPrep: { active: false, items: [] },
+            atmosfer: { active: false, items: [] }
+        };
+        let currentSpecialMenuSubtab = 'chat'; // Currently selected subtab
+
         const customNoteInput = document.getElementById('customNoteInput');
         const customDetailInput = document.getElementById('customDetailInput');
         const prayerNameInput = document.getElementById('prayerNameInput');
@@ -1811,32 +1849,68 @@
 
         // === NEW QUICK ACTION FUNCTIONS ===
 
-        // Toggle Saturday menu on/off (uses items from Firebase)
-        window.toggleSaturdayMenu = function () {
-            // Toggle the Saturday mode on/off
-            // Items are already loaded from Firebase
-            const btn = document.getElementById('btnSaturday');
+        // === SPECIAL MENUS FUNCTIONS ===
 
-            if (btn.classList.contains('active')) {
-                // Turn OFF - disable Saturday mode
-                socket.emit('toggleSaturdayMode', { active: false });
-                btn.classList.remove('active');
-            } else {
-                // Turn ON - enable Saturday mode with existing Firebase items
-                socket.emit('toggleSaturdayMode', { active: true });
-                btn.classList.add('active');
-            }
+        // Toggle a specific special menu (called from top bar buttons)
+        window.toggleSpecialMenu = function (menuType) {
+            const btnIds = { chat: 'btnChatMenu', chatPrep: 'btnChatPrepMenu', atmosfer: 'btnAtmosferMenu' };
+            const btn = document.getElementById(btnIds[menuType]);
+            const newState = !specialMenus[menuType].active;
+
+            // Update local state
+            specialMenus[menuType].active = newState;
+
+            // Update button style
+            updateSpecialMenuButton(menuType, newState);
+
+            // Send to server
+            socket.emit('toggleSpecialMenu', { menuType, active: newState });
         };
 
-        // Update Saturday button active state
-        function updateSaturdayButton() {
-            const btn = document.getElementById('btnSaturday');
-            if (saturdayMenuItems.length > 0) {
-                btn.classList.add('active');
-            } else {
-                btn.classList.remove('active');
+        // Update special menu button active state
+        function updateSpecialMenuButton(menuType, isActive) {
+            const btnIds = { chat: 'btnChatMenu', chatPrep: 'btnChatPrepMenu', atmosfer: 'btnAtmosferMenu' };
+            const colors = { chat: '#3b82f6', chatPrep: '#8b5cf6', atmosfer: '#ec4899' };
+            const btn = document.getElementById(btnIds[menuType]);
+            if (btn) {
+                if (isActive) {
+                    btn.classList.add('active');
+                    btn.style.boxShadow = `0 0 20px ${colors[menuType]}88`;
+                    btn.style.transform = 'scale(1.05)';
+                } else {
+                    btn.classList.remove('active');
+                    btn.style.boxShadow = '';
+                    btn.style.transform = '';
+                }
             }
         }
+
+        // Switch between special menu subtabs
+        window.switchSpecialMenuSubtab = function (menuType) {
+            currentSpecialMenuSubtab = menuType;
+
+            // Update subtab buttons
+            const subtabs = ['chat', 'chatPrep', 'atmosfer'];
+            const colors = { chat: '#3b82f6', chatPrep: '#8b5cf6', atmosfer: '#ec4899' };
+
+            subtabs.forEach(type => {
+                const subtabBtn = document.getElementById('subtab' + type.charAt(0).toUpperCase() + type.slice(1));
+                const contentDiv = document.getElementById(type + 'MenuContent');
+
+                if (type === menuType) {
+                    subtabBtn.style.background = colors[type];
+                    subtabBtn.classList.add('active');
+                    contentDiv.style.display = 'block';
+                } else {
+                    subtabBtn.style.background = `rgba(${type === 'chat' ? '59, 130, 246' : type === 'chatPrep' ? '139, 92, 246' : '236, 72, 153'}, 0.3)`;
+                    subtabBtn.classList.remove('active');
+                    contentDiv.style.display = 'none';
+                }
+            });
+
+            // Render the grid for the selected menu
+            renderSpecialMenuGrid(menuType);
+        };
 
         // Update cafe status badge in top bar
         function updateCafeStatusBadge() {
@@ -1920,9 +1994,9 @@
                 renderStockGrid();
             }
 
-            // Cumartesi menüsü sekmesine girildiğinde grid'i doldur
-            if (tabName === 'saturday') {
-                renderSaturdayMenuGrid();
+            // Özel Menüler sekmesine girildiğinde ilk grid'i doldur
+            if (tabName === 'specialMenus') {
+                renderSpecialMenuGrid(currentSpecialMenuSubtab);
             }
 
             // Raporlar sekmesine girildiğinde raporları yükle
@@ -2010,13 +2084,16 @@
             socket.emit('updateStock', { itemName: itemName, isAvailable: newStatus });
         }
 
-        // Cumartesi menüsü grid'ini render et
-        function renderSaturdayMenuGrid() {
-            const container = document.getElementById('saturdayMenuContainer');
+        // Render special menu grid for a specific menu type
+        function renderSpecialMenuGrid(menuType) {
+            const containerIds = { chat: 'chatMenuContainer', chatPrep: 'chatPrepMenuContainer', atmosfer: 'atmosferMenuContainer' };
+            const container = document.getElementById(containerIds[menuType]);
+            if (!container) return;
+
             container.innerHTML = '';
 
             allMenuItems.forEach(item => {
-                const isSelected = saturdayMenuItems.includes(item);
+                const isSelected = specialMenus[menuType].items.includes(item);
                 const statusClass = isSelected ? 'available' : 'unavailable';
                 const statusText = isSelected ? 'Seçili' : 'Seçili Değil';
                 const icon = isSelected ? 'bi-check-circle-fill' : 'bi-circle';
@@ -2025,7 +2102,7 @@
                 itemDiv.className = 'stock-item';
                 itemDiv.innerHTML = `
                     <div class="stock-item-name">${item}</div>
-                    <button class="stock-toggle-btn ${statusClass}" onclick="toggleSaturdayMenuItem(this, '${item}')">
+                    <button class="stock-toggle-btn ${statusClass}" onclick="toggleSpecialMenuItem(this, '${menuType}', '${item}')">
                         <i class="bi ${icon}"></i> ${statusText}
                     </button>
                 `;
@@ -2033,40 +2110,42 @@
             });
         }
 
-        // Cumartesi menüsünde ürün seç/kaldır
-        window.toggleSaturdayMenuItem = function (btn, itemName) {
+        // Toggle item in special menu
+        window.toggleSpecialMenuItem = function (btn, menuType, itemName) {
             const isCurrentlySelected = btn.classList.contains('available');
 
             if (isCurrentlySelected) {
-                // Kaldır
-                saturdayMenuItems = saturdayMenuItems.filter(item => item !== itemName);
+                // Remove
+                specialMenus[menuType].items = specialMenus[menuType].items.filter(item => item !== itemName);
                 btn.classList.remove('available');
                 btn.classList.add('unavailable');
                 btn.innerHTML = '<i class="bi bi-circle"></i> Seçili Değil';
             } else {
-                // Ekle
-                saturdayMenuItems.push(itemName);
+                // Add
+                specialMenus[menuType].items.push(itemName);
                 btn.classList.remove('unavailable');
                 btn.classList.add('available');
                 btn.innerHTML = '<i class="bi bi-check-circle-fill"></i> Seçili';
             }
 
-            // Sunucuya gönder
-            socket.emit('updateSaturdayMenu', saturdayMenuItems);
+            // Send to server
+            socket.emit('updateSpecialMenuItems', { menuType, items: specialMenus[menuType].items });
         };
 
-        // Tüm ürünleri cumartesi menüsüne ekle
-        window.selectAllSaturdayItems = function () {
-            saturdayMenuItems = [...allMenuItems];
-            socket.emit('updateSaturdayMenu', saturdayMenuItems);
-            renderSaturdayMenuGrid();
+        // Select all items for current subtab
+        window.selectAllSpecialItems = function () {
+            const menuType = currentSpecialMenuSubtab;
+            specialMenus[menuType].items = [...allMenuItems];
+            socket.emit('updateSpecialMenuItems', { menuType, items: specialMenus[menuType].items });
+            renderSpecialMenuGrid(menuType);
         };
 
-        // Tüm ürünleri cumartesi menüsünden kaldır
-        window.deselectAllSaturdayItems = function () {
-            saturdayMenuItems = [];
-            socket.emit('updateSaturdayMenu', saturdayMenuItems);
-            renderSaturdayMenuGrid();
+        // Deselect all items for current subtab
+        window.deselectAllSpecialItems = function () {
+            const menuType = currentSpecialMenuSubtab;
+            specialMenus[menuType].items = [];
+            socket.emit('updateSpecialMenuItems', { menuType, items: specialMenus[menuType].items });
+            renderSpecialMenuGrid(menuType);
         };
 
         function updateStats() {
@@ -2162,7 +2241,7 @@
                     <span class="time-badge">${timeOnly}</span>
                 </div>
                 <div class="order-item">
-                    ${data.item}
+                    ${data.item}${data.rating ? ` <span style="color: #FFD700; font-size: 0.8em;">${'★'.repeat(data.rating)}${'☆'.repeat(5 - data.rating)}</span>` : ''}
                 </div>
                 <div class="stock-controls">
                     <button class="btn-stock ${stockButtonClass}" onclick="toggleStock(this, '${data.item}')">
@@ -2239,8 +2318,12 @@
                 Object.entries(dayData.items)
                     .sort(([, a], [, b]) => b - a)
                     .forEach(([item, count]) => {
+                        const ratingInfo = dayData.itemRatings && dayData.itemRatings[item];
+                        const ratingDisplay = ratingInfo && ratingInfo.avg
+                            ? `<span style="color: #FFD700; margin-left: 8px;">★ ${ratingInfo.avg.toFixed(1)}</span>`
+                            : '';
                         html += `<div class="report-item">
-                            <span class="report-name">${item}</span>
+                            <span class="report-name">${item}${ratingDisplay}</span>
                             <span class="report-count">${count}</span>
                         </div>`;
                     });
@@ -2291,8 +2374,12 @@
                 Object.entries(monthData.items)
                     .sort(([, a], [, b]) => b - a)
                     .forEach(([item, count]) => {
+                        const ratingInfo = monthData.itemRatings && monthData.itemRatings[item];
+                        const ratingDisplay = ratingInfo && ratingInfo.avg
+                            ? `<span style="color: #FFD700; margin-left: 8px;">★ ${ratingInfo.avg.toFixed(1)}</span>`
+                            : '';
                         html += `<div class="report-item">
-                            <span class="report-name">${item}</span>
+                            <span class="report-name">${item}${ratingDisplay}</span>
                             <span class="report-count">${count}</span>
                         </div>`;
                     });
@@ -2447,48 +2534,45 @@
         // Admin yüklendiğinde stok durumunu iste
         socket.emit('getStock');
 
-        // Cumartesi menüsü durumunu iste
-        socket.emit('getSaturdayMenuStatus');
+        // Özel menüler durumunu iste
+        socket.emit('getSpecialMenuStatus');
 
         // Stok durumunu al
         socket.on('stockStatus', (status) => {
             stockStatus = status;
         });
 
-        // Cumartesi menüsü durumunu al
-        socket.on('saturdayMenuStatus', d => {
-            saturdayMenuItems = d.items || [];
-            const isActive = d.active || false;
-            const btn = document.getElementById('btnSaturday');
-            if (btn) {
-                if (isActive) {
-                    btn.classList.add('active');
-                } else {
-                    btn.classList.remove('active');
-                }
-            }
-            console.log('Cumartesi menüsü yüklendi:', saturdayMenuItems.length, 'ürün', isActive ? '(AKTIF)' : '(KAPALI)');
+        // Özel menüler durumunu al
+        socket.on('specialMenuStatus', data => {
+            specialMenus = data;
+            // Update all button states
+            ['chat', 'chatPrep', 'atmosfer'].forEach(menuType => {
+                updateSpecialMenuButton(menuType, specialMenus[menuType].active);
+            });
+            console.log('Özel menüler yüklendi:',
+                'Chat:', specialMenus.chat.items.length,
+                'ChatPrep:', specialMenus.chatPrep.items.length,
+                'Atmosfer:', specialMenus.atmosfer.items.length);
         });
 
-        // Cumartesi menüsü güncellendiğinde
-        socket.on('saturdayMenuUpdated', items => {
-            saturdayMenuItems = items;
-            // Eğer cumartesi sekmesindeyse grid'i yeniden render et
-            const saturdayTab = document.getElementById('saturdayTab');
-            if (saturdayTab.classList.contains('active')) {
-                renderSaturdayMenuGrid();
+        // Özel menü gücellendiğinde
+        socket.on('specialMenuUpdated', data => {
+            specialMenus[data.menuType].items = data.items;
+            specialMenus[data.menuType].active = data.active;
+            // Eğer özel menüler sekmesindeyse ve doğru subtab aktifse grid'i yeniden render et
+            const specialMenusTab = document.getElementById('specialMenusTab');
+            if (specialMenusTab.classList.contains('active') && currentSpecialMenuSubtab === data.menuType) {
+                renderSpecialMenuGrid(data.menuType);
             }
         });
 
-        // Cumartesi modu açık/kapalı değiştiğinde
-        socket.on('saturdayModeToggled', data => {
-            const btn = document.getElementById('btnSaturday');
-            if (data.active) {
-                btn.classList.add('active');
-            } else {
-                btn.classList.remove('active');
-            }
-            console.log('Cumartesi modu:', data.active ? 'AÇIK' : 'KAPALI');
+        // Özel menü açık/kapalı değiştiğinde
+        socket.on('specialMenuToggled', data => {
+            specialMenus[data.menuType].active = data.active;
+            specialMenus[data.menuType].items = data.items;
+            updateSpecialMenuButton(data.menuType, data.active);
+            const menuNames = { chat: 'Sohbet', chatPrep: 'Sohbet Hazırlık', atmosfer: 'Atmosfer' };
+            console.log(menuNames[data.menuType] + ' menüsü:', data.active ? 'AÇIK' : 'KAPALI');
         });
 
         // Günlük İstatistikleri Güncelle (Server'dan gelen)
@@ -2776,6 +2860,7 @@
                     <div>
                         <div style="font-weight: 700; color: var(--starbucks-green); font-size: 1.1rem;">#${order.orderNumber}</div>
                         <div style="color: var(--text-gray); font-size: 0.9rem; margin-top: 4px;">${order.guestName}</div>
+                        <div style="color: white; font-size: 0.85rem; margin-top: 4px; opacity: 0.9;">${order.item || ''}</div>
                     </div>
                     <button onclick="completeOrderFromTv('${order.id}')" style="background: var(--starbucks-green); color: white; border: none; padding: 8px 16px; border-radius: 8px; cursor: pointer; font-weight: 600;">
                         <i class="bi bi-check-circle"></i> Sipariş Teslim Edildi

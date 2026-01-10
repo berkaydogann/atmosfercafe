@@ -1052,6 +1052,61 @@
         .saturday-banner i {
             margin-right: 8px;
         }
+
+        /* ========================================
+           STAR RATING COMPONENT
+        ======================================== */
+        .rating-container {
+            margin: 20px 0;
+            text-align: center;
+        }
+
+        .rating-label {
+            font-size: 0.95rem;
+            font-weight: 700;
+            color: var(--text-dark);
+            margin-bottom: 12px;
+            display: block;
+        }
+
+        .star-rating {
+            display: flex;
+            justify-content: center;
+            gap: 8px;
+            margin-bottom: 10px;
+        }
+
+        .star-rating .star {
+            font-size: 2.2rem;
+            cursor: pointer;
+            color: #d1d5db;
+            transition: all 0.2s ease;
+            -webkit-tap-highlight-color: transparent;
+        }
+
+        .star-rating .star:hover {
+            transform: scale(1.15);
+        }
+
+        .star-rating .star.active {
+            color: #FFD700;
+            text-shadow: 0 0 8px rgba(255, 215, 0, 0.5);
+        }
+
+        .star-rating .star:active {
+            transform: scale(0.95);
+        }
+
+        .rating-average {
+            font-size: 0.85rem;
+            color: var(--text-medium);
+            margin-top: 8px;
+        }
+
+        .rating-average .avg-stars {
+            color: #FFD700;
+            font-weight: 700;
+        }
     </style>
 </head>
 
@@ -1128,6 +1183,18 @@
             </div>
             <h6 class="sheet-item-name" id="modalItemName">...</h6>
             <small class="sheet-item-subtitle">Siparişini oluşturuyoruz</small>
+        </div>
+        <!-- Star Rating Component -->
+        <div class="rating-container">
+            <label class="rating-label">Bu içeceği değerlendir (isteğe bağlı)</label>
+            <div class="star-rating" id="starRating">
+                <span class="star" data-rating="1" onclick="setRating(1)">★</span>
+                <span class="star" data-rating="2" onclick="setRating(2)">★</span>
+                <span class="star" data-rating="3" onclick="setRating(3)">★</span>
+                <span class="star" data-rating="4" onclick="setRating(4)">★</span>
+                <span class="star" data-rating="5" onclick="setRating(5)">★</span>
+            </div>
+            <div class="rating-average" id="ratingAverage"></div>
         </div>
         <div class="form-group">
             <label class="form-label">Ad Soyad</label>
@@ -1496,19 +1563,71 @@
 
         let stockStatus = {};
         let selectedItemName = "";
-        let saturdayMenuItems = [];
-        let isSaturdayEvening = false;
+        let specialMenus = {
+            chat: { active: false, items: [] },
+            chatPrep: { active: false, items: [] },
+            atmosfer: { active: false, items: [] }
+        };
+        let selectedRating = 0; // Default no rating (optional)
+        let itemRatings = {}; // Cache for item ratings from server
+
+        // Get active menu info (only one should be active at a time)
+        function getActiveMenu() {
+            if (specialMenus.chat.active && specialMenus.chat.items.length > 0) {
+                return { type: 'chat', name: 'Sohbet Menüsü', items: specialMenus.chat.items };
+            }
+            if (specialMenus.chatPrep.active && specialMenus.chatPrep.items.length > 0) {
+                return { type: 'chatPrep', name: 'Sohbet Hazırlık Menüsü', items: specialMenus.chatPrep.items };
+            }
+            if (specialMenus.atmosfer.active && specialMenus.atmosfer.items.length > 0) {
+                return { type: 'atmosfer', name: 'Atmosfer Menüsü', items: specialMenus.atmosfer.items };
+            }
+            return null;
+        }
 
         document.addEventListener('DOMContentLoaded', () => {
             socket.emit('getStock');
-            socket.emit('getSaturdayMenuStatus');
+            socket.emit('getSpecialMenuStatus');
+            socket.emit('getItemRatings'); // Fetch item ratings
             setupScrollEffects();
             setupModalHandlers();
             checkCafeStatus();
         });
 
+        // Rating received from server
+        socket.on('itemRatings', (data) => {
+            itemRatings = data || {};
+            console.log('Item ratings loaded:', Object.keys(itemRatings).length, 'items');
+        });
+
+        // Set rating when user clicks a star
+        function setRating(rating) {
+            selectedRating = rating;
+            const stars = document.querySelectorAll('#starRating .star');
+            stars.forEach((star, index) => {
+                if (index < rating) {
+                    star.classList.add('active');
+                } else {
+                    star.classList.remove('active');
+                }
+            });
+        }
+
+        // Update average display in modal
+        function updateRatingDisplay(itemName) {
+            const avgDisplay = document.getElementById('ratingAverage');
+            const itemData = itemRatings[itemName];
+
+            if (itemData && itemData.totalRatings > 0) {
+                const avg = itemData.averageRating.toFixed(1);
+                avgDisplay.innerHTML = `<span class="avg-stars">${avg} ★</span> (${itemData.totalRatings} değerlendirme)`;
+            } else {
+                avgDisplay.innerHTML = 'Henüz değerlendirme yok';
+            }
+        }
+
         function isReadyToRender() {
-            return Object.keys(stockStatus).length > 0 && saturdayMenuItems.length >= 0;
+            return Object.keys(stockStatus).length > 0;
         }
 
         // Render Menu
@@ -1521,10 +1640,13 @@
 
             let categoriesToRender = menuData;
 
-            if (isSaturdayEvening && saturdayMenuItems.length > 0) {
+            // Check if any special menu is active
+            const activeMenu = getActiveMenu();
+
+            if (activeMenu) {
                 categoriesToRender = menuData.map(cat => {
                     const filteredItems = cat.items.filter(item =>
-                        saturdayMenuItems.includes(item.name)
+                        activeMenu.items.includes(item.name)
                     );
 
                     return {
@@ -1535,7 +1657,7 @@
 
                 const banner = document.createElement('div');
                 banner.className = 'saturday-banner';
-                banner.innerHTML = '<i class="bi bi-calendar-week"></i> Cumartesi Özel Menüsü (18:00 sonrası)';
+                banner.innerHTML = `<i class="bi bi-calendar-week"></i> ${activeMenu.name}`;
                 menuContainer.appendChild(banner);
             }
 
@@ -1700,13 +1822,14 @@
             updateStockUI();
         });
 
-        socket.on('saturdayMenuStatus', (data) => {
-            saturdayMenuItems = data.items || [];
-            const manualActive = data.active || false;
-            const autoActive = data.isSaturdayEvening || false;
-            isSaturdayEvening = manualActive || autoActive;
-            console.log('Cumartesi durumu:', manualActive ? 'Manuel Aktif' : (autoActive ? 'Otomatik Aktif' : 'Kapalı'));
-            console.log('Cumartesi menüsü:', saturdayMenuItems.length, 'ürün');
+        socket.on('specialMenuStatus', (data) => {
+            specialMenus = data || {
+                chat: { active: false, items: [] },
+                chatPrep: { active: false, items: [] },
+                atmosfer: { active: false, items: [] }
+            };
+            const activeMenu = getActiveMenu();
+            console.log('Special menu status:', activeMenu ? activeMenu.name : 'None active');
 
             const menuContainer = document.getElementById('menuContainer');
             if (menuContainer.innerHTML === '' && isReadyToRender()) {
@@ -1716,22 +1839,21 @@
             }
         });
 
-        socket.on('saturdayMenuUpdated', (items) => {
-            saturdayMenuItems = items;
-            console.log('Cumartesi menüsü güncellendi:', items.length, 'ürün');
-
-            if (isSaturdayEvening) {
-                renderMenu();
+        socket.on('specialMenuUpdated', (data) => {
+            if (data.menuType && specialMenus[data.menuType]) {
+                specialMenus[data.menuType].items = data.items || [];
+                specialMenus[data.menuType].active = data.active || false;
             }
+            console.log('Special menu updated:', data.menuType, data.items?.length, 'items');
+            renderMenu();
         });
 
-        socket.on('saturdayModeToggled', (data) => {
-            const turkishTime = new Date(Date.now() + (3 * 60 * 60 * 1000));
-            const dayOfWeek = turkishTime.getUTCDay();
-            const hour = turkishTime.getUTCHours();
-            const autoActive = (dayOfWeek === 6 && hour >= 18);
-            isSaturdayEvening = data.active || autoActive;
-            console.log('Cumartesi menüsü güncellendi:', isSaturdayEvening ? 'Aktif' : 'Kapalı');
+        socket.on('specialMenuToggled', (data) => {
+            if (data.menuType && specialMenus[data.menuType]) {
+                specialMenus[data.menuType].active = data.active || false;
+                specialMenus[data.menuType].items = data.items || [];
+            }
+            console.log('Special menu toggled:', data.menuType, data.active ? 'Active' : 'Inactive');
             renderMenu();
         });
 
@@ -1789,6 +1911,10 @@
             if (savedName) document.getElementById('guestName').value = savedName;
             if (savedPhone) document.getElementById('guestPhone').value = savedPhone;
 
+            // Reset rating to 0 (no rating) and update average display
+            setRating(0);
+            updateRatingDisplay(name);
+
             const backdrop = document.getElementById('modalBackdrop');
             const modal = document.getElementById('orderModal');
 
@@ -1817,6 +1943,7 @@
                 phone: phone,
                 deviceId: deviceId,
                 item: selectedItemName,
+                rating: selectedRating > 0 ? selectedRating : null, // Only send if rated
                 orderTime: new Date().toLocaleTimeString('tr-TR', { hour: '2-digit', minute: '2-digit' }),
                 fcmToken: currentFcmToken
             });

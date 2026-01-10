@@ -498,11 +498,27 @@
         }
 
         let stockStatus = {};
-        let saturdayMenuItems = [];
-        let isSaturdayEvening = false;
+        let specialMenus = {
+            chat: { active: false, items: [] },
+            chatPrep: { active: false, items: [] },
+            atmosfer: { active: false, items: [] }
+        };
         let cafeIsClosed = false;
         let cafeStatusDetails = {};
 
+        // Get active menu info (only one should be active at a time)
+        function getActiveMenu() {
+            if (specialMenus.chat.active && specialMenus.chat.items.length > 0) {
+                return { type: 'chat', name: 'SOHBET MENÜSÜ', items: specialMenus.chat.items };
+            }
+            if (specialMenus.chatPrep.active && specialMenus.chatPrep.items.length > 0) {
+                return { type: 'chatPrep', name: 'SOHBET HAZIRLIK', items: specialMenus.chatPrep.items };
+            }
+            if (specialMenus.atmosfer.active && specialMenus.atmosfer.items.length > 0) {
+                return { type: 'atmosfer', name: 'ATMOSFER MENÜSÜ', items: specialMenus.atmosfer.items };
+            }
+            return null;
+        }
 
         // --- SICAK MENÜ İÇERİĞİ ---
         const menuSections = [
@@ -578,21 +594,24 @@
                 columns.push(div);
             }
 
-            // Cumartesi Filtresi
+            // Check if any special menu is active
+            const activeMenu = getActiveMenu();
             let sectionsToRender = JSON.parse(JSON.stringify(menuSections));
-            if (isSaturdayEvening && saturdayMenuItems.length > 0) {
-                const badge = document.getElementById('saturdayBadge');
-                if (badge) badge.style.display = 'block';
+            const badge = document.getElementById('saturdayBadge');
 
-                // Filter sections to only show items in Saturday menu
+            if (activeMenu) {
+                if (badge) {
+                    badge.textContent = activeMenu.name;
+                    badge.style.display = 'block';
+                }
+
+                // Filter sections to only show items in active menu
                 sectionsToRender = sectionsToRender.map(s => {
-                    s.items = s.items.filter(i => saturdayMenuItems.includes(i));
+                    s.items = s.items.filter(i => activeMenu.items.includes(i));
                     return s;
                 }).filter(s => s.items.length > 0);
             } else {
-                const badge = document.getElementById('saturdayBadge');
                 if (badge) badge.style.display = 'none';
-                isSaturdayEvening = false; // Reset if no items
             }
 
             // Kartları Render Et
@@ -711,7 +730,7 @@
         const debouncedRender = debounce(renderMenu, 150);
 
         socket.emit('getStock');
-        socket.emit('getSaturdayMenuStatus');
+        socket.emit('getSpecialMenuStatus');
         socket.emit('getCafeStatus');
 
         socket.on('stockStatus', s => { stockStatus = s; debouncedRender(); });
@@ -720,18 +739,26 @@
             // Only re-render if visible
             debouncedRender();
         });
-        socket.on('saturdayMenuStatus', d => {
-            saturdayMenuItems = d.items || [];
-            isSaturdayEvening = d.active || false;
+        socket.on('specialMenuStatus', data => {
+            specialMenus = data || {
+                chat: { active: false, items: [] },
+                chatPrep: { active: false, items: [] },
+                atmosfer: { active: false, items: [] }
+            };
             debouncedRender();
         });
-        socket.on('saturdayMenuUpdated', items => {
-            saturdayMenuItems = items;
+        socket.on('specialMenuUpdated', data => {
+            if (data.menuType && specialMenus[data.menuType]) {
+                specialMenus[data.menuType].items = data.items || [];
+                specialMenus[data.menuType].active = data.active || false;
+            }
             debouncedRender();
         });
-        socket.on('saturdayModeToggled', data => {
-            isSaturdayEvening = data.active;
-            saturdayMenuItems = data.items || [];
+        socket.on('specialMenuToggled', data => {
+            if (data.menuType && specialMenus[data.menuType]) {
+                specialMenus[data.menuType].active = data.active || false;
+                specialMenus[data.menuType].items = data.items || [];
+            }
             debouncedRender();
         });
         socket.on('cafeStatus', s => {
@@ -742,11 +769,6 @@
 
         // Klavye Kısayolları (Test)
         document.addEventListener('keydown', e => {
-            if (e.key === 's') {
-                isSaturdayEvening = !isSaturdayEvening;
-                if (!saturdayMenuItems.length) saturdayMenuItems = ['Latte', 'Chai Tea Latte', 'Espresso'];
-                debouncedRender();
-            }
             if (e.key === 'c') { cafeIsClosed = !cafeIsClosed; updateCafeStatus(); }
             // Force reload on R key to clear memory if needed
             if (e.key === 'r') { window.location.reload(); }

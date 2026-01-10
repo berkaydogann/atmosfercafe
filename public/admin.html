@@ -296,9 +296,9 @@
             color: white;
             border: none;
             width: 100%;
-            padding: 16px;
+            padding: 18px 20px;
             border-radius: 16px;
-            font-size: 1rem;
+            font-size: 1.1rem;
             font-weight: 700;
             cursor: pointer;
             transition: all 0.2s;
@@ -306,6 +306,7 @@
             justify-content: center;
             align-items: center;
             gap: 10px;
+            min-height: 56px;
         }
 
         .btn-complete:active {
@@ -317,15 +318,16 @@
             background: rgba(255, 95, 87, 0.2);
             color: var(--danger);
             border: 1px solid var(--danger);
-            padding: 8px 12px;
-            border-radius: 8px;
-            font-size: 0.75rem;
+            padding: 14px 16px;
+            border-radius: 12px;
+            font-size: 0.85rem;
             font-weight: 700;
             cursor: pointer;
             transition: all 0.2s;
             display: flex;
             align-items: center;
-            gap: 6px;
+            gap: 8px;
+            min-height: 50px;
         }
 
         .btn-stock:hover {
@@ -346,9 +348,10 @@
 
         .stock-controls {
             display: flex;
-            gap: 10px;
-            margin-top: 15px;
-            padding-top: 15px;
+            flex-wrap: wrap;
+            gap: 12px;
+            margin-top: 20px;
+            padding-top: 20px;
             border-top: 1px solid rgba(255, 255, 255, 0.1);
         }
 

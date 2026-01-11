@@ -195,164 +195,317 @@
             gap: 20px;
         }
 
-        /* Modern Kart Tasarımı */
+        /* ============================================
+           PROFESSIONAL BARISTA TICKET v4
+           Horizontal layout - inspired by real POS systems
+           ============================================ */
+
         .order-card {
-            background: var(--card-dark);
-            border-radius: 24px;
-            padding: 20px;
+            background: #1c1c1e;
+            border-radius: 16px;
+            padding: 0;
             position: relative;
-            overflow: visible;
-            transition: all 0.3s cubic-bezier(0.175, 0.885, 0.32, 1.275);
-            border: 1px solid rgba(255, 255, 255, 0.05);
-            animation: slideIn 0.5s ease-out forwards;
+            overflow: hidden;
+            transition: all 0.15s ease;
+            border: none;
+            animation: ticketSlide 0.2s ease-out forwards;
             opacity: 0;
-            transform: translateY(20px);
+            transform: translateX(-10px);
+            box-shadow: 0 2px 8px rgba(0, 0, 0, 0.3);
         }
 
-        @keyframes slideIn {
+        @keyframes ticketSlide {
             to {
                 opacity: 1;
-                transform: translateY(0);
+                transform: translateX(0);
             }
         }
 
         .order-card:hover {
-            transform: translateY(-5px);
-            box-shadow: 0 10px 30px rgba(0, 0, 0, 0.3);
-            border-color: rgba(255, 255, 255, 0.1);
+            box-shadow: 0 4px 16px rgba(0, 0, 0, 0.4);
         }
 
+        /* Sıcak/Soğuk renk şeridi - sol kenar */
         .order-card::before {
             content: '';
             position: absolute;
             top: 0;
             left: 0;
-            width: 4px;
+            width: 5px;
             height: 100%;
-            background: var(--starbucks-green);
+            background: linear-gradient(180deg, #ff6347, #ff8c00);
+            border-radius: 16px 0 0 16px;
         }
 
-        .card-header-row {
+        .order-card.cold-order::before {
+            background: linear-gradient(180deg, #00d4aa, #00b4d8);
+        }
+
+        /* Ana kart yapısı - yatay flex */
+        .card-content {
             display: flex;
-            justify-content: space-between;
+            align-items: stretch;
+            padding: 0;
+            min-height: 72px;
+        }
+
+        /* SOL BÖLÜM: Sipariş numarası */
+        .order-number-big {
+            display: flex;
             align-items: center;
-            margin-bottom: 15px;
+            justify-content: center;
+            font-size: 1.5rem;
+            font-weight: 900;
+            color: #fff;
+            min-width: 55px;
+            padding: 0 12px;
+            background: rgba(255, 255, 255, 0.03);
+            border-right: 1px solid rgba(255, 255, 255, 0.06);
+            letter-spacing: -1px;
+            margin-left: 5px;
+        }
+
+        /* ORTA BÖLÜM: İçecek ve müşteri bilgisi */
+        .order-item {
+            flex: 1;
+            display: flex;
+            flex-direction: column;
+            justify-content: center;
+            padding: 8px 12px;
+            background: transparent;
+            border: none;
+            border-radius: 0;
+            border-left: none;
+            gap: 2px;
+        }
+
+        .drink-name {
+            font-size: 0.95rem;
+            font-weight: 700;
+            color: #fff;
+            line-height: 1.2;
+            display: flex;
+            align-items: center;
+            gap: 6px;
+        }
+
+        .customer-info {
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            margin-top: 2px;
         }
 
         .guest-name {
-            font-size: 1.2rem;
-            font-weight: 700;
-            color: var(--text-white);
+            font-size: 0.7rem;
+            font-weight: 600;
+            color: rgba(255, 255, 255, 0.6);
+            background: none;
+            padding: 0;
+            border-radius: 0;
         }
 
         .time-badge {
-            background: #1a1a1a;
-            color: var(--text-gray);
-            font-size: 0.8rem;
-            padding: 6px 12px;
-            border-radius: 12px;
-            font-family: monospace;
+            font-size: 0.65rem;
+            color: rgba(255, 255, 255, 0.35);
+            background: none;
+            padding: 0;
+            font-family: 'Outfit', monospace;
         }
 
         .phone-badge {
-            background: #2a2a2a;
-            color: var(--primary-color);
-            font-size: 0.8rem;
-            padding: 6px 12px;
-            border-radius: 12px;
-            margin-left: 8px;
+            display: none;
         }
 
-        .order-item {
+        /* ============================================
+           HAZIR BUTONU - Büyük dairesel check
+           ============================================ */
+        .btn-complete {
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            width: 72px;
+            min-width: 72px;
+            height: auto;
+            background: linear-gradient(135deg, #22c55e 0%, #16a34a 100%);
+            color: white;
+            border: none;
+            border-radius: 0 16px 16px 0;
             font-size: 1.6rem;
-            font-weight: 900;
-            /* Extra Bold */
-            color: var(--latte-accent);
-            line-height: 1.2;
-            margin-bottom: 25px;
+            font-weight: 800;
+            cursor: pointer;
+            transition: all 0.1s ease;
+            padding: 0;
+            margin: 0;
         }
 
-        /* Dev Buton */
-        .btn-complete {
-            background: var(--starbucks-green);
-            color: white;
-            border: none;
-            width: 100%;
-            padding: 16px;
-            border-radius: 16px;
-            font-size: 1rem;
-            font-weight: 700;
-            cursor: pointer;
-            transition: all 0.2s;
-            display: flex;
-            justify-content: center;
-            align-items: center;
-            gap: 10px;
-        }
-
-        /* Dev Buton */
-        .btn-complete {
-            background: var(--starbucks-green);
-            color: white;
-            border: none;
-            width: 100%;
-            padding: 18px 20px;
-            border-radius: 16px;
-            font-size: 1.1rem;
-            font-weight: 700;
-            cursor: pointer;
-            transition: all 0.2s;
-            display: flex;
-            justify-content: center;
-            align-items: center;
-            gap: 10px;
-            min-height: 56px;
+        .btn-complete:hover {
+            background: linear-gradient(135deg, #4ade80 0%, #22c55e 100%);
+            width: 80px;
         }
 
         .btn-complete:active {
             transform: scale(0.95);
-            background: #005c3c;
         }
 
-        .btn-stock {
-            background: rgba(255, 95, 87, 0.2);
-            color: var(--danger);
-            border: 1px solid var(--danger);
-            padding: 14px 16px;
-            border-radius: 12px;
-            font-size: 0.85rem;
-            font-weight: 700;
+        .btn-complete i {
+            font-size: 1.8rem;
+        }
+
+        .btn-complete span {
+            display: none;
+            /* Hide text, just show icon */
+        }
+
+        /* İptal butonu - üst köşede gizli, hover'da görünür */
+        .btn-cancel {
+            position: absolute;
+            top: 6px;
+            right: 80px;
+            background: rgba(239, 68, 68, 0.9);
+            color: white;
+            border: none;
+            width: 22px;
+            height: 22px;
+            border-radius: 50%;
+            font-size: 0.65rem;
             cursor: pointer;
-            transition: all 0.2s;
+            transition: all 0.15s ease;
             display: flex;
             align-items: center;
-            gap: 8px;
-            min-height: 50px;
+            justify-content: center;
+            padding: 0;
+            opacity: 0;
+            transform: scale(0.8);
         }
 
-        .btn-stock:hover {
-            background: var(--danger);
-            color: white;
+        .order-card:hover .btn-cancel {
+            opacity: 1;
+            transform: scale(1);
         }
 
-        .btn-stock.in-stock {
-            background: rgba(0, 112, 74, 0.2);
-            color: var(--starbucks-green);
-            border-color: var(--starbucks-green);
+        .btn-cancel:hover {
+            background: #dc2626;
+            transform: scale(1.15);
         }
 
-        .btn-stock.in-stock:hover {
-            background: var(--starbucks-green);
-            color: white;
+        /* Stok butonu - gizli */
+        .btn-stock {
+            display: none;
         }
 
         .stock-controls {
+            display: none;
+        }
+
+        /* Rating gösterimi */
+        .rating-display {
+            color: #fbbf24;
+            font-size: 0.9rem;
+            letter-spacing: -1px;
+        }
+
+        /* ============================================
+           DRINK CATEGORY GROUPING
+           Collapsible categories for duplicate orders
+           ============================================ */
+        .drink-category {
+            background: rgba(255, 255, 255, 0.03);
+            border-radius: 16px;
+            margin-bottom: 12px;
+            overflow: hidden;
+            border: 1px solid rgba(255, 255, 255, 0.06);
+            transition: all 0.2s ease;
+        }
+
+        .drink-category.hot-category {
+            border-left: 4px solid #ff6347;
+        }
+
+        .drink-category.cold-category {
+            border-left: 4px solid #00d4aa;
+        }
+
+        .category-header {
             display: flex;
-            flex-wrap: wrap;
+            align-items: center;
+            justify-content: space-between;
+            padding: 14px 18px;
+            cursor: pointer;
+            background: rgba(255, 255, 255, 0.02);
+            transition: background 0.2s ease;
+            user-select: none;
+        }
+
+        .category-header:hover {
+            background: rgba(255, 255, 255, 0.05);
+        }
+
+        .category-header-left {
+            display: flex;
+            align-items: center;
             gap: 12px;
-            margin-top: 20px;
-            padding-top: 20px;
-            border-top: 1px solid rgba(255, 255, 255, 0.1);
+        }
+
+        .category-icon {
+            font-size: 1.3rem;
+            opacity: 0.8;
+        }
+
+        .category-name {
+            font-size: 1.1rem;
+            font-weight: 700;
+            color: #fff;
+        }
+
+        .category-count {
+            background: var(--starbucks-green);
+            color: white;
+            font-size: 0.85rem;
+            font-weight: 800;
+            padding: 4px 10px;
+            border-radius: 12px;
+            min-width: 24px;
+            text-align: center;
+        }
+
+        .category-chevron {
+            font-size: 1.2rem;
+            color: rgba(255, 255, 255, 0.4);
+            transition: transform 0.2s ease;
+        }
+
+        .drink-category.collapsed .category-chevron {
+            transform: rotate(-90deg);
+        }
+
+        .category-orders {
+            padding: 8px;
+            padding-top: 0;
+            display: flex;
+            flex-direction: column;
+            gap: 8px;
+            max-height: 1000px;
+            overflow: hidden;
+            transition: max-height 0.3s ease, padding 0.3s ease, opacity 0.2s ease;
+            opacity: 1;
+        }
+
+        .drink-category.collapsed .category-orders {
+            max-height: 0;
+            padding: 0 8px;
+            opacity: 0;
+        }
+
+        /* Orders inside category have slightly different styling */
+        .drink-category .order-card {
+            margin-bottom: 0;
+            border-radius: 12px;
+        }
+
+        .drink-category .order-card::before {
+            display: none;
+            /* Hide left border inside category */
         }
 
         .empty-state {
@@ -678,6 +831,47 @@
             justify-content: space-between;
             gap: 20px;
             box-shadow: 0 4px 12px rgba(0, 0, 0, 0.3);
+            transition: all 0.3s ease;
+            overflow: hidden;
+        }
+
+        .top-control-bar.collapsed {
+            padding: 0;
+            height: 0;
+            margin-bottom: 0;
+            border: none;
+            opacity: 0;
+        }
+
+        /* Toggle Control Bar Button */
+        .toggle-controls-btn {
+            position: fixed;
+            top: 10px;
+            right: 20px;
+            z-index: 1000;
+            background: var(--starbucks-green);
+            color: white;
+            border: none;
+            padding: 10px 16px;
+            border-radius: 10px;
+            font-weight: 700;
+            font-size: 0.85rem;
+            cursor: pointer;
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            box-shadow: 0 4px 15px rgba(0, 112, 74, 0.4);
+            transition: all 0.2s;
+        }
+
+        .toggle-controls-btn:hover {
+            transform: scale(1.05);
+            box-shadow: 0 6px 20px rgba(0, 112, 74, 0.5);
+        }
+
+        .toggle-controls-btn.hidden-mode {
+            background: rgba(255, 255, 255, 0.1);
+            border: 1px solid rgba(255, 255, 255, 0.2);
         }
 
         .status-indicators {
@@ -1080,8 +1274,13 @@
 <body>
     <audio id="notificationSound" src="/notification.mp3" preload="auto"></audio>
 
+    <!-- Toggle Controls Button -->
+    <button class="toggle-controls-btn" id="toggleControlsBtn" onclick="toggleControlBar()">
+        <i class="bi bi-chevron-up"></i> Kontrolleri Gizle
+    </button>
+
     <!-- Top Control Bar -->
-    <div class="top-control-bar">
+    <div class="top-control-bar" id="topControlBar">
         <div class="status-indicators">
             <div class="status-badge open" id="cafeStatusBadge">
                 <i class="bi bi-shop"></i>
@@ -1989,6 +2188,24 @@
             if (info.name) prayerNameInput.value = info.name;
         });
 
+        // Toggle Control Bar (Gizle/Göster)
+        function toggleControlBar() {
+            const controlBar = document.getElementById('topControlBar');
+            const toggleBtn = document.getElementById('toggleControlsBtn');
+
+            if (controlBar.classList.contains('collapsed')) {
+                // Göster
+                controlBar.classList.remove('collapsed');
+                toggleBtn.innerHTML = '<i class="bi bi-chevron-up"></i> Kontrolleri Gizle';
+                toggleBtn.classList.remove('hidden-mode');
+            } else {
+                // Gizle
+                controlBar.classList.add('collapsed');
+                toggleBtn.innerHTML = '<i class="bi bi-chevron-down"></i> Kontrolleri Göster';
+                toggleBtn.classList.add('hidden-mode');
+            }
+        }
+
         // Tab Yönetimi
         function switchTab(tabName, btn) {
             // Tüm sekmeleri gizle
@@ -2224,12 +2441,52 @@
             const emptyState = container.querySelector('.empty-state');
             if (emptyState) emptyState.style.display = 'none';
 
-            // Kart Oluştur
+            // Create the order card
+            const card = createOrderCard(data, isCold);
+
+            // Check if we need to create or use a category
+            const drinkName = data.item;
+            const categoryId = `category-${sanitizeId(drinkName)}-${isCold ? 'cold' : 'hot'}`;
+
+            // Count existing orders with same drink in this container
+            const existingOrders = container.querySelectorAll(`[data-item-name="${drinkName}"]`);
+            const existingCategory = document.getElementById(categoryId);
+
+            if (existingCategory) {
+                // Category already exists, add to it
+                const ordersContainer = existingCategory.querySelector('.category-orders');
+                ordersContainer.appendChild(card);
+                updateCategoryCount(existingCategory);
+            } else if (existingOrders.length >= 1) {
+                // We have 1+ existing orders, need to create a category
+                const category = createCategory(drinkName, isCold, categoryId);
+                const ordersContainer = category.querySelector('.category-orders');
+
+                // Move existing orders into category
+                existingOrders.forEach(order => {
+                    // Remove from current position
+                    order.parentElement.removeChild(order);
+                    ordersContainer.appendChild(order);
+                });
+
+                // Add the new card
+                ordersContainer.appendChild(card);
+
+                // Add category to container
+                container.appendChild(category);
+                updateCategoryCount(category);
+            } else {
+                // First order of this type, just add normally
+                container.appendChild(card);
+            }
+        }
+
+        // Create an order card element
+        function createOrderCard(data, isCold) {
             const card = document.createElement('div');
             card.className = 'order-card';
             card.id = `order-${data.id}`;
             card.setAttribute('data-item-name', data.item);
-            // Fix: Add missing data attributes for finishOrder
             card.setAttribute('data-order-number', data.orderNumber);
             card.setAttribute('data-guest-name', data.guestName);
             card.setAttribute('data-item', data.item);
@@ -2243,37 +2500,130 @@
                 } catch (e) { console.warn(e); }
             }
 
-            // Stok durumunu kontrol et
-            const isInStock = stockStatus[data.item] !== false;
-            const stockButtonClass = isInStock ? 'btn-stock in-stock' : 'btn-stock';
-            const stockButtonText = isInStock ? '<i class="bi bi-check-circle"></i> Stokta Var' : '<i class="bi bi-exclamation-circle"></i> Stokta Yok';
+            // Add cold-order class for color coding
+            if (isCold) {
+                card.classList.add('cold-order');
+            }
 
             card.innerHTML = `
-                <div class="card-header-row">
-                    <span class="guest-name">#${data.orderNumber || '---'} - ${data.guestName}</span>
-                    <span class="phone-badge">${data.phone || ''}</span>
-                    <span class="time-badge">${timeOnly}</span>
-                </div>
-                <div class="order-item">
-                    ${data.item}${data.rating ? ` <span style="color: #FFD700; font-size: 0.8em;">${'★'.repeat(data.rating)}${'☆'.repeat(5 - data.rating)}</span>` : ''}
-                </div>
-                <div class="stock-controls">
-                    <button class="btn-stock ${stockButtonClass}" onclick="toggleStock(this, '${data.item}')">
-                        ${stockButtonText}
-                    </button>
-                    <!-- Using finishOrder for consistency -->
-                    <button class="btn-complete" style="flex: 1;" onclick="finishOrder(this, '${data.id}')">
-                        <i class="bi bi-check-lg"></i> Hazırla
-                    </button>
-                    <button class="btn-cancel" onclick="cancelOrder('${data.id}', '${data.guestName}')" style="margin-left:8px; background:var(--danger); color:white; border:none; padding:8px; border-radius:8px;">
-                        <i class="bi bi-x-lg"></i>
+                <button class="btn-cancel" onclick="cancelOrder('${data.id}', '${data.guestName}')" title="İptal">
+                    <i class="bi bi-x"></i>
+                </button>
+                <div class="card-content">
+                    <div class="order-number-big">#${data.orderNumber || '-'}</div>
+                    <div class="order-item">
+                        <div class="drink-name">
+                            ${data.item}${data.rating ? ` <span class="rating-display">${'★'.repeat(data.rating)}</span>` : ''}
+                        </div>
+                        <div class="customer-info">
+                            <span class="guest-name">${data.guestName}</span>
+                            <span class="time-badge">• ${timeOnly}</span>
+                        </div>
+                    </div>
+                    <button class="btn-complete" onclick="finishOrder(this, '${data.id}')">
+                        <i class="bi bi-check-lg"></i>
                     </button>
                 </div>
             `;
 
-            // Append to the list
-            container.appendChild(card);
+            return card;
         }
+
+        // Create a category container for grouped orders
+        function createCategory(drinkName, isCold, categoryId) {
+            const category = document.createElement('div');
+            category.className = `drink-category ${isCold ? 'cold-category' : 'hot-category'}`;
+            category.id = categoryId;
+            category.setAttribute('data-drink-name', drinkName);
+
+            const icon = isCold ? '🧊' : '☕';
+
+            category.innerHTML = `
+                <div class="category-header" onclick="toggleCategory('${categoryId}')">
+                    <div class="category-header-left">
+                        <span class="category-icon">${icon}</span>
+                        <span class="category-name">${drinkName}</span>
+                        <span class="category-count">0</span>
+                    </div>
+                    <i class="bi bi-chevron-down category-chevron"></i>
+                </div>
+                <div class="category-orders"></div>
+            `;
+
+            return category;
+        }
+
+        // Update category count badge
+        function updateCategoryCount(category) {
+            const ordersContainer = category.querySelector('.category-orders');
+            const count = ordersContainer.querySelectorAll('.order-card').length;
+            const countBadge = category.querySelector('.category-count');
+            countBadge.textContent = count;
+        }
+
+        // Toggle category collapse/expand
+        window.toggleCategory = function (categoryId) {
+            const category = document.getElementById(categoryId);
+            if (category) {
+                category.classList.toggle('collapsed');
+            }
+        };
+
+        // Sanitize drink name for use as ID
+        function sanitizeId(name) {
+            return name.replace(/[^a-zA-Z0-9çğıöşüÇĞİÖŞÜ]/g, '_').toLowerCase();
+        }
+
+        // Handle removing order from category
+        function handleCategoryAfterOrderRemoval(card) {
+            const category = card.closest('.drink-category');
+            const container = card.closest('.column-scroll');
+            const cardId = card.id;
+
+            if (category) {
+                // Card is inside a category - wait until card is removed (after 300ms animation)
+                setTimeout(() => {
+                    // Check if category still exists (might have been removed by another completion)
+                    if (!document.body.contains(category)) return;
+
+                    const ordersContainer = category.querySelector('.category-orders');
+                    const remainingOrders = ordersContainer.querySelectorAll('.order-card');
+
+                    if (remainingOrders.length === 0) {
+                        // No orders left, remove category
+                        category.remove();
+                    } else if (remainingOrders.length === 1) {
+                        // Only 1 order left, dissolve category back to individual card
+                        const lastOrder = remainingOrders[0];
+                        const parentContainer = category.parentElement;
+                        parentContainer.insertBefore(lastOrder, category);
+                        category.remove();
+                    } else {
+                        // Update count
+                        updateCategoryCount(category);
+                    }
+
+                    // Check if container is empty
+                    checkContainerEmpty(container);
+                }, 350); // Wait 350ms - after the 300ms card removal animation
+            } else {
+                // Card is not in a category
+                setTimeout(() => checkContainerEmpty(container), 350);
+            }
+        }
+
+        // Check if container is empty and show empty state
+        function checkContainerEmpty(container) {
+            if (!container) return;
+            const orders = container.querySelectorAll('.order-card');
+            const categories = container.querySelectorAll('.drink-category');
+            const emptyState = container.querySelector('.empty-state');
+
+            if (orders.length === 0 && categories.length === 0 && emptyState) {
+                emptyState.style.display = 'block';
+            }
+        }
+
 
         function isColdItem(name) {
             if (!name) return false;
@@ -2910,6 +3260,9 @@
                 item: item
             });
 
+            // Handle category update before removing card
+            handleCategoryAfterOrderRemoval(card);
+
             // Animasyonla Sil
             card.style.transform = 'scale(0.9) translateY(20px)';
             card.style.opacity = '0';
@@ -2919,11 +3272,33 @@
                 stats.pending--;
                 stats.completed++;
                 updateStats();
+            }, 300);
+        };
 
-                // Eğer kart kalmadıysa boş durumu göster
-                if (container.children.length === 0 || (container.children.length === 1 && container.children[0].id === 'emptyState')) {
-                    if (emptyState) emptyState.style.display = 'block';
-                }
+        // Cancel order function
+        window.cancelOrder = function (orderId, guestName) {
+            const card = document.getElementById(`order-${orderId}`);
+            if (!card) return;
+
+            // Confirm cancellation
+            if (!confirm(`${guestName} siparişini iptal etmek istediğinize emin misiniz?`)) {
+                return;
+            }
+
+            // Emit cancel event to server
+            socket.emit('cancelOrder', { orderId: orderId });
+
+            // Handle category update before removing card
+            handleCategoryAfterOrderRemoval(card);
+
+            // Animate and remove
+            card.style.transform = 'scale(0.9) translateY(20px)';
+            card.style.opacity = '0';
+
+            setTimeout(() => {
+                card.remove();
+                stats.pending--;
+                updateStats();
             }, 300);
         };
     </script>

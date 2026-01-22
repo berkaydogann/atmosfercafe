@@ -499,6 +499,32 @@
             box-shadow: 0 4px 16px rgba(255, 107, 107, 0.4);
         }
 
+        /* Acı/Tatlı Badge */
+        .taste-badge {
+            position: absolute;
+            bottom: 8px;
+            left: 8px;
+            font-size: 0.7rem;
+            font-weight: 700;
+            padding: 5px 10px;
+            border-radius: 8px;
+            z-index: 3;
+            backdrop-filter: blur(8px);
+            -webkit-backdrop-filter: blur(8px);
+        }
+
+        .taste-badge.taste-sert {
+            background: linear-gradient(135deg, rgba(255, 87, 51, 0.9), rgba(255, 99, 71, 0.9));
+            color: white;
+            box-shadow: 0 2px 8px rgba(255, 87, 51, 0.4);
+        }
+
+        .taste-badge.taste-tatli {
+            background: linear-gradient(135deg, rgba(255, 193, 7, 0.9), rgba(255, 179, 71, 0.9));
+            color: #333;
+            box-shadow: 0 2px 8px rgba(255, 193, 7, 0.4);
+        }
+
         .card-content {
             padding: 16px;
             display: flex;
@@ -1562,6 +1588,7 @@
         ];
 
         let stockStatus = {};
+        let drinkTasteOptions = {}; // Sert/Tatlı seçenekleri
         let selectedItemName = "";
         let specialMenus = {
             chat: { active: false, items: [] },
@@ -1589,6 +1616,7 @@
             socket.emit('getStock');
             socket.emit('getSpecialMenuStatus');
             socket.emit('getItemRatings'); // Fetch item ratings
+            socket.emit('getDrinkTasteOptions'); // Fetch taste options
             setupScrollEffects();
             setupModalHandlers();
             checkCafeStatus();
@@ -1719,6 +1747,7 @@
             });
 
             updateStockUI();
+            updateTasteBadges();
         }
 
         function scrollToSection(id) {
@@ -1821,6 +1850,42 @@
             stockStatus[data.itemName] = data.isAvailable;
             updateStockUI();
         });
+
+        // Sert/Tatlı seçeneklerini al
+        socket.on('drinkTasteOptions', (options) => {
+            drinkTasteOptions = options || {};
+            updateTasteBadges();
+        });
+
+        // Sert/Tatlı güncellemelerini dinle
+        socket.on('drinkTasteUpdated', (data) => {
+            if (data.taste === null) {
+                delete drinkTasteOptions[data.itemName];
+            } else {
+                drinkTasteOptions[data.itemName] = data.taste;
+            }
+            updateTasteBadges();
+        });
+
+        // Tüm ürün kartlarındaki tat badge'lerini güncelle
+        function updateTasteBadges() {
+            document.querySelectorAll('.product-card').forEach(card => {
+                const name = card.dataset.itemName;
+                const taste = drinkTasteOptions[name];
+                
+                // Mevcut badge'i kaldır
+                const existingBadge = card.querySelector('.taste-badge');
+                if (existingBadge) existingBadge.remove();
+                
+                // Yeni badge ekle (eğer seçiliyse)
+                if (taste) {
+                    const badge = document.createElement('div');
+                    badge.className = 'taste-badge taste-' + taste;
+                    badge.innerHTML = taste === 'sert' ? '🔥 Sert' : '🍯 Tatlı';
+                    card.querySelector('.product-img-wrapper').appendChild(badge);
+                }
+            });
+        }
 
         socket.on('specialMenuStatus', (data) => {
             specialMenus = data || {

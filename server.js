@@ -107,6 +107,9 @@ let specialMenus = {
   atmosfer: { active: false, items: [] }
 };
 
+// Sert/Tatlı seçenekleri cache
+let drinkTasteOptions = {};
+
 let tvReadyOrders = [];
 let currentVideoUrl = null;
 
@@ -115,6 +118,16 @@ async function initializeCache() {
   try {
     cachedCafeStatus = await fbHelper.getCafeStatus() || cachedCafeStatus;
     cachedStockStatus = await fbHelper.getStockStatus() || {};
+
+    // Load drink taste options from Firebase
+    try {
+      const tasteDoc = await db.collection('settings').doc('drinkTasteOptions').get();
+      if (tasteDoc.exists) {
+        drinkTasteOptions = tasteDoc.data() || {};
+      }
+    } catch (err) {
+      console.warn('⚠️ Could not load drink taste options from Firebase');
+    }
 
     // Load all three special menus from Firebase
     const menuTypes = ['chat', 'chatPrep', 'atmosfer'];
@@ -192,6 +205,35 @@ io.on('connection', (socket) => {
   // Send current cafe status to newly connected client
   socket.emit('cafeStatus', cachedCafeStatus);
   socket.emit('stockStatus', cachedStockStatus);
+  socket.emit('drinkTasteOptions', drinkTasteOptions);
+
+  // ============ DRINK TASTE OPTIONS (Sert/Tatlı) ============
+  socket.on('getDrinkTasteOptions', () => {
+    socket.emit('drinkTasteOptions', drinkTasteOptions);
+  });
+
+  socket.on('updateDrinkTaste', async (data) => {
+    try {
+      const { itemName, taste } = data;
+      
+      // Update local cache
+      if (taste === null) {
+        delete drinkTasteOptions[itemName];
+      } else {
+        drinkTasteOptions[itemName] = taste;
+      }
+      
+      // Save to Firebase
+      await db.collection('settings').doc('drinkTasteOptions').set(drinkTasteOptions);
+      
+      // Broadcast to all clients
+      io.emit('drinkTasteUpdated', { itemName, taste });
+      
+      console.log(`[${getTimestamp()}] 🍵 İçecek tadı güncellendi: ${itemName} = ${taste || 'kaldırıldı'}`);
+    } catch (error) {
+      console.error(`[${getTimestamp()}] ❌ Drink taste update error:`, error);
+    }
+  });
 
   // ============ ORDER PLACEMENT ============
   socket.on('placeOrder', async (orderData) => {

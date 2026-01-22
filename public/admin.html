@@ -1796,6 +1796,7 @@
 
         let stats = { total: 0, pending: 0, completed: 0 };
         let stockStatus = {}; // Stok durumunu tut
+        let drinkTasteOptions = {}; // Sert/Tatlı seçenekleri { itemName: 'sert' | 'tatli' | null }
         let cafeIsClosed = false; // Kafe kapalı mı
 
         // Special menus state (Chat, Chat Prep, Atmosfer)
@@ -2431,6 +2432,9 @@
                 const statusClass = isAvailable ? 'available' : 'unavailable';
                 const statusText = isAvailable ? 'Stokta Var' : 'Stokta Yok';
                 const icon = isAvailable ? 'bi-check-circle' : 'bi-exclamation-circle';
+                
+                // Sert/Tatlı seçenekleri
+                const currentTaste = drinkTasteOptions[item] || null;
 
                 const itemDiv = document.createElement('div');
                 itemDiv.className = 'stock-item';
@@ -2439,9 +2443,31 @@
                     <button class="stock-toggle-btn ${statusClass}" onclick="toggleStockGlobal(this, '${item}')">
                         <i class="bi ${icon}"></i> ${statusText}
                     </button>
+                    <div class="taste-options" style="display: flex; gap: 6px; margin-top: 8px;">
+                        <button class="taste-btn ${currentTaste === 'sert' ? 'active' : ''}" onclick="toggleTasteOption('${item}', 'sert', this)" style="flex: 1; padding: 6px 8px; border-radius: 8px; border: 1px solid ${currentTaste === 'sert' ? '#f59e0b' : 'rgba(255,255,255,0.1)'}; background: ${currentTaste === 'sert' ? 'rgba(245, 158, 11, 0.3)' : 'rgba(255,255,255,0.05)'}; color: ${currentTaste === 'sert' ? '#f59e0b' : 'var(--text-gray)'}; cursor: pointer; font-size: 0.8rem; font-weight: 600; transition: all 0.2s;">
+                            <i class="bi bi-fire"></i> Sert
+                        </button>
+                        <button class="taste-btn ${currentTaste === 'tatli' ? 'active' : ''}" onclick="toggleTasteOption('${item}', 'tatli', this)" style="flex: 1; padding: 6px 8px; border-radius: 8px; border: 1px solid ${currentTaste === 'tatli' ? '#ec4899' : 'rgba(255,255,255,0.1)'}; background: ${currentTaste === 'tatli' ? 'rgba(236, 72, 153, 0.3)' : 'rgba(255,255,255,0.05)'}; color: ${currentTaste === 'tatli' ? '#ec4899' : 'var(--text-gray)'}; cursor: pointer; font-size: 0.8rem; font-weight: 600; transition: all 0.2s;">
+                            <i class="bi bi-droplet"></i> Tatlı
+                        </button>
+                    </div>
                 `;
                 stockContainer.appendChild(itemDiv);
             });
+        }
+
+        // Toggle taste option (Sert/Tatlı)
+        function toggleTasteOption(itemName, taste, btn) {
+            const currentTaste = drinkTasteOptions[itemName];
+            const newTaste = currentTaste === taste ? null : taste; // Aynı butona tekrar basarsa kaldır
+            
+            drinkTasteOptions[itemName] = newTaste;
+            
+            // Sunucuya gönder
+            socket.emit('updateDrinkTaste', { itemName: itemName, taste: newTaste });
+            
+            // UI'ı güncelle - grid'i yeniden render et
+            renderStockGrid();
         }
 
         function updateStockButton(itemName, isAvailable) {
@@ -3064,12 +3090,30 @@
         // Admin yüklendiğinde stok durumunu iste
         socket.emit('getStock');
 
+        // Sert/Tatlı seçeneklerini iste
+        socket.emit('getDrinkTasteOptions');
+
         // Özel menüler durumunu iste
         socket.emit('getSpecialMenuStatus');
 
         // Stok durumunu al
         socket.on('stockStatus', (status) => {
             stockStatus = status;
+        });
+
+        // Sert/Tatlı seçeneklerini al
+        socket.on('drinkTasteOptions', (options) => {
+            drinkTasteOptions = options || {};
+        });
+
+        // Sert/Tatlı güncelleme dinle
+        socket.on('drinkTasteUpdated', (data) => {
+            drinkTasteOptions[data.itemName] = data.taste;
+            // Eğer stok sekmesi açıksa grid'i güncelle
+            const stockTab = document.getElementById('stockTab');
+            if (stockTab && stockTab.classList.contains('active')) {
+                renderStockGrid();
+            }
         });
 
         // Özel menüler durumunu al

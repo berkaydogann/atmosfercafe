@@ -1288,10 +1288,137 @@
         .toast-notification-content small {
             opacity: 0.9;
         }
+
+        /* Login Page Styles */
+        .login-container {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: var(--bg-dark);
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            z-index: 99999;
+        }
+
+        .login-box {
+            background: var(--card-dark);
+            padding: 40px;
+            border-radius: 16px;
+            box-shadow: 0 10px 40px rgba(0, 0, 0, 0.5);
+            width: 100%;
+            max-width: 400px;
+            text-align: center;
+        }
+
+        .login-box h2 {
+            margin-bottom: 30px;
+            font-size: 1.8rem;
+            color: var(--text-white);
+        }
+
+        .login-box h2 i {
+            color: var(--starbucks-green);
+            margin-right: 10px;
+        }
+
+        .login-input {
+            width: 100%;
+            padding: 14px 16px;
+            margin-bottom: 16px;
+            border: 2px solid rgba(255, 255, 255, 0.1);
+            border-radius: 10px;
+            background: rgba(0, 0, 0, 0.3);
+            color: var(--text-white);
+            font-size: 1rem;
+            font-family: 'Outfit', sans-serif;
+            box-sizing: border-box;
+            transition: border-color 0.3s;
+        }
+
+        .login-input:focus {
+            outline: none;
+            border-color: var(--starbucks-green);
+        }
+
+        .login-input::placeholder {
+            color: var(--text-gray);
+        }
+
+        .login-btn {
+            width: 100%;
+            padding: 14px;
+            background: var(--starbucks-green);
+            color: white;
+            border: none;
+            border-radius: 10px;
+            font-size: 1.1rem;
+            font-weight: 600;
+            cursor: pointer;
+            transition: all 0.3s;
+            font-family: 'Outfit', sans-serif;
+        }
+
+        .login-btn:hover {
+            background: #005c3c;
+            transform: translateY(-2px);
+            box-shadow: 0 4px 15px rgba(0, 112, 74, 0.4);
+        }
+
+        .login-error {
+            color: var(--danger);
+            margin-bottom: 16px;
+            font-size: 0.9rem;
+            display: none;
+        }
+
+        .logout-btn {
+            background: rgba(255, 95, 87, 0.2);
+            color: var(--danger);
+            border: 1px solid var(--danger);
+            padding: 8px 16px;
+            border-radius: 30px;
+            font-weight: 600;
+            font-size: 0.9rem;
+            cursor: pointer;
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            transition: all 0.3s;
+            margin-left: 10px;
+        }
+
+        .logout-btn:hover {
+            background: var(--danger);
+            color: white;
+        }
+
+        .admin-content {
+            display: none;
+        }
+
+        .admin-content.logged-in {
+            display: block;
+        }
     </style>
 </head>
 
 <body>
+    <!-- Login Page -->
+    <div class="login-container" id="loginContainer">
+        <div class="login-box">
+            <h2><i class="bi bi-shield-lock"></i>Admin Girişi</h2>
+            <div class="login-error" id="loginError">Kullanıcı adı veya şifre hatalı!</div>
+            <input type="text" class="login-input" id="usernameInput" placeholder="Kullanıcı Adı" autocomplete="off">
+            <input type="password" class="login-input" id="passwordInput" placeholder="Şifre">
+            <button class="login-btn" onclick="handleLogin()"><i class="bi bi-box-arrow-in-right"></i> Giriş Yap</button>
+        </div>
+    </div>
+
+    <!-- Admin Content -->
+    <div class="admin-content" id="adminContent">
     <audio id="notificationSound" src="/notification.mp3" preload="auto"></audio>
 
     <!-- Toggle Controls Button -->
@@ -1315,6 +1442,9 @@
                 <i class="bi bi-bell-slash"></i>
                 <span>Bildirimler Kapalı</span>
             </div>
+            <button class="logout-btn" onclick="handleLogout()">
+                <i class="bi bi-box-arrow-right"></i> Oturumu Kapat
+            </button>
         </div>
         <div class="control-buttons-row">
             <button class="ctrl-btn" id="btnChatMenu" onclick="toggleSpecialMenu('chat')"
@@ -3337,7 +3467,52 @@
                 updateStats();
             }, 300);
         };
+
+        // Login/Logout Functions
+        function handleLogin() {
+            const username = document.getElementById('usernameInput').value;
+            const password = document.getElementById('passwordInput').value;
+            const errorEl = document.getElementById('loginError');
+            
+            if (username === 'cinaralti' && password === 'Atmosfer?/.1') {
+                sessionStorage.setItem('adminLoggedIn', 'true');
+                document.getElementById('loginContainer').style.display = 'none';
+                document.getElementById('adminContent').classList.add('logged-in');
+                errorEl.style.display = 'none';
+            } else {
+                errorEl.style.display = 'block';
+            }
+        }
+
+        function handleLogout() {
+            sessionStorage.removeItem('adminLoggedIn');
+            document.getElementById('loginContainer').style.display = 'flex';
+            document.getElementById('adminContent').classList.remove('logged-in');
+            document.getElementById('usernameInput').value = '';
+            document.getElementById('passwordInput').value = '';
+        }
+
+        // Check login status on page load
+        (function checkLoginStatus() {
+            if (sessionStorage.getItem('adminLoggedIn') === 'true') {
+                document.getElementById('loginContainer').style.display = 'none';
+                document.getElementById('adminContent').classList.add('logged-in');
+            }
+        })();
+
+        // Enter key to login
+        document.getElementById('passwordInput').addEventListener('keypress', function(e) {
+            if (e.key === 'Enter') {
+                handleLogin();
+            }
+        });
+        document.getElementById('usernameInput').addEventListener('keypress', function(e) {
+            if (e.key === 'Enter') {
+                handleLogin();
+            }
+        });
     </script>
+    </div> <!-- End of admin-content -->
 </body>
 
 </html>

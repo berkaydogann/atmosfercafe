@@ -5,8 +5,13 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
     <title>Atmosfer Kafe | Menü</title>
+    
+    <!-- Preconnect for faster resource loading -->
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link rel="preconnect" href="https://cdn.jsdelivr.net">
 
-    <link href="https://fonts.googleapis.com/css2?family=Outfit:wght@300;400;500;700;900&display=swap" rel="stylesheet">
+    <link href="https://fonts.googleapis.com/css2?family=Outfit:wght@400;500;700;800&display=swap" rel="stylesheet">
     <link href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.1/font/bootstrap-icons.css" rel="stylesheet">
     <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/css/bootstrap.min.css" rel="stylesheet">
 
@@ -55,54 +60,21 @@
             position: relative;
         }
 
-        /* Subtle Aurora Background Mesh */
+        /* Subtle Aurora Background - STATIC (Performance Optimized) */
         body::before {
             content: '';
             position: fixed;
             inset: 0;
             background:
-                radial-gradient(circle at 20% 30%, rgba(0, 220, 130, 0.12) 0%, transparent 50%),
-                radial-gradient(circle at 80% 70%, rgba(255, 179, 71, 0.12) 0%, transparent 50%),
-                radial-gradient(circle at 50% 10%, rgba(0, 220, 130, 0.08) 0%, transparent 40%),
-                radial-gradient(circle at 10% 80%, rgba(255, 179, 71, 0.08) 0%, transparent 40%),
+                radial-gradient(circle at 20% 30%, rgba(0, 220, 130, 0.08) 0%, transparent 50%),
+                radial-gradient(circle at 80% 70%, rgba(255, 179, 71, 0.08) 0%, transparent 50%),
                 linear-gradient(135deg, #F2F4F8 0%, #F5F7FA 50%, #F2F4F8 100%);
-            filter: blur(80px);
             z-index: 0;
             pointer-events: none;
-            animation: auroraFloat 20s ease-in-out infinite;
+            will-change: auto;
         }
 
-        @keyframes auroraFloat {
-
-            0%,
-            100% {
-                transform: translate(0, 0) scale(1);
-                opacity: 1;
-            }
-
-            33% {
-                transform: translate(2%, -1%) scale(1.02);
-                opacity: 0.95;
-            }
-
-            66% {
-                transform: translate(-1%, 2%) scale(0.98);
-                opacity: 1;
-            }
-        }
-
-        body::after {
-            content: '';
-            position: fixed;
-            inset: 0;
-            background:
-                radial-gradient(ellipse at 30% 50%, rgba(0, 220, 130, 0.06) 0%, transparent 60%),
-                radial-gradient(ellipse at 70% 50%, rgba(255, 179, 71, 0.06) 0%, transparent 60%);
-            filter: blur(120px);
-            z-index: 0;
-            pointer-events: none;
-            animation: auroraFloat 25s ease-in-out infinite reverse;
-        }
+        /* Removed heavy blur animations for performance */
 
         /* ========================================
            HERO SECTION - Premium with Gradient
@@ -131,18 +103,10 @@
             position: absolute;
             inset: 0;
             background:
-                linear-gradient(180deg, rgba(17, 17, 17, 0.3) 0%, rgba(17, 17, 17, 0.5) 50%, rgba(242, 244, 248, 0.85) 85%, var(--bg-premium) 100%),
-                url('https://images.unsplash.com/photo-1509042239860-f550ce710b93?w=1200&q=85') center/cover;
+                linear-gradient(180deg, rgba(17, 17, 17, 0.4) 0%, rgba(17, 17, 17, 0.5) 50%, rgba(242, 244, 248, 0.9) 85%, var(--bg-premium) 100%),
+                url('https://images.unsplash.com/photo-1509042239860-f550ce710b93?w=800&q=70') center/cover;
             background-size: cover;
             background-position: center 40%;
-        }
-
-        .hero-bg::before {
-            content: '';
-            position: absolute;
-            inset: 0;
-            background: radial-gradient(ellipse at 50% 30%, rgba(0, 220, 130, 0.08) 0%, transparent 70%);
-            mix-blend-mode: screen;
         }
 
         .hero-content {
@@ -231,13 +195,10 @@
             position: sticky;
             top: 0;
             z-index: 1000;
-            background: rgba(255, 255, 255, 0.8);
-            backdrop-filter: blur(20px) saturate(180%);
-            -webkit-backdrop-filter: blur(20px) saturate(180%);
+            background: rgba(255, 255, 255, 0.97);
             border-bottom: 1px solid var(--border-soft);
             padding: max(12px, var(--safe-area-top)) 0 12px 0;
             box-shadow: var(--shadow-medium);
-            transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
         }
 
         /* Search Bar */
@@ -304,7 +265,6 @@
             font-weight: 700;
             white-space: nowrap;
             border: none;
-            transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
             cursor: pointer;
             flex-shrink: 0;
             min-height: 46px;
@@ -315,25 +275,7 @@
         }
 
         .category-pill:active {
-            animation: buttonBounce 0.4s cubic-bezier(0.68, -0.55, 0.265, 1.55);
-        }
-
-        @keyframes buttonBounce {
-            0% {
-                transform: scale(1);
-            }
-
-            50% {
-                transform: scale(0.9);
-            }
-
-            70% {
-                transform: scale(1.05);
-            }
-
-            100% {
-                transform: scale(1);
-            }
+            opacity: 0.8;
         }
 
         .category-pill.active {
@@ -355,8 +297,7 @@
         .menu-section {
             scroll-margin-top: 150px;
             margin-bottom: 48px;
-            opacity: 0;
-            animation: fadeInUp 0.6s cubic-bezier(0.16, 1, 0.3, 1) forwards;
+            contain: layout style;
         }
 
         .section-header {
@@ -393,6 +334,7 @@
             display: grid;
             grid-template-columns: repeat(auto-fill, minmax(165px, 1fr));
             gap: 16px;
+            contain: layout style;
         }
 
         @media (min-width: 400px) {
@@ -408,7 +350,7 @@
             }
         }
 
-        /* Product Card - Premium Floating Design */
+        /* Product Card - Optimized Design */
         .product-card {
             background: var(--card-white);
             border: none;
@@ -416,22 +358,20 @@
             overflow: hidden;
             display: flex;
             flex-direction: column;
-            transition: all 0.4s cubic-bezier(0.4, 0, 0.2, 1);
-            box-shadow: var(--shadow-medium);
+            box-shadow: var(--shadow-soft);
             cursor: pointer;
             position: relative;
-            transform-style: preserve-3d;
+            contain: layout style paint;
         }
 
-        .product-card:hover {
-            transform: translateY(-8px) rotateX(2deg) rotateY(-1deg);
-            box-shadow:
-                0 12px 40px rgba(0, 0, 0, 0.12),
-                0 0 30px rgba(0, 220, 130, 0.15);
+        @media (hover: hover) {
+            .product-card:hover {
+                box-shadow: var(--shadow-medium);
+            }
         }
 
         .product-card:active {
-            transform: translateY(-4px) rotateX(1deg) scale(0.98);
+            opacity: 0.9;
         }
 
         .product-img-wrapper {
@@ -452,11 +392,7 @@
             width: 100%;
             height: 100%;
             object-fit: cover;
-            transition: transform 0.5s cubic-bezier(0.4, 0, 0.2, 1);
-        }
-
-        .product-card:hover .product-img {
-            transform: scale(1.1);
+            content-visibility: auto;
         }
 
         /* Out of Stock - Grayscale + Overlay */
@@ -509,8 +445,6 @@
             padding: 5px 10px;
             border-radius: 8px;
             z-index: 3;
-            backdrop-filter: blur(8px);
-            -webkit-backdrop-filter: blur(8px);
         }
 
         .taste-badge.taste-sert {
@@ -577,14 +511,14 @@
             box-shadow: 0 4px 12px rgba(0, 220, 130, 0.3);
         }
 
-        .btn-add:not(:disabled):hover {
-            background: var(--accent-green-hover);
-            transform: translateY(-2px);
-            box-shadow: 0 6px 20px rgba(0, 220, 130, 0.4);
+        @media (hover: hover) {
+            .btn-add:not(:disabled):hover {
+                background: var(--accent-green-hover);
+            }
         }
 
         .btn-add:not(:disabled):active {
-            animation: buttonBounce 0.4s cubic-bezier(0.68, -0.55, 0.265, 1.55);
+            opacity: 0.8;
         }
 
         .btn-add:disabled {
@@ -600,13 +534,11 @@
         .bottom-sheet-backdrop {
             position: fixed;
             inset: 0;
-            background: rgba(0, 0, 0, 0.5);
-            backdrop-filter: blur(4px);
-            -webkit-backdrop-filter: blur(4px);
+            background: rgba(0, 0, 0, 0.6);
             z-index: 10000;
             opacity: 0;
             visibility: hidden;
-            transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+            transition: opacity 0.2s ease;
         }
 
         .bottom-sheet-backdrop.show {
@@ -1658,13 +1590,14 @@
             return Object.keys(stockStatus).length > 0;
         }
 
-        // Render Menu
+        // Render Menu - Optimized with DocumentFragment
         function renderMenu() {
             const navContainer = document.getElementById('categoryNav');
             const menuContainer = document.getElementById('menuContainer');
 
-            navContainer.innerHTML = '';
-            menuContainer.innerHTML = '';
+            // Use DocumentFragment for batch DOM updates
+            const navFragment = document.createDocumentFragment();
+            const menuFragment = document.createDocumentFragment();
 
             let categoriesToRender = menuData;
 
@@ -1686,7 +1619,7 @@
                 const banner = document.createElement('div');
                 banner.className = 'saturday-banner';
                 banner.innerHTML = `<i class="bi bi-calendar-week"></i> ${activeMenu.name}`;
-                menuContainer.appendChild(banner);
+                menuFragment.appendChild(banner);
             }
 
             categoriesToRender.forEach((cat, index) => {
@@ -1696,13 +1629,12 @@
                 pill.textContent = cat.title;
                 pill.dataset.target = cat.id;
                 pill.onclick = () => scrollToSection(cat.id);
-                navContainer.appendChild(pill);
+                navFragment.appendChild(pill);
 
                 // Menu Section
                 const section = document.createElement('div');
                 section.className = 'menu-section';
                 section.id = cat.id;
-                section.style.animationDelay = `${index * 0.08}s`;
 
                 const header = document.createElement('div');
                 header.className = 'section-header';
@@ -1725,16 +1657,17 @@
                     card.onclick = () => openModal(item.name);
 
                     const imgUrl = item.img;
+                    const escapedName = item.name.replace(/'/g, "\\'");
 
                     card.innerHTML = `
                         ${cat.special ? '<div class="special-badge">ÖZEL</div>' : ''}
                         <div class="product-img-wrapper">
-                            <img src="${imgUrl}" class="product-img" loading="lazy" alt="${item.name}">
+                            <img src="${imgUrl}" class="product-img" loading="lazy" decoding="async" alt="${item.name}" width="180" height="180">
                         </div>
                         <div class="card-content">
                             <div class="product-name">${item.name}</div>
                             <div class="product-desc">${item.desc}</div>
-                            <button class="btn-add" onclick="event.stopPropagation(); openModal('${item.name}')">
+                            <button class="btn-add" onclick="event.stopPropagation(); openModal('${escapedName}')">
                                 <i class="bi bi-plus-lg"></i> Ekle
                             </button>
                         </div>
@@ -1743,11 +1676,52 @@
                 });
 
                 section.appendChild(grid);
-                menuContainer.appendChild(section);
+                menuFragment.appendChild(section);
             });
+
+            // Batch DOM updates
+            navContainer.innerHTML = '';
+            menuContainer.innerHTML = '';
+            navContainer.appendChild(navFragment);
+            menuContainer.appendChild(menuFragment);
+
+            // Setup scroll spy after DOM is ready
+            setupScrollSpy();
 
             updateStockUI();
             updateTasteBadges();
+        }
+
+        // Separate scroll spy setup for better performance
+        function setupScrollSpy() {
+            const navItems = document.querySelectorAll('.category-pill');
+            const sections = document.querySelectorAll('.menu-section');
+            
+            if (sections.length === 0) return;
+
+            const observer = new IntersectionObserver((entries) => {
+                entries.forEach(entry => {
+                    if (entry.isIntersecting) {
+                        navItems.forEach(nav => {
+                            const isActive = nav.dataset.target === entry.target.id;
+                            nav.classList.toggle('active', isActive);
+
+                            if (isActive) {
+                                const categoryNav = document.getElementById('categoryNav');
+                                categoryNav.scrollTo({
+                                    left: nav.offsetLeft - 20,
+                                    behavior: 'smooth'
+                                });
+                            }
+                        });
+                    }
+                });
+            }, {
+                rootMargin: "-20% 0px -60% 0px",
+                threshold: 0
+            });
+
+            sections.forEach(section => observer.observe(section));
         }
 
         function scrollToSection(id) {
@@ -1766,39 +1740,22 @@
 
         function setupScrollEffects() {
             const scrollTop = document.getElementById('scrollTop');
-            const navItems = document.querySelectorAll('.category-pill');
-            const sections = document.querySelectorAll('.menu-section');
+            let scrollTicking = false;
 
-            // Scroll top button visibility
+            // Throttled scroll handler for scroll-to-top button
             window.addEventListener('scroll', () => {
-                if (window.scrollY > 300) {
-                    scrollTop.classList.add('visible');
-                } else {
-                    scrollTop.classList.remove('visible');
+                if (!scrollTicking) {
+                    requestAnimationFrame(() => {
+                        if (window.scrollY > 300) {
+                            scrollTop.classList.add('visible');
+                        } else {
+                            scrollTop.classList.remove('visible');
+                        }
+                        scrollTicking = false;
+                    });
+                    scrollTicking = true;
                 }
-            });
-
-            // Scroll spy for navigation
-            const observer = new IntersectionObserver((entries) => {
-                entries.forEach(entry => {
-                    if (entry.isIntersecting) {
-                        navItems.forEach(nav => {
-                            nav.classList.toggle('active', nav.dataset.target === entry.target.id);
-
-                            if (nav.dataset.target === entry.target.id) {
-                                document.getElementById('categoryNav').scrollTo({
-                                    left: nav.offsetLeft - 20,
-                                    behavior: 'smooth'
-                                });
-                            }
-                        });
-                    }
-                });
-            }, {
-                rootMargin: "-20% 0px -60% 0px"
-            });
-
-            sections.forEach(section => observer.observe(section));
+            }, { passive: true });
 
             // Scroll to top
             scrollTop.onclick = () => {
@@ -1806,31 +1763,35 @@
             };
         }
 
-        // Search
+        // Search with debounce
+        let searchTimeout;
         document.getElementById('searchInput').addEventListener('input', (e) => {
-            const val = e.target.value.toLowerCase().trim();
-            const sections = document.querySelectorAll('.menu-section');
-            let hasResult = false;
+            clearTimeout(searchTimeout);
+            searchTimeout = setTimeout(() => {
+                const val = e.target.value.toLowerCase().trim();
+                const sections = document.querySelectorAll('.menu-section');
+                let hasResult = false;
 
-            sections.forEach(sec => {
-                const cards = sec.querySelectorAll('.product-card');
-                let secHasMatch = false;
+                sections.forEach(sec => {
+                    const cards = sec.querySelectorAll('.product-card');
+                    let secHasMatch = false;
 
-                cards.forEach(card => {
-                    const text = card.innerText.toLowerCase();
-                    if (text.includes(val)) {
-                        card.style.display = 'flex';
-                        secHasMatch = true;
-                        hasResult = true;
-                    } else {
-                        card.style.display = 'none';
-                    }
+                    cards.forEach(card => {
+                        const text = card.innerText.toLowerCase();
+                        if (text.includes(val)) {
+                            card.style.display = 'flex';
+                            secHasMatch = true;
+                            hasResult = true;
+                        } else {
+                            card.style.display = 'none';
+                        }
+                    });
+
+                    sec.style.display = secHasMatch ? 'block' : 'none';
                 });
 
-                sec.style.display = secHasMatch ? 'block' : 'none';
-            });
-
-            document.getElementById('emptyState').classList.toggle('d-none', hasResult);
+                document.getElementById('emptyState').classList.toggle('d-none', hasResult);
+            }, 150);
         });
 
         // Socket & Stock Logic

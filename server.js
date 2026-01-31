@@ -481,6 +481,12 @@ io.on('connection', (socket) => {
     socket.emit('readyOrders', tvReadyOrders);
   });
 
+  // Admin panel requests ready orders for TV management
+  socket.on('getReadyOrdersForTv', () => {
+    socket.emit('readyOrders', tvReadyOrders);
+    console.log(`[${getTimestamp()}] 📋 Admin TV hazır siparişleri istedi: ${tvReadyOrders.length} sipariş`);
+  });
+
   socket.on('playVideo', (data) => {
     if (data.videoUrl) {
       currentVideoUrl = data.videoUrl;

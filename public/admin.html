@@ -3410,11 +3410,21 @@
 
         // Yeni siparişin hazır olduğunu al
         socket.on('orderReadyForTv', (order) => {
-            tvReadyOrders.push(order);
+            // Önce mevcut listede olup olmadığını kontrol et (duplikat önleme)
+            const exists = tvReadyOrders.some(o => o.id === order.id);
+            if (!exists) {
+                tvReadyOrders.push(order);
+                updateTvReadyOrdersList();
+            }
+        });
+
+        // Siparişin tamamlandığını al (server 'orderPickedUp' event'i gönderiyor)
+        socket.on('orderPickedUp', (orderId) => {
+            tvReadyOrders = tvReadyOrders.filter(o => o.id !== orderId);
             updateTvReadyOrdersList();
         });
 
-        // Siparişin tamamlandığını al
+        // Siparişin tamamlandığını al (eski event adı - geriye dönük uyumluluk)
         socket.on('orderCompletedOnTv', (orderId) => {
             tvReadyOrders = tvReadyOrders.filter(o => o.id !== orderId);
             updateTvReadyOrdersList();

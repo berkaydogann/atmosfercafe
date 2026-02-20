@@ -712,6 +712,47 @@
         /* ========================================
            SUCCESS OVERLAY - Premium
         ======================================== */
+        .error-overlay {
+            position: fixed;
+            inset: 0;
+            background: var(--card-white);
+            z-index: 10003;
+            display: none;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            padding: max(30px, var(--safe-area-left)) max(30px, var(--safe-area-right));
+            animation: fadeIn 0.3s ease;
+        }
+
+        .error-overlay.show {
+            display: flex;
+        }
+
+        .error-icon {
+            font-size: clamp(4.5rem, 16vw, 6.5rem);
+            color: #ef4444;
+            margin-bottom: 28px;
+            filter: drop-shadow(0 8px 24px rgba(239, 68, 68, 0.3));
+            animation: scaleInBounce 0.6s cubic-bezier(0.34, 1.56, 0.64, 1);
+        }
+
+        .error-title {
+            font-size: clamp(1.8rem, 7vw, 2.5rem);
+            font-weight: 900;
+            color: var(--text-dark);
+            margin-bottom: 12px;
+            text-align: center;
+        }
+
+        .error-subtitle {
+            font-size: clamp(1rem, 4vw, 1.2rem);
+            color: var(--text-medium);
+            text-align: center;
+            max-width: 320px;
+            line-height: 1.5;
+        }
+
         .success-overlay {
             position: fixed;
             inset: 0;
@@ -1168,6 +1209,13 @@
     </div>
 
     <!-- Success Overlay -->
+    <!-- Error / Order Limit Overlay -->
+    <div id="errorScreen" class="error-overlay">
+        <i class="bi bi-x-circle-fill error-icon"></i>
+        <h3 class="error-title" id="errorTitle">Sipariş Verilemedi</h3>
+        <p class="error-subtitle" id="errorMessage">Bir hata oluştu.</p>
+    </div>
+
     <div id="successScreen" class="success-overlay">
         <i class="bi bi-check-circle-fill success-icon"></i>
         <h3 class="success-title">Sipariş Alındı!</h3>
@@ -1996,42 +2044,37 @@
         socket.on('orderError', (data) => {
             const msg = data.message || 'Sipariş işlenirken bir hata oluştu.';
 
-            // Show inline error on the order form
-            const orderModal = document.querySelector('.modal.active, .order-modal.active, [id*="orderModal"]');
-            const phoneInput = document.getElementById('guestPhone');
-            
-            // Remove any existing error
-            document.querySelectorAll('.whatsapp-error-msg').forEach(el => el.remove());
-            
-            // Create styled error message
-            const errorDiv = document.createElement('div');
-            errorDiv.className = 'whatsapp-error-msg';
-            errorDiv.innerHTML = `
-                <div style="background: #fee2e2; border: 1px solid #ef4444; border-radius: 12px; padding: 14px 16px; margin: 12px 0; display: flex; align-items: flex-start; gap: 10px; animation: shakeX 0.5s ease-in-out;">
-                    <span style="font-size: 22px; line-height: 1;">❌</span>
-                    <div>
-                        <div style="font-weight: 600; color: #b91c1c; font-size: 14px; margin-bottom: 2px;">Geçersiz Telefon Numarası</div>
-                        <div style="color: #dc2626; font-size: 13px;">${msg}</div>
+            // Check if it's a WhatsApp/phone validation error (modal might still be open)
+            const isPhoneError = msg.toLowerCase().includes('whatsapp') || msg.toLowerCase().includes('telefon numarası');
+            const orderModal = document.getElementById('orderModal');
+            const isModalOpen = orderModal && orderModal.classList.contains('show');
+
+            if (isPhoneError && isModalOpen) {
+                // Show inline error inside the open modal
+                const phoneInput = document.getElementById('guestPhone');
+                document.querySelectorAll('.whatsapp-error-msg').forEach(el => el.remove());
+
+                const errorDiv = document.createElement('div');
+                errorDiv.className = 'whatsapp-error-msg';
+                errorDiv.innerHTML = `
+                    <div style="background: #fee2e2; border: 1px solid #ef4444; border-radius: 12px; padding: 14px 16px; margin: 12px 0; display: flex; align-items: flex-start; gap: 10px; animation: shakeX 0.5s ease-in-out;">
+                        <span style="font-size: 22px; line-height: 1;">❌</span>
+                        <div>
+                            <div style="font-weight: 600; color: #b91c1c; font-size: 14px; margin-bottom: 2px;">Geçersiz Telefon Numarası</div>
+                            <div style="color: #dc2626; font-size: 13px;">${msg}</div>
+                        </div>
                     </div>
-                </div>
-            `;
-
-            // Insert error near the phone input or at top of modal
-            if (phoneInput && phoneInput.parentElement) {
-                phoneInput.parentElement.insertAdjacentElement('afterend', errorDiv);
-                phoneInput.style.borderColor = '#ef4444';
-                phoneInput.focus();
-                // Reset border after 5 seconds
-                setTimeout(() => { phoneInput.style.borderColor = ''; }, 5000);
-            } else if (orderModal) {
-                orderModal.querySelector('.modal-content, .modal-body, form')?.prepend(errorDiv);
+                `;
+                if (phoneInput && phoneInput.parentElement) {
+                    phoneInput.parentElement.insertAdjacentElement('afterend', errorDiv);
+                    phoneInput.style.borderColor = '#ef4444';
+                    setTimeout(() => { phoneInput.style.borderColor = ''; }, 5000);
+                }
+                setTimeout(() => errorDiv.remove(), 8000);
             } else {
-                // Fallback to alert if no modal found
-                alert('❌ ' + msg);
+                // Show full-screen error overlay for all other errors (limit, no rights, etc.)
+                showErrorOverlay(msg);
             }
-
-            // Auto-remove error after 8 seconds
-            setTimeout(() => errorDiv.remove(), 8000);
 
             // Re-enable the submit button if it was disabled
             const submitBtn = document.querySelector('.btn-submit');
@@ -2040,6 +2083,32 @@
                 submitBtn.textContent = 'Siparişi Tamamla';
             }
         });
+
+        function showErrorOverlay(msg, duration) {
+            const overlay = document.getElementById('errorScreen');
+            const titleEl = document.getElementById('errorTitle');
+            const msgEl = document.getElementById('errorMessage');
+            if (!overlay) return;
+
+            // Customize title based on message content
+            if (msg.toLowerCase().includes('hak') || msg.toLowerCase().includes('sipariş sayısı') || msg.toLowerCase().includes('maksimum')) {
+                titleEl.textContent = 'Sipariş Hakkınız Doldu';
+            } else if (msg.toLowerCase().includes('cihaz')) {
+                titleEl.textContent = 'Cihaz Limiti Aşıldı';
+            } else {
+                titleEl.textContent = 'Sipariş Verilemedi';
+            }
+            msgEl.textContent = msg;
+
+            overlay.classList.add('show');
+            document.body.style.overflow = 'hidden';
+
+            const hideDelay = duration || 4000;
+            setTimeout(() => {
+                overlay.classList.remove('show');
+                document.body.style.overflow = 'auto';
+            }, hideDelay);
+        }
 
         // Cafe Closed Logic
         socket.on('cafeStatus', (status) => {
@@ -2116,29 +2185,18 @@
         });
 
         socket.on('orderLimitExceeded', (data) => {
-            alert(`❌ ${data.message}\n\nKalan hakkınız: ${data.remaining}`);
-
-            const orderBtn = document.querySelector('.btn-submit');
-            if (orderBtn) {
-                orderBtn.disabled = true;
-                orderBtn.textContent = 'Günlük Hak Doldu';
-                orderBtn.style.background = '#ccc';
-            }
+            const msg = data.remaining > 0
+                ? `${data.message}\n\nKalan hakkınız: ${data.remaining}`
+                : data.message;
+            showErrorOverlay(msg, 5000);
         });
 
         socket.on('phoneNameMismatch', (data) => {
-            alert(`⚠️ ${data.message}`);
+            showErrorOverlay(data.message, 5000);
         });
 
         socket.on('deviceLimitExceeded', (data) => {
-            alert(`🚫 ${data.message}`);
-
-            const orderBtn = document.querySelector('.btn-submit');
-            if (orderBtn) {
-                orderBtn.disabled = true;
-                orderBtn.textContent = 'Günlük Hak Doldu';
-                orderBtn.style.background = '#ccc';
-            }
+            showErrorOverlay(data.message, 5000);
         });
 
         function checkCafeStatus() {

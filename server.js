@@ -85,6 +85,71 @@ const upload = multer({
   }
 });
 
+// WATI WhatsApp configuration
+const WATI_API_TOKEN = process.env.WATI_API_TOKEN || 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJ1bmlxdWVfbmFtZSI6ImJlcmtheWRvZ2FudWs5OEBnbWFpbC5jb20iLCJuYW1laWQiOiJiZXJrYXlkb2dhbnVrOThAZ21haWwuY29tIiwiZW1haWwiOiJiZXJrYXlkb2dhbnVrOThAZ21haWwuY29tIiwiYXV0aF90aW1lIjoiMDIvMDMvMjAyNiAxNjowODowNSIsInRlbmFudF9pZCI6IjQyODkwNiIsImRiX25hbWUiOiJtdC1wcm9kLVRlbmFudHMiLCJodHRwOi8vc2NoZW1hcy5taWNyb3NvZnQuY29tL3dzLzIwMDgvMDYvaWRlbnRpdHkvY2xhaW1zL3JvbGUiOiJBRE1JTklTVFJBVE9SIiwiZXhwIjoyNTM0MDIzMDA4MDAsImlzcyI6IkNsYXJlX0FJIiwiYXVkIjoiQ2xhcmVfQUkifQ.dQOzN40-Snxdvk_EVivMogIoEdafJfwNl7-Z_SgDGow';
+const WATI_CHATBOT_ID = process.env.WATI_CHATBOT_ID || '6939288e6d19e6b67c2de5ce';
+const WATI_TENANT_ID = process.env.WATI_TENANT_ID || '428906';
+const WATI_API_URL = `https://live-mt-server.wati.io/${WATI_TENANT_ID}/api/v1/sendTemplateMessage`;
+const WATI_TEMPLATE_ORDER_CREATED = process.env.WATI_TEMPLATE_ORDER_CREATED || 'cinaralti_siparis_alindi';
+const WATI_TEMPLATE_ORDER_READY = process.env.WATI_TEMPLATE_ORDER_READY || 'cinaralti_siparis_hazir';
+
+/**
+ * Send WhatsApp message via WATI
+ * @param {string} phone - Phone number (5xxxxxxxxx format)
+ * @param {string} templateName - WATI template name
+ * @param {Array} parameters - Template parameters [{name: 'param1', value: 'val1'}]
+ * @returns {Promise<{success: boolean, validWhatsApp: boolean}>} - Result with validation info
+ */
+async function sendWatiWhatsApp(phone, templateName, parameters) {
+  try {
+    // Convert Turkish phone format (5xxxxxxxxx) to international (905xxxxxxxxx)
+    let whatsappNumber = phone;
+    if (phone.startsWith('5') && phone.length === 10) {
+      whatsappNumber = '90' + phone;
+    } else if (phone.startsWith('05') && phone.length === 11) {
+      whatsappNumber = '9' + phone;
+    } else if (!phone.startsWith('90')) {
+      whatsappNumber = '90' + phone;
+    }
+
+    // WATI v1 API: whatsappNumber goes as query parameter, parameters in body
+    const url = `${WATI_API_URL}?whatsappNumber=${whatsappNumber}`;
+
+    const payload = {
+      template_name: templateName,
+      broadcast_name: 'cinaralti_orders',
+      parameters: parameters
+    };
+
+    console.log(`[${getTimestamp()}] 📱 WATI mesaj gönderiliyor: ${whatsappNumber} - Template: ${templateName}`);
+
+    const response = await axios.post(url, payload, {
+      headers: {
+        'Authorization': `Bearer ${WATI_API_TOKEN}`,
+        'Content-Type': 'application/json-patch+json'
+      },
+      timeout: 10000
+    });
+
+    const isValid = response.data?.validWhatsAppNumber !== false;
+    const isSent = response.data && (response.data.result === true || response.data.result === 'true');
+
+    if (isSent && isValid) {
+      console.log(`[${getTimestamp()}] ✅ WATI mesaj gönderildi: ${whatsappNumber} (valid: ${isValid})`);
+      return { success: true, validWhatsApp: true };
+    } else if (isSent && !isValid) {
+      console.warn(`[${getTimestamp()}] ⚠️ WATI: Numara WhatsApp'ta geçersiz: ${whatsappNumber}`);
+      return { success: false, validWhatsApp: false };
+    } else {
+      console.warn(`[${getTimestamp()}] ⚠️ WATI yanıt beklenmedik:`, response.data);
+      return { success: false, validWhatsApp: true }; // API hatası olsa bile siparişi engelleme
+    }
+  } catch (error) {
+    console.error(`[${getTimestamp()}] ❌ WATI mesaj hatası:`, error.response?.status, error.response?.data || error.message);
+    return { success: false, validWhatsApp: true }; // WATI hatasında siparişi engelleme
+  }
+}
+
 // Port configuration
 const PORT = process.env.PORT || 3000;
 
@@ -244,13 +309,13 @@ io.on('connection', (socket) => {
         return;
       }
 
-      // Place order using Firebase
+      // Step 1: Place order using Firebase (get order number first)
       const result = await fbHelper.placeOrder({
         guestName: orderData.guestName,
         phone: orderData.phone,
         deviceId: orderData.deviceId,
         item: orderData.item,
-        rating: orderData.rating || null, // Only include if provided
+        rating: orderData.rating || null,
         fcmToken: orderData.fcmToken,
         deviceInfo: {
           deviceModel: orderData.deviceModel,
@@ -259,6 +324,54 @@ io.on('connection', (socket) => {
           os: orderData.os
         }
       });
+
+      // Step 2: Send WATI message and validate WhatsApp number
+      if (orderData.phone) {
+        const watiResult = await sendWatiWhatsApp(orderData.phone, WATI_TEMPLATE_ORDER_CREATED, [
+          { name: 'musteri_adi', value: orderData.guestName },
+          { name: 'siparis_no', value: result.orderNumber.toString() },
+          { name: 'icecek_adi', value: orderData.item }
+        ]);
+
+        if (!watiResult.validWhatsApp) {
+          // Cancel the order - number is fake
+          console.log(`[${getTimestamp()}] ❌ Geçersiz WhatsApp numarası: ${orderData.phone} - Sipariş #${result.orderNumber} iptal edildi`);
+          try {
+            // 1. Delete the order from activeOrders
+            await db.collection('activeOrders').doc(result.orderId).delete();
+
+            // 2. Reset order rights so customer can try again with valid number
+            const today = fbHelper.getTurkishDate();
+            const rightsRef = db.collection('orderRights').doc(orderData.phone);
+            const rightsDoc = await rightsRef.get();
+            if (rightsDoc.exists) {
+              const rights = rightsDoc.data();
+              const updatedOrders = (rights.orders || []).filter(o => o.orderId !== result.orderId);
+              if (updatedOrders.length === 0) {
+                await rightsRef.delete();
+              } else {
+                await rightsRef.update({
+                  orders: updatedOrders,
+                  orderCount: updatedOrders.length
+                });
+              }
+            }
+
+            // 3. Reset device usage so device can order again
+            if (orderData.deviceId) {
+              await db.collection('dailyDeviceUsage').doc(orderData.deviceId).delete();
+            }
+
+            console.log(`[${getTimestamp()}] 🗑️ Geçersiz numara - sipariş ve haklar temizlendi: ${result.orderId}`);
+          } catch (cancelErr) {
+            console.error(`[${getTimestamp()}] ⚠️ Sipariş iptal hatası:`, cancelErr.message);
+          }
+          socket.emit('orderError', {
+            message: 'Bu telefon numarası WhatsApp\'ta kayıtlı değil. Lütfen geçerli bir WhatsApp numarası girin.'
+          });
+          return;
+        }
+      }
 
       console.log(`[${getTimestamp()}] ✅ Sipariş alındı:`);
       console.log(`   İsim: ${orderData.guestName}`);
@@ -406,6 +519,16 @@ io.on('connection', (socket) => {
       const result = await fbHelper.completeOrder(orderData.orderId);
 
       console.log(`[${getTimestamp()}] ✅ Sipariş hazırlandı: #${result.orderNumber}`);
+
+      // Send WhatsApp notification via WATI - Order Ready
+      const customerPhone = result.phone || orderData.phone;
+      if (customerPhone) {
+        sendWatiWhatsApp(customerPhone, WATI_TEMPLATE_ORDER_READY, [
+          { name: 'musteri_adi', value: result.guestName || orderData.guestName },
+          { name: 'siparis_no', value: result.orderNumber.toString() },
+          { name: 'icecek_adi', value: result.item || orderData.item }
+        ]).catch(err => console.error(`[${getTimestamp()}] ⚠️ WATI hazır bildirimi hatası:`, err.message));
+      }
 
       // Add to TV ready orders
       tvReadyOrders.push({
@@ -573,6 +696,201 @@ io.on('connection', (socket) => {
       console.log(`[${getTimestamp()}] 📋 ${menuNames[menuType]} menüsü güncellendi: ${items.length} ürün`);
     } catch (error) {
       console.error(`[${getTimestamp()}] ❌ Error updating special menu items:`, error);
+    }
+  });
+
+  // ============ MANUAL ORDER (Barista Manuel Sipariş) ============
+
+  // Check if a person can order by name
+  socket.on('checkManualOrderRights', async (data) => {
+    try {
+      const { firstName, lastName } = data;
+      if (!firstName || !lastName) {
+        socket.emit('manualOrderRightsResult', { canOrder: false, reason: 'İsim ve soyisim gerekli.' });
+        return;
+      }
+
+      const normalizedName = (firstName.trim() + ' ' + lastName.trim()).toLowerCase().replace(/\s+/g, ' ');
+      const today = fbHelper.getTurkishDate();
+
+      const rightsRef = db.collection('manualOrderRights').doc(normalizedName);
+      const rightsDoc = await rightsRef.get();
+
+      if (!rightsDoc.exists || rightsDoc.data().date !== today) {
+        socket.emit('manualOrderRightsResult', {
+          canOrder: true,
+          remaining: 3,
+          orderCount: 0,
+          displayName: firstName.trim() + ' ' + lastName.trim()
+        });
+        return;
+      }
+
+      const rights = rightsDoc.data();
+      const orderCount = rights.orderCount || 0;
+
+      if (orderCount >= 3) {
+        socket.emit('manualOrderRightsResult', {
+          canOrder: false,
+          remaining: 0,
+          orderCount: orderCount,
+          reason: `⚠️ ${rights.displayName || normalizedName} bugün ${orderCount} sipariş vermiş. Günlük hakkı dolmuştur!`,
+          displayName: rights.displayName || normalizedName,
+          orders: rights.orders || []
+        });
+      } else {
+        socket.emit('manualOrderRightsResult', {
+          canOrder: true,
+          remaining: 3 - orderCount,
+          orderCount: orderCount,
+          displayName: rights.displayName || normalizedName,
+          orders: rights.orders || []
+        });
+      }
+    } catch (error) {
+      console.error(`[${getTimestamp()}] ❌ Manual order rights check error:`, error);
+      socket.emit('manualOrderRightsResult', { canOrder: false, reason: 'Hak sorgulamasında hata oluştu.' });
+    }
+  });
+
+  // Place a manual order (barista enters on behalf of customer)
+  socket.on('placeManualOrder', async (data) => {
+    try {
+      const { firstName, lastName, item } = data;
+
+      if (!firstName || !lastName || !item) {
+        socket.emit('manualOrderError', { message: 'İsim, soyisim ve içecek seçimi gerekli.' });
+        return;
+      }
+
+      // Check cafe status
+      if (!cachedCafeStatus.isOpen) {
+        socket.emit('manualOrderError', { message: 'Kafe şu anda kapalı.' });
+        return;
+      }
+
+      const normalizedName = (firstName.trim() + ' ' + lastName.trim()).toLowerCase().replace(/\s+/g, ' ');
+      const displayName = firstName.trim() + ' ' + lastName.trim();
+      const today = fbHelper.getTurkishDate();
+
+      // Check manual order rights
+      const rightsRef = db.collection('manualOrderRights').doc(normalizedName);
+      const rightsDoc = await rightsRef.get();
+
+      let orderCount = 0;
+      if (rightsDoc.exists && rightsDoc.data().date === today) {
+        orderCount = rightsDoc.data().orderCount || 0;
+      }
+
+      if (orderCount >= 3) {
+        const existingOrders = rightsDoc.data().orders || [];
+        socket.emit('manualOrderError', {
+          message: `${displayName} bugün ${orderCount} sipariş vermiş. Günlük hakkı dolmuştur!`,
+          orders: existingOrders
+        });
+        return;
+      }
+
+      // Get next order number
+      const counterRef = db.collection('dailyCounters').doc(today);
+      const orderNumber = await db.runTransaction(async (transaction) => {
+        const counterDoc = await transaction.get(counterRef);
+        let nextNumber = 1;
+        if (counterDoc.exists) {
+          nextNumber = (counterDoc.data().lastOrderNumber || 0) + 1;
+        }
+        transaction.set(counterRef, {
+          lastOrderNumber: nextNumber,
+          date: today,
+          lastUpdated: admin.firestore.FieldValue.serverTimestamp()
+        });
+        return nextNumber;
+      });
+
+      // Create order document
+      const orderRef = db.collection('activeOrders').doc();
+      const orderId = orderRef.id;
+      const currentHour = fbHelper.getTurkishHour();
+      const slot = fbHelper.determineSlot(currentHour);
+
+      await orderRef.set({
+        orderId: orderId,
+        orderNumber: orderNumber,
+        guestName: displayName,
+        phone: null,
+        deviceId: null,
+        item: item,
+        slot: slot,
+        rating: null,
+        fcmToken: null,
+        isManualOrder: true,
+        createdAt: admin.firestore.FieldValue.serverTimestamp(),
+        date: today
+      });
+
+      // Update manual order rights
+      const now = new Date().toISOString();
+      if (!rightsDoc.exists || rightsDoc.data().date !== today) {
+        await rightsRef.set({
+          normalizedName: normalizedName,
+          displayName: displayName,
+          orders: [{
+            orderNumber: orderNumber,
+            orderId: orderId,
+            item: item,
+            placedAt: now
+          }],
+          orderCount: 1,
+          date: today,
+          lastOrderAt: admin.firestore.FieldValue.serverTimestamp()
+        });
+      } else {
+        await rightsRef.update({
+          orders: admin.firestore.FieldValue.arrayUnion({
+            orderNumber: orderNumber,
+            orderId: orderId,
+            item: item,
+            placedAt: now
+          }),
+          orderCount: orderCount + 1,
+          lastOrderAt: admin.firestore.FieldValue.serverTimestamp(),
+          displayName: displayName
+        });
+      }
+
+      console.log(`[${getTimestamp()}] ✅ Manuel sipariş alındı:`);
+      console.log(`   İsim: ${displayName}`);
+      console.log(`   Ürün: ${item}`);
+      console.log(`   Sipariş No: #${orderNumber}`);
+      console.log(`   Kalan Hak: ${3 - (orderCount + 1)}`);
+
+      // Send success to barista
+      socket.emit('manualOrderSuccess', {
+        orderNumber: orderNumber,
+        guestName: displayName,
+        item: item,
+        remaining: 3 - (orderCount + 1)
+      });
+
+      // Broadcast new order to all admin dashboards
+      io.emit('newOrder', {
+        id: orderId,
+        orderNumber: orderNumber,
+        guestName: displayName,
+        phone: null,
+        item: item,
+        rating: null,
+        slot: slot,
+        createdAt: getTimestamp(),
+        isManualOrder: true
+      });
+
+      // Update daily stats
+      broadcastDailyStats();
+
+    } catch (error) {
+      console.error(`[${getTimestamp()}] ❌ Manuel sipariş hatası:`, error.message);
+      socket.emit('manualOrderError', { message: error.message || 'Manuel sipariş işlenirken hata oluştu.' });
     }
   });
 

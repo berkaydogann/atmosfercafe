@@ -1504,6 +1504,9 @@
         <button class="tab-btn" onclick="switchTab('specialMenus', this)">
             <i class="bi bi-list-stars"></i> Özel Menüler
         </button>
+        <button class="tab-btn" onclick="switchTab('manualOrder', this)">
+            <i class="bi bi-person-plus"></i> Manuel Sipariş
+        </button>
         <button class="tab-btn" onclick="switchTab('reports', this)">
             <i class="bi bi-bar-chart"></i> Raporlar
         </button>
@@ -1745,6 +1748,352 @@
         </div>
         <div id="atmosferMenuContent" class="special-menu-content" style="display: none;">
             <div class="stock-grid" id="atmosferMenuContainer"></div>
+        </div>
+    </div>
+
+    <!-- Manuel Sipariş Sekmesi -->
+    <div id="manualOrderTab" class="tab-content">
+        <style>
+            .manual-order-container {
+                max-width: 700px;
+                margin: 0 auto;
+            }
+            .manual-order-card {
+                background: var(--card-dark);
+                border-radius: 16px;
+                padding: 28px;
+                margin-bottom: 20px;
+                border: 1px solid rgba(255,255,255,0.05);
+            }
+            .manual-order-card h3 {
+                color: var(--starbucks-green);
+                margin-bottom: 8px;
+                font-size: 1.3rem;
+                display: flex;
+                align-items: center;
+                gap: 10px;
+            }
+            .manual-order-card p.desc {
+                color: var(--text-gray);
+                font-size: 0.9rem;
+                margin-bottom: 20px;
+            }
+            .manual-input-row {
+                display: grid;
+                grid-template-columns: 1fr 1fr;
+                gap: 12px;
+                margin-bottom: 16px;
+            }
+            .manual-input-group {
+                display: flex;
+                flex-direction: column;
+                gap: 6px;
+            }
+            .manual-input-group label {
+                font-size: 0.85rem;
+                color: var(--text-gray);
+                font-weight: 600;
+            }
+            .manual-input-group input,
+            .manual-input-group select {
+                padding: 12px 16px;
+                border-radius: 10px;
+                border: 2px solid rgba(255,255,255,0.1);
+                background: rgba(0,0,0,0.3);
+                color: var(--text-white);
+                font-size: 1rem;
+                font-family: 'Outfit', sans-serif;
+                transition: border-color 0.3s;
+            }
+            .manual-input-group input:focus,
+            .manual-input-group select:focus {
+                outline: none;
+                border-color: var(--starbucks-green);
+            }
+            .manual-input-group input::placeholder {
+                color: rgba(255,255,255,0.3);
+            }
+            .manual-search-input {
+                width: 100%;
+                padding: 12px 16px;
+                border-radius: 10px;
+                border: 2px solid rgba(255,255,255,0.1);
+                background: rgba(0,0,0,0.3);
+                color: var(--text-white);
+                font-size: 1rem;
+                font-family: 'Outfit', sans-serif;
+                margin-bottom: 12px;
+                box-sizing: border-box;
+                transition: border-color 0.3s;
+            }
+            .manual-search-input:focus {
+                outline: none;
+                border-color: var(--starbucks-green);
+            }
+            .manual-items-grid {
+                display: grid;
+                grid-template-columns: repeat(auto-fill, minmax(150px, 1fr));
+                gap: 8px;
+                max-height: 300px;
+                overflow-y: auto;
+                padding: 4px;
+            }
+            .manual-items-grid::-webkit-scrollbar {
+                width: 8px;
+            }
+            .manual-items-grid::-webkit-scrollbar-track {
+                background: rgba(0,0,0,0.2);
+                border-radius: 4px;
+            }
+            .manual-items-grid::-webkit-scrollbar-thumb {
+                background: rgba(255,255,255,0.25);
+                border-radius: 4px;
+            }
+            .manual-item-btn {
+                padding: 10px 12px;
+                border-radius: 10px;
+                border: 2px solid rgba(255,255,255,0.08);
+                background: rgba(255,255,255,0.03);
+                color: var(--text-white);
+                font-size: 0.85rem;
+                font-weight: 600;
+                cursor: pointer;
+                transition: all 0.2s;
+                text-align: center;
+                font-family: 'Outfit', sans-serif;
+            }
+            .manual-item-btn:hover {
+                border-color: var(--starbucks-green);
+                background: rgba(0,112,74,0.1);
+            }
+            .manual-item-btn.selected {
+                background: var(--starbucks-green);
+                border-color: var(--starbucks-green);
+                color: white;
+                box-shadow: 0 0 12px rgba(0,112,74,0.4);
+            }
+            .manual-item-btn.out-of-stock {
+                opacity: 0.35;
+                pointer-events: none;
+                text-decoration: line-through;
+            }
+            .manual-submit-btn {
+                width: 100%;
+                padding: 16px;
+                border-radius: 12px;
+                border: none;
+                background: var(--starbucks-green);
+                color: white;
+                font-size: 1.15rem;
+                font-weight: 700;
+                cursor: pointer;
+                font-family: 'Outfit', sans-serif;
+                transition: all 0.2s;
+                display: flex;
+                align-items: center;
+                justify-content: center;
+                gap: 10px;
+                margin-top: 10px;
+            }
+            .manual-submit-btn:hover {
+                background: #005c3c;
+                transform: translateY(-2px);
+                box-shadow: 0 6px 20px rgba(0,112,74,0.4);
+            }
+            .manual-submit-btn:disabled {
+                opacity: 0.4;
+                pointer-events: none;
+            }
+            .manual-check-btn {
+                width: 100%;
+                padding: 12px;
+                border-radius: 10px;
+                border: 2px solid rgba(255,255,255,0.15);
+                background: rgba(255,255,255,0.05);
+                color: var(--text-white);
+                font-size: 0.95rem;
+                font-weight: 600;
+                cursor: pointer;
+                font-family: 'Outfit', sans-serif;
+                transition: all 0.2s;
+                display: flex;
+                align-items: center;
+                justify-content: center;
+                gap: 8px;
+            }
+            .manual-check-btn:hover {
+                border-color: var(--starbucks-green);
+                background: rgba(0,112,74,0.15);
+            }
+            .manual-warning-box {
+                padding: 16px 20px;
+                border-radius: 12px;
+                margin-bottom: 16px;
+                display: none;
+                animation: slideInRight 0.3s ease-out;
+            }
+            .manual-warning-box.success {
+                display: block;
+                background: rgba(0,112,74,0.15);
+                border: 2px solid var(--starbucks-green);
+                color: var(--starbucks-green);
+            }
+            .manual-warning-box.danger {
+                display: block;
+                background: rgba(255,95,87,0.15);
+                border: 2px solid var(--danger);
+                color: var(--danger);
+            }
+            .manual-warning-box.info {
+                display: block;
+                background: rgba(59,130,246,0.15);
+                border: 2px solid #3b82f6;
+                color: #93bbfc;
+            }
+            .manual-warning-box .warning-title {
+                font-weight: 700;
+                font-size: 1.1rem;
+                margin-bottom: 6px;
+                display: flex;
+                align-items: center;
+                gap: 8px;
+            }
+            .manual-warning-box .warning-detail {
+                font-size: 0.9rem;
+                opacity: 0.9;
+            }
+            .manual-warning-box .warning-orders {
+                margin-top: 10px;
+                padding-top: 10px;
+                border-top: 1px solid rgba(255,255,255,0.1);
+            }
+            .manual-warning-box .warning-orders .order-line {
+                display: flex;
+                justify-content: space-between;
+                padding: 4px 0;
+                font-size: 0.85rem;
+                opacity: 0.85;
+            }
+            .manual-selected-item {
+                display: none;
+                background: rgba(0,112,74,0.12);
+                border: 2px solid var(--starbucks-green);
+                border-radius: 12px;
+                padding: 14px 18px;
+                margin-bottom: 16px;
+                color: var(--starbucks-green);
+                font-weight: 700;
+                font-size: 1.05rem;
+                justify-content: space-between;
+                align-items: center;
+            }
+            .manual-selected-item.visible {
+                display: flex;
+            }
+            .manual-selected-item .clear-item {
+                background: none;
+                border: none;
+                color: var(--danger);
+                cursor: pointer;
+                font-size: 1.2rem;
+                padding: 4px 8px;
+                border-radius: 6px;
+                transition: background 0.2s;
+            }
+            .manual-selected-item .clear-item:hover {
+                background: rgba(255,95,87,0.2);
+            }
+            .manual-success-result {
+                display: none;
+                background: rgba(0,112,74,0.12);
+                border: 2px solid var(--starbucks-green);
+                border-radius: 12px;
+                padding: 24px;
+                text-align: center;
+                margin-top: 16px;
+                animation: slideInRight 0.3s ease-out;
+            }
+            .manual-success-result.visible {
+                display: block;
+            }
+            .manual-success-result .success-icon {
+                font-size: 3rem;
+                margin-bottom: 12px;
+            }
+            .manual-success-result .success-text {
+                color: var(--starbucks-green);
+                font-size: 1.2rem;
+                font-weight: 700;
+                margin-bottom: 6px;
+            }
+            .manual-success-result .success-detail {
+                color: var(--text-gray);
+                font-size: 0.95rem;
+            }
+        </style>
+
+        <div class="manual-order-container">
+
+            <!-- Bilgi Kartı -->
+            <div class="manual-order-card">
+                <h3><i class="bi bi-person-plus-fill"></i> Manuel Sipariş Girişi</h3>
+                <p class="desc">
+                    Müşteri adına sipariş girin. Her kişi günde en fazla <strong>3 sipariş</strong> hakkına sahiptir.
+                    İsim ve soyisim ile takip edilir.
+                </p>
+
+                <!-- Uyarı Kutusu -->
+                <div id="manualWarningBox" class="manual-warning-box"></div>
+
+                <!-- İsim Soyisim -->
+                <div class="manual-input-row">
+                    <div class="manual-input-group">
+                        <label><i class="bi bi-person"></i> İsim</label>
+                        <input type="text" id="manualFirstName" placeholder="Müşteri ismi" autocomplete="off"
+                               oninput="onManualNameInput()">
+                    </div>
+                    <div class="manual-input-group">
+                        <label><i class="bi bi-person"></i> Soyisim</label>
+                        <input type="text" id="manualLastName" placeholder="Müşteri soyismi" autocomplete="off"
+                               oninput="onManualNameInput()">
+                    </div>
+                </div>
+
+                <!-- Hak Sorgula Butonu -->
+                <button class="manual-check-btn" id="manualCheckBtn" onclick="checkManualRights()">
+                    <i class="bi bi-search"></i> Hak Durumunu Sorgula
+                </button>
+            </div>
+
+            <!-- İçecek Seçimi Kartı -->
+            <div class="manual-order-card" id="manualItemCard" style="opacity: 0.5; pointer-events: none;">
+                <h3><i class="bi bi-cup-hot-fill"></i> İçecek Seçimi</h3>
+
+                <!-- Seçilen İçecek -->
+                <div class="manual-selected-item" id="manualSelectedItem">
+                    <span><i class="bi bi-check-circle-fill"></i> <span id="manualSelectedItemName"></span></span>
+                    <button class="clear-item" onclick="clearManualItem()"><i class="bi bi-x-lg"></i></button>
+                </div>
+
+                <!-- Arama -->
+                <input type="text" class="manual-search-input" id="manualItemSearch"
+                       placeholder="İçecek ara..." oninput="filterManualItems()">
+
+                <!-- İçecek Grid -->
+                <div class="manual-items-grid" id="manualItemsGrid"></div>
+            </div>
+
+            <!-- Sipariş Ver Butonu -->
+            <button class="manual-submit-btn" id="manualSubmitBtn" onclick="submitManualOrder()" disabled>
+                <i class="bi bi-send-fill"></i> Siparişi Gönder
+            </button>
+
+            <!-- Başarılı Sonuç -->
+            <div class="manual-success-result" id="manualSuccessResult">
+                <div class="success-icon">✅</div>
+                <div class="success-text" id="manualSuccessText"></div>
+                <div class="success-detail" id="manualSuccessDetail"></div>
+            </div>
         </div>
     </div>
 
@@ -2682,6 +3031,7 @@
             card.setAttribute('data-order-number', data.orderNumber);
             card.setAttribute('data-guest-name', data.guestName);
             card.setAttribute('data-item', data.item);
+            card.setAttribute('data-phone', data.phone || '');
 
             // createdAt'ten zamanı al
             let timeOnly = 'Yeni';
@@ -3471,13 +3821,15 @@
             const orderNumber = card.getAttribute('data-order-number');
             const guestName = card.getAttribute('data-guest-name');
             const item = card.getAttribute('data-item');
+            const phone = card.getAttribute('data-phone');
 
             // Emit orderReady event to notify customer
             socket.emit('completeOrder', {
                 orderId: id,
                 orderNumber: orderNumber,
                 guestName: guestName,
-                item: item
+                item: item,
+                phone: phone
             });
 
             // Handle category update before removing card
@@ -3564,6 +3916,253 @@
             if (e.key === 'Enter') {
                 handleLogin();
             }
+        });
+
+        // ============ MANUEL SİPARİŞ SİSTEMİ ============
+        let manualSelectedItem = null;
+        let manualRightsChecked = false;
+        let manualCanOrder = false;
+
+        // Name input handler - auto-check rights with debounce
+        let manualNameTimeout = null;
+        function onManualNameInput() {
+            manualRightsChecked = false;
+            manualCanOrder = false;
+            updateManualSubmitState();
+
+            // Hide previous warnings
+            const warningBox = document.getElementById('manualWarningBox');
+            warningBox.style.display = 'none';
+            warningBox.className = 'manual-warning-box';
+
+            // Hide success result
+            document.getElementById('manualSuccessResult').classList.remove('visible');
+
+            // Reset item card opacity
+            document.getElementById('manualItemCard').style.opacity = '0.5';
+            document.getElementById('manualItemCard').style.pointerEvents = 'none';
+
+            // Debounced auto-check
+            clearTimeout(manualNameTimeout);
+            const fn = document.getElementById('manualFirstName').value.trim();
+            const ln = document.getElementById('manualLastName').value.trim();
+            if (fn.length >= 2 && ln.length >= 2) {
+                manualNameTimeout = setTimeout(() => {
+                    checkManualRights();
+                }, 600);
+            }
+        }
+
+        // Check manual order rights
+        function checkManualRights() {
+            const firstName = document.getElementById('manualFirstName').value.trim();
+            const lastName = document.getElementById('manualLastName').value.trim();
+
+            if (!firstName || !lastName) {
+                showManualWarning('danger', 'Eksik Bilgi', 'Lütfen isim ve soyisim girin.');
+                return;
+            }
+
+            if (firstName.length < 2 || lastName.length < 2) {
+                showManualWarning('danger', 'Geçersiz İsim', 'İsim ve soyisim en az 2 karakter olmalıdır.');
+                return;
+            }
+
+            socket.emit('checkManualOrderRights', { firstName, lastName });
+        }
+
+        // Rights check result handler
+        socket.on('manualOrderRightsResult', (result) => {
+            manualRightsChecked = true;
+
+            if (result.canOrder) {
+                manualCanOrder = true;
+
+                // Enable item selection
+                document.getElementById('manualItemCard').style.opacity = '1';
+                document.getElementById('manualItemCard').style.pointerEvents = 'auto';
+
+                if (result.orderCount === 0) {
+                    showManualWarning('success', '✅ Sipariş hakkı var',
+                        `${result.displayName} - İlk sipariş. Kalan hak: <strong>${result.remaining}</strong>`);
+                } else {
+                    let ordersHtml = '';
+                    if (result.orders && result.orders.length > 0) {
+                        ordersHtml = '<div class="warning-orders"><strong>Bugünkü siparişleri:</strong>';
+                        result.orders.forEach((o, i) => {
+                            const time = o.placedAt ? new Date(o.placedAt).toLocaleTimeString('tr-TR', {hour:'2-digit', minute:'2-digit'}) : '-';
+                            ordersHtml += `<div class="order-line"><span>#${o.orderNumber} - ${o.item}</span><span>${time}</span></div>`;
+                        });
+                        ordersHtml += '</div>';
+                    }
+                    showManualWarning('info', `ℹ️ ${result.displayName}`,
+                        `Bugün ${result.orderCount} sipariş vermiş. Kalan hak: <strong>${result.remaining}</strong>${ordersHtml}`);
+                }
+
+                // Render items grid
+                renderManualItemsGrid();
+            } else {
+                manualCanOrder = false;
+
+                // Keep item card disabled
+                document.getElementById('manualItemCard').style.opacity = '0.5';
+                document.getElementById('manualItemCard').style.pointerEvents = 'none';
+
+                let ordersHtml = '';
+                if (result.orders && result.orders.length > 0) {
+                    ordersHtml = '<div class="warning-orders"><strong>Bugünkü siparişleri:</strong>';
+                    result.orders.forEach((o, i) => {
+                        const time = o.placedAt ? new Date(o.placedAt).toLocaleTimeString('tr-TR', {hour:'2-digit', minute:'2-digit'}) : '-';
+                        ordersHtml += `<div class="order-line"><span>#${o.orderNumber} - ${o.item}</span><span>${time}</span></div>`;
+                    });
+                    ordersHtml += '</div>';
+                }
+
+                showManualWarning('danger', '⛔ Sipariş hakkı yok!', `${result.reason}${ordersHtml}`);
+            }
+
+            updateManualSubmitState();
+        });
+
+        // Show manual warning/info box
+        function showManualWarning(type, title, detail) {
+            const box = document.getElementById('manualWarningBox');
+            box.className = `manual-warning-box ${type}`;
+            box.innerHTML = `
+                <div class="warning-title">${title}</div>
+                <div class="warning-detail">${detail}</div>
+            `;
+            box.style.display = 'block';
+        }
+
+        // Render manual items grid
+        function renderManualItemsGrid() {
+            const grid = document.getElementById('manualItemsGrid');
+            grid.innerHTML = '';
+
+            const searchTerm = (document.getElementById('manualItemSearch')?.value || '').toLowerCase().trim();
+
+            allMenuItems.forEach(item => {
+                if (searchTerm && !item.toLowerCase().includes(searchTerm)) return;
+
+                const isOutOfStock = stockStatus[item] === false;
+                const isSelected = manualSelectedItem === item;
+
+                const btn = document.createElement('button');
+                btn.className = `manual-item-btn${isSelected ? ' selected' : ''}${isOutOfStock ? ' out-of-stock' : ''}`;
+                btn.textContent = item;
+                btn.onclick = () => selectManualItem(item);
+                grid.appendChild(btn);
+            });
+        }
+
+        // Filter manual items
+        function filterManualItems() {
+            renderManualItemsGrid();
+        }
+
+        // Select an item
+        function selectManualItem(itemName) {
+            manualSelectedItem = itemName;
+
+            // Show selected item display
+            document.getElementById('manualSelectedItemName').textContent = itemName;
+            document.getElementById('manualSelectedItem').classList.add('visible');
+
+            // Update grid
+            renderManualItemsGrid();
+            updateManualSubmitState();
+        }
+
+        // Clear selected item
+        function clearManualItem() {
+            manualSelectedItem = null;
+            document.getElementById('manualSelectedItem').classList.remove('visible');
+            renderManualItemsGrid();
+            updateManualSubmitState();
+        }
+
+        // Update submit button state
+        function updateManualSubmitState() {
+            const btn = document.getElementById('manualSubmitBtn');
+            const firstName = document.getElementById('manualFirstName').value.trim();
+            const lastName = document.getElementById('manualLastName').value.trim();
+
+            btn.disabled = !(manualRightsChecked && manualCanOrder && manualSelectedItem && firstName && lastName);
+        }
+
+        // Submit manual order
+        function submitManualOrder() {
+            const firstName = document.getElementById('manualFirstName').value.trim();
+            const lastName = document.getElementById('manualLastName').value.trim();
+
+            if (!firstName || !lastName || !manualSelectedItem) return;
+
+            // Disable button during processing
+            const btn = document.getElementById('manualSubmitBtn');
+            btn.disabled = true;
+            btn.innerHTML = '<i class="bi bi-hourglass-split"></i> İşleniyor...';
+
+            socket.emit('placeManualOrder', {
+                firstName,
+                lastName,
+                item: manualSelectedItem
+            });
+        }
+
+        // Manual order success handler
+        socket.on('manualOrderSuccess', (result) => {
+            // Show success
+            const successDiv = document.getElementById('manualSuccessResult');
+            document.getElementById('manualSuccessText').textContent = 
+                `Sipariş #${result.orderNumber} başarıyla oluşturuldu!`;
+            document.getElementById('manualSuccessDetail').textContent = 
+                `${result.guestName} - ${result.item} | Kalan hak: ${result.remaining}`;
+            successDiv.classList.add('visible');
+
+            // Reset form
+            manualSelectedItem = null;
+            document.getElementById('manualSelectedItem').classList.remove('visible');
+            document.getElementById('manualItemSearch').value = '';
+
+            // Reset button
+            const btn = document.getElementById('manualSubmitBtn');
+            btn.disabled = true;
+            btn.innerHTML = '<i class="bi bi-send-fill"></i> Siparişi Gönder';
+
+            // Re-check rights (will update remaining count)
+            const firstName = document.getElementById('manualFirstName').value.trim();
+            const lastName = document.getElementById('manualLastName').value.trim();
+            if (firstName && lastName) {
+                socket.emit('checkManualOrderRights', { firstName, lastName });
+            }
+
+            // Render items again
+            renderManualItemsGrid();
+
+            // Auto-hide success after 5 seconds
+            setTimeout(() => {
+                successDiv.classList.remove('visible');
+            }, 5000);
+        });
+
+        // Manual order error handler
+        socket.on('manualOrderError', (result) => {
+            let ordersHtml = '';
+            if (result.orders && result.orders.length > 0) {
+                ordersHtml = '<div class="warning-orders"><strong>Bugünkü siparişleri:</strong>';
+                result.orders.forEach((o) => {
+                    const time = o.placedAt ? new Date(o.placedAt).toLocaleTimeString('tr-TR', {hour:'2-digit', minute:'2-digit'}) : '-';
+                    ordersHtml += `<div class="order-line"><span>#${o.orderNumber} - ${o.item}</span><span>${time}</span></div>`;
+                });
+                ordersHtml += '</div>';
+            }
+            showManualWarning('danger', '⛔ Sipariş Hatası', `${result.message}${ordersHtml}`);
+
+            // Reset button
+            const btn = document.getElementById('manualSubmitBtn');
+            btn.disabled = false;
+            btn.innerHTML = '<i class="bi bi-send-fill"></i> Siparişi Gönder';
         });
     </script>
     </div> <!-- End of admin-content -->

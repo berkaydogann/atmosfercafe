@@ -407,6 +407,7 @@ class FirebaseHelper {
             orderNumber: orderData.orderNumber,
             item: orderData.item,
             guestName: orderData.guestName,
+            phone: orderData.phone,
             rating: orderData.rating
         };
     }

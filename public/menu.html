@@ -1994,7 +1994,44 @@
 
         // Handle order errors
         socket.on('orderError', (data) => {
-            alert('❌ Sipariş Hatası\n\n' + (data.message || 'Sipariş işlenirken bir hata oluştu.'));
+            const msg = data.message || 'Sipariş işlenirken bir hata oluştu.';
+
+            // Show inline error on the order form
+            const orderModal = document.querySelector('.modal.active, .order-modal.active, [id*="orderModal"]');
+            const phoneInput = document.getElementById('guestPhone');
+            
+            // Remove any existing error
+            document.querySelectorAll('.whatsapp-error-msg').forEach(el => el.remove());
+            
+            // Create styled error message
+            const errorDiv = document.createElement('div');
+            errorDiv.className = 'whatsapp-error-msg';
+            errorDiv.innerHTML = `
+                <div style="background: #fee2e2; border: 1px solid #ef4444; border-radius: 12px; padding: 14px 16px; margin: 12px 0; display: flex; align-items: flex-start; gap: 10px; animation: shakeX 0.5s ease-in-out;">
+                    <span style="font-size: 22px; line-height: 1;">❌</span>
+                    <div>
+                        <div style="font-weight: 600; color: #b91c1c; font-size: 14px; margin-bottom: 2px;">Geçersiz Telefon Numarası</div>
+                        <div style="color: #dc2626; font-size: 13px;">${msg}</div>
+                    </div>
+                </div>
+            `;
+
+            // Insert error near the phone input or at top of modal
+            if (phoneInput && phoneInput.parentElement) {
+                phoneInput.parentElement.insertAdjacentElement('afterend', errorDiv);
+                phoneInput.style.borderColor = '#ef4444';
+                phoneInput.focus();
+                // Reset border after 5 seconds
+                setTimeout(() => { phoneInput.style.borderColor = ''; }, 5000);
+            } else if (orderModal) {
+                orderModal.querySelector('.modal-content, .modal-body, form')?.prepend(errorDiv);
+            } else {
+                // Fallback to alert if no modal found
+                alert('❌ ' + msg);
+            }
+
+            // Auto-remove error after 8 seconds
+            setTimeout(() => errorDiv.remove(), 8000);
 
             // Re-enable the submit button if it was disabled
             const submitBtn = document.querySelector('.btn-submit');

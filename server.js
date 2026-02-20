@@ -333,44 +333,8 @@ io.on('connection', (socket) => {
           { name: 'icecek_adi', value: orderData.item }
         ]);
 
-        if (!watiResult.validWhatsApp) {
-          // Cancel the order - number is fake
-          console.log(`[${getTimestamp()}] ❌ Geçersiz WhatsApp numarası: ${orderData.phone} - Sipariş #${result.orderNumber} iptal edildi`);
-          try {
-            // 1. Delete the order from activeOrders
-            await db.collection('activeOrders').doc(result.orderId).delete();
-
-            // 2. Reset order rights so customer can try again with valid number
-            const today = fbHelper.getTurkishDate();
-            const rightsRef = db.collection('orderRights').doc(orderData.phone);
-            const rightsDoc = await rightsRef.get();
-            if (rightsDoc.exists) {
-              const rights = rightsDoc.data();
-              const updatedOrders = (rights.orders || []).filter(o => o.orderId !== result.orderId);
-              if (updatedOrders.length === 0) {
-                await rightsRef.delete();
-              } else {
-                await rightsRef.update({
-                  orders: updatedOrders,
-                  orderCount: updatedOrders.length
-                });
-              }
-            }
-
-            // 3. Reset device usage so device can order again
-            if (orderData.deviceId) {
-              await db.collection('dailyDeviceUsage').doc(orderData.deviceId).delete();
-            }
-
-            console.log(`[${getTimestamp()}] 🗑️ Geçersiz numara - sipariş ve haklar temizlendi: ${result.orderId}`);
-          } catch (cancelErr) {
-            console.error(`[${getTimestamp()}] ⚠️ Sipariş iptal hatası:`, cancelErr.message);
-          }
-          socket.emit('orderError', {
-            message: 'Bu telefon numarası WhatsApp\'ta kayıtlı değil. Lütfen geçerli bir WhatsApp numarası girin.'
-          });
-          return;
-        }
+        // GEÇİCİ OLARAK DEVRE DIŞI: WATI numara doğrulama kontrolü kapatıldı
+        // if (!watiResult.validWhatsApp) { ... }
       }
 
       console.log(`[${getTimestamp()}] ✅ Sipariş alındı:`);

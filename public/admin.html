@@ -1510,6 +1510,9 @@
         <button class="tab-btn" onclick="switchTab('reports', this)">
             <i class="bi bi-bar-chart"></i> Raporlar
         </button>
+        <button class="tab-btn" onclick="switchTab('tvAnnouncement', this)">
+            <i class="bi bi-megaphone"></i> TV Duyuru
+        </button>
     </div>
 
     <!-- Siparişler Sekmesi -->
@@ -2093,6 +2096,141 @@
                 <div class="success-icon">✅</div>
                 <div class="success-text" id="manualSuccessText"></div>
                 <div class="success-detail" id="manualSuccessDetail"></div>
+            </div>
+        </div>
+    </div>
+
+    <!-- TV Duyuru Sekmesi -->
+    <div id="tvAnnouncementTab" class="tab-content">
+        <style>
+            .announcement-panel {
+                max-width: 700px;
+                margin: 40px auto;
+                background: rgba(0, 112, 74, 0.08);
+                border: 1px solid rgba(0, 112, 74, 0.25);
+                border-radius: 16px;
+                padding: 35px;
+            }
+            .announcement-panel h2 {
+                font-size: 1.5rem;
+                font-weight: 700;
+                margin-bottom: 8px;
+                display: flex;
+                align-items: center;
+                gap: 10px;
+            }
+            .announcement-panel p.desc {
+                color: var(--text-gray);
+                font-size: 0.9rem;
+                margin-bottom: 24px;
+            }
+            .announcement-textarea {
+                width: 100%;
+                min-height: 120px;
+                background: var(--card-dark);
+                color: var(--text-white);
+                border: 1px solid rgba(255,255,255,0.12);
+                border-radius: 10px;
+                padding: 16px;
+                font-family: 'Outfit', sans-serif;
+                font-size: 1.1rem;
+                resize: vertical;
+                transition: border-color 0.3s;
+            }
+            .announcement-textarea:focus {
+                outline: none;
+                border-color: var(--starbucks-green);
+            }
+            .announcement-textarea::placeholder {
+                color: rgba(255,255,255,0.3);
+            }
+            .announcement-actions {
+                display: flex;
+                gap: 12px;
+                margin-top: 18px;
+            }
+            .announcement-actions button {
+                padding: 12px 28px;
+                border-radius: 10px;
+                font-family: 'Outfit', sans-serif;
+                font-weight: 600;
+                font-size: 1rem;
+                cursor: pointer;
+                border: none;
+                transition: all 0.3s;
+            }
+            .btn-announce-save {
+                background: var(--starbucks-green);
+                color: #fff;
+            }
+            .btn-announce-save:hover {
+                background: #009960;
+                transform: translateY(-1px);
+            }
+            .btn-announce-clear {
+                background: rgba(255, 95, 87, 0.15);
+                color: var(--danger);
+                border: 1px solid rgba(255, 95, 87, 0.3) !important;
+            }
+            .btn-announce-clear:hover {
+                background: var(--danger);
+                color: #fff;
+            }
+            .announcement-status {
+                margin-top: 16px;
+                padding: 12px 18px;
+                border-radius: 8px;
+                font-size: 0.9rem;
+                display: none;
+            }
+            .announcement-status.active {
+                display: block;
+                background: rgba(0, 220, 130, 0.1);
+                color: #00dc82;
+                border: 1px solid rgba(0, 220, 130, 0.25);
+            }
+            .announcement-status.empty {
+                display: block;
+                background: rgba(255,255,255,0.05);
+                color: var(--text-gray);
+            }
+            .announcement-preview {
+                margin-top: 24px;
+                padding: 20px;
+                background: #030705;
+                border-radius: 12px;
+                border: 1px solid rgba(0, 220, 130, 0.2);
+                text-align: center;
+                min-height: 80px;
+                display: flex;
+                align-items: center;
+                justify-content: center;
+            }
+            .announcement-preview-text {
+                font-family: 'Oswald', sans-serif;
+                font-size: 1.8rem;
+                font-weight: 600;
+                color: #fff;
+                text-shadow: 0 0 20px rgba(0, 220, 130, 0.4);
+                letter-spacing: 1px;
+            }
+            .announcement-preview-empty {
+                color: rgba(255,255,255,0.2);
+                font-style: italic;
+            }
+        </style>
+        <div class="announcement-panel">
+            <h2><i class="bi bi-megaphone"></i> TV Ekran Duyurusu</h2>
+            <p class="desc">Buraya girdiğiniz metin, hem sıcak hem soğuk TV ekranlarının ortasında gösterilir. Metin boş bırakıldığında duyuru kapanır.</p>
+            <textarea class="announcement-textarea" id="announcementInput" placeholder="Duyuru metnini buraya yazın..."></textarea>
+            <div class="announcement-actions">
+                <button class="btn-announce-save" onclick="saveAnnouncement()"><i class="bi bi-send"></i> Yayınla</button>
+                <button class="btn-announce-clear" onclick="clearAnnouncement()"><i class="bi bi-x-circle"></i> Kaldır</button>
+            </div>
+            <div class="announcement-status" id="announcementStatus"></div>
+            <div style="margin-top: 20px; font-size: 0.85rem; color: var(--text-gray);">Önizleme:</div>
+            <div class="announcement-preview" id="announcementPreview">
+                <span class="announcement-preview-empty" id="announcementPreviewText">Duyuru metni yok</span>
             </div>
         </div>
     </div>
@@ -3437,6 +3575,52 @@
             audio.currentTime = 0;
             audio.play().catch(e => console.log("Sipariş hazır ses izni gerekli"));
         }
+        // ============ TV DUYURU FONKSİYONLARI ============
+        function saveAnnouncement() {
+            const text = document.getElementById('announcementInput').value.trim();
+            if (!text) return;
+            socket.emit('setTvAnnouncement', { text });
+        }
+
+        function clearAnnouncement() {
+            document.getElementById('announcementInput').value = '';
+            socket.emit('setTvAnnouncement', { text: '' });
+        }
+
+        function updateAnnouncementUI(text) {
+            const input = document.getElementById('announcementInput');
+            const status = document.getElementById('announcementStatus');
+            const previewText = document.getElementById('announcementPreviewText');
+
+            if (input && input !== document.activeElement) {
+                input.value = text || '';
+            }
+
+            if (status) {
+                if (text) {
+                    status.className = 'announcement-status active';
+                    status.innerHTML = '<i class="bi bi-broadcast"></i> Şu anda yayında: <strong>"' + text + '"</strong>';
+                } else {
+                    status.className = 'announcement-status empty';
+                    status.textContent = 'Şu anda aktif duyuru yok.';
+                }
+            }
+
+            if (previewText) {
+                if (text) {
+                    previewText.className = 'announcement-preview-text';
+                    previewText.textContent = text;
+                } else {
+                    previewText.className = 'announcement-preview-empty';
+                    previewText.textContent = 'Duyuru metni yok';
+                }
+            }
+        }
+
+        socket.on('tvAnnouncementUpdate', (data) => {
+            updateAnnouncementUI(data.text || '');
+        });
+
         // Admin yüklendiğinde stok durumunu iste
         socket.emit('getStock');
 
@@ -3445,6 +3629,9 @@
 
         // Özel menüler durumunu iste
         socket.emit('getSpecialMenuStatus');
+
+        // TV duyuru durumunu iste
+        socket.emit('getTvAnnouncement');
 
         // Stok durumunu al
         socket.on('stockStatus', (status) => {

@@ -177,6 +177,7 @@ let drinkTasteOptions = {};
 
 let tvReadyOrders = [];
 let currentVideoUrl = null;
+let tvAnnouncementText = '';
 
 // Load initial cache from Firestore on startup
 async function initializeCache() {
@@ -192,6 +193,16 @@ async function initializeCache() {
       }
     } catch (err) {
       console.warn('⚠️ Could not load drink taste options from Firebase');
+    }
+
+    // Load TV announcement text from Firebase
+    try {
+      const announcementDoc = await db.collection('settings').doc('tvAnnouncement').get();
+      if (announcementDoc.exists) {
+        tvAnnouncementText = announcementDoc.data().text || '';
+      }
+    } catch (err) {
+      console.warn('⚠️ Could not load TV announcement from Firebase');
     }
 
     // Load all three special menus from Firebase
@@ -271,6 +282,32 @@ io.on('connection', (socket) => {
   socket.emit('cafeStatus', cachedCafeStatus);
   socket.emit('stockStatus', cachedStockStatus);
   socket.emit('drinkTasteOptions', drinkTasteOptions);
+  socket.emit('tvAnnouncementUpdate', { text: tvAnnouncementText });
+
+  // ============ TV ANNOUNCEMENT TEXT ============
+  socket.on('getTvAnnouncement', () => {
+    socket.emit('tvAnnouncementUpdate', { text: tvAnnouncementText });
+  });
+
+  socket.on('setTvAnnouncement', async (data) => {
+    try {
+      const text = (data.text || '').trim();
+      tvAnnouncementText = text;
+
+      // Save to Firebase
+      await db.collection('settings').doc('tvAnnouncement').set({
+        text: text,
+        lastUpdated: admin.firestore.FieldValue.serverTimestamp()
+      });
+
+      // Broadcast to all clients
+      io.emit('tvAnnouncementUpdate', { text: tvAnnouncementText });
+
+      console.log(`[${getTimestamp()}] 📢 TV duyuru metni güncellendi: ${text ? '"' + text + '"' : '(temizlendi)'}`);
+    } catch (error) {
+      console.error(`[${getTimestamp()}] ❌ TV announcement update error:`, error);
+    }
+  });
 
   // ============ DRINK TASTE OPTIONS (Sert/Tatlı) ============
   socket.on('getDrinkTasteOptions', () => {
